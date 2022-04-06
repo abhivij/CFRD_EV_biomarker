@@ -9,7 +9,6 @@ setwd(base_dir)
 #Each of CFRD_100_1, CFRD_100_2, ... corresponds to results of different quantification jobs
 #   from Qiagen Geneglobe
 for(i in c(1:11)){
-  # i <- 2
   data_file_name <- paste0("CFRD_100_", i, ".xlsx")
   print(paste("data", data_file_name, sep = "/"))
   
