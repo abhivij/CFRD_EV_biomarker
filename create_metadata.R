@@ -149,3 +149,43 @@ mastersheet_info.cph <- mastersheet_info.cph %>%
 colnames(mastersheet_info.cph)[6] <- "is_sample_available"
 mastersheet_info.cph <- mastersheet_info.cph %>%
   filter(is_sample_available == 1)
+
+colnames(mastersheet_info.cph)[c(2,3)] <- c("study_id", "CF_number")
+mastersheet_info.cph <- mastersheet_info.cph %>%
+  mutate(individual_id = paste0("CPH", study_id), .after = study_id) %>%
+  separate(intake, into = c("year", NA, NA), sep = " ", remove = FALSE)
+mastersheet_info.cph <- mastersheet_info.cph %>%
+  select(c(1:17), -c(is_sample_available, `EXOSOME ISOLATION`)) 
+
+mastersheet_info.cph <- mastersheet_info.cph %>%
+  mutate(sample_name = case_when(individual_id %in% c("CPH10", "CPH22") ~ individual_id,
+                                 year == "2017" ~ paste("2017", individual_id, sep = "_"),
+                                 year == "2020" ~ paste("2020_t0", individual_id, sep = "_"),
+                                 TRUE ~ NA_character_), 
+         .after = year) %>%
+  select(-c(individual_id, year))
+
+# sample_info_sub <- sample_info.cph %>%
+#   select(sample_name, quant_batch)
+# 
+# cph_info <- mastersheet_info.cph %>%
+#   left_join(sample_info_sub)
+#2020_t0_CPH24 entry not present in 272 samples
+
+
+cph_info <- sample_info.cph %>%
+  inner_join(mastersheet_info.cph)
+
+summary(factor(cph_info$`Sex 1=male, 2=female`))
+
+cph_info <- cph_info[,-c(9:11, 16:19)]
+colnames(cph_info)[9:13] <- c("pre_post_modulator", "cftr_modulator_2020", "sex", "age", "FEV1")
+
+cph_info <- cph_info %>%
+  mutate(sex = case_when(sex == 1 ~ "M",
+                         sex == 2 ~ "F",
+                         TRUE ~ NA_character_))
+  
+summary(factor(cph_info$sex))
+
+write.csv(cph_info, "data/formatted/sample_info_cph.csv", row.names = FALSE)
