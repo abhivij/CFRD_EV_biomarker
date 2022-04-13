@@ -17,6 +17,11 @@ quantification_batch <- read.csv("data/formatted/quantification_batch.csv")
 sample_info <- sample_info %>%
   inner_join(quantification_batch)
 
+#special cases - samples named differently in master sheet
+sample_info <- sample_info %>%
+  mutate(sample_name = sub("034MJC", "034MC", sample_name, fixed = TRUE)) %>%
+  mutate(sample_name = sub("050JMC", "050JM", sample_name, fixed = TRUE))
+
 sample_info <- sample_info %>%
   mutate(individual_id = case_when(
     grepl("2020_t0_CPH", sample_name, fixed = TRUE) ~ gsub(pattern = "2020_t0_", 
@@ -52,6 +57,8 @@ sample_info <- sample_info %>%
   select(sample_long_name, illumina_sample_number, quant_batch, 
          sample_name, individual_id, year) %>%
   mutate(biotype = "serum", .after = quant_batch)
+
+
 
 write.csv(sample_info, "data/formatted/sample_info_temp.txt", row.names = FALSE)
 
@@ -188,4 +195,78 @@ cph_info <- cph_info %>%
   
 summary(factor(cph_info$sex))
 
+length(unique(cph_info$individual_id))
+#93
+
 write.csv(cph_info, "data/formatted/sample_info_cph.csv", row.names = FALSE)
+
+
+
+#RPA/NSW
+sample_info.rpa <- sample_info %>%
+  filter(grepl("^17_", sample_name))
+length(unique(sample_info.rpa$individual_id))
+
+mastersheet_info.rpa_sch_14e <- read_xlsx("data/ExoCF mastersheet_RPA Copenhagen SCH.xlsx",
+                                          sheet = 2)
+mastersheet_info.rpa_sch_14e <- mastersheet_info.rpa_sch_14e %>%
+  select(-c(9:32, 34, 36, 42:44))
+mastersheet_info.rpa_sch_14e <- mastersheet_info.rpa_sch_14e[3:83,]
+colnames(mastersheet_info.rpa_sch_14e)[1:2] <- c("diabetes_status", "sample_name")
+colnames(mastersheet_info.rpa_sch_14e)[c(7, 9, 10)] <- c("age", "sex", "FEV1")
+
+for(i in c(2:dim(mastersheet_info.rpa_sch_14e)[1])){
+  print(i)
+  if(!is.na(mastersheet_info.rpa_sch_14e[i, "sex"]) & 
+     mastersheet_info.rpa_sch_14e[i, "sex"] == "See above"){
+    mastersheet_info.rpa_sch_14e[i, "sex"] <- mastersheet_info.rpa_sch_14e[(i-1), "sex"]
+  }
+  if(!is.na(mastersheet_info.rpa_sch_14e[i, "FEV1"]) &
+     mastersheet_info.rpa_sch_14e[i, "FEV1"] == "See above"){
+    mastersheet_info.rpa_sch_14e[i, "FEV1"] <- mastersheet_info.rpa_sch_14e[(i-1), "FEV1"]
+  }
+}
+
+mastersheet_info.rpa <- mastersheet_info.rpa_sch_14e %>%
+  filter(grepl("^17-", sample_name))
+mastersheet_info.rpa <- mastersheet_info.rpa %>%
+  mutate(sample_name = sub("On insulin from SCH 26/4/17", "", sample_name, fixed = TRUE)) %>%
+  mutate(sample_name = gsub("-", "_", sample_name, fixed = TRUE)) %>%
+  mutate(sample_name = gsub("[[:space:]]", "", sample_name))
+
+mastersheet_info.rpa[c(which(mastersheet_info.rpa$diabetes_status == "CFRD"):
+                         (which(mastersheet_info.rpa$diabetes_status == "IGT") - 1)), 
+                     "diabetes_status"] <- "CFRD"
+mastersheet_info.rpa[c(which(mastersheet_info.rpa$diabetes_status == "IGT"):
+                         (which(mastersheet_info.rpa$diabetes_status == "NGT") - 1)), 
+                     "diabetes_status"] <- "IGT"
+mastersheet_info.rpa[c(which(mastersheet_info.rpa$diabetes_status == "NGT"):
+                         dim(mastersheet_info.rpa)[1]), 
+                     "diabetes_status"] <- "NGT"
+
+options(digits = 3)
+mastersheet_info.rpa <- mastersheet_info.rpa %>%
+  mutate(age = as.double(age))
+
+# rpa_info <- sample_info.rpa %>%
+#   left_join(mastersheet_info.rpa)
+# sum(is.na(rpa_info$diabetes_status))
+#0
+
+missing_samples_rpa <- mastersheet_info.rpa %>%
+  anti_join(sample_info.rpa) %>%
+  mutate(sample_name = gsub("_", "-", sample_name, fixed = TRUE))
+write.csv(missing_samples_rpa, "data/missing_samples_rpa.csv", row.names = FALSE)
+
+rpa_info <- sample_info.rpa %>%
+  inner_join(mastersheet_info.rpa)
+sum(is.na(rpa_info$diabetes_status))
+
+rpa_info <- rpa_info %>%
+  select(-c(10:12, 14, 17:21))
+colnames(rpa_info)[9] <- "pre_post_modulator"
+
+# rpa_info <- rpa_info %>%
+#   separate(pre_post_modulator, into = c("pre_post_modulator1", "modulator"), sep = " ", remove = FALSE)
+
+write.csv(rpa_info, "data/formatted/sample_info_rpa.csv", row.names = FALSE)
