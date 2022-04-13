@@ -248,6 +248,9 @@ options(digits = 3)
 mastersheet_info.rpa <- mastersheet_info.rpa %>%
   mutate(age = as.double(age))
 
+mastersheet_info.rpa <- mastersheet_info.rpa %>%
+  separate(FEV1, into = c("FEV1", NA), sep = " ")
+
 # rpa_info <- sample_info.rpa %>%
 #   left_join(mastersheet_info.rpa)
 # sum(is.na(rpa_info$diabetes_status))
@@ -266,7 +269,26 @@ rpa_info <- rpa_info %>%
   select(-c(10:12, 14, 17:21))
 colnames(rpa_info)[9] <- "pre_post_modulator"
 
-# rpa_info <- rpa_info %>%
-#   separate(pre_post_modulator, into = c("pre_post_modulator1", "modulator"), sep = " ", remove = FALSE)
+rpa_info <- rpa_info %>%
+  separate(pre_post_modulator, into = c("pre_post_modulator", "modulator"), sep = "\\[") %>%
+  mutate(modulator = gsub("]", "", modulator, fixed = TRUE))
 
-write.csv(rpa_info, "data/formatted/sample_info_rpa.csv", row.names = FALSE)
+write.csv(format(rpa_info, digits = 3), "data/formatted/sample_info_rpa.csv", row.names = FALSE)
+
+
+
+#SCH/NSW
+sample_info.sch <- sample_info %>%
+  filter(grepl("^11_", sample_name))
+length(unique(sample_info.sch$individual_id))
+
+mastersheet_info.sch <- mastersheet_info.rpa_sch_14e %>%
+  mutate(sample_name = gsub("(SCH)", "", sample_name, fixed = TRUE)) %>%
+  mutate(sample_name = gsub("[[:space:]]", "", sample_name)) %>%
+  filter(grepl("^11-", sample_name))
+
+
+#14E
+sample_info.14e <- sample_info %>%
+  filter(grepl("^14E_", sample_name))
+length(unique(sample_info.14e$individual_id))
