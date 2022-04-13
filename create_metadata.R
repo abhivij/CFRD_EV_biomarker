@@ -285,10 +285,32 @@ length(unique(sample_info.sch$individual_id))
 mastersheet_info.sch <- mastersheet_info.rpa_sch_14e %>%
   mutate(sample_name = gsub("(SCH)", "", sample_name, fixed = TRUE)) %>%
   mutate(sample_name = gsub("[[:space:]]", "", sample_name)) %>%
-  filter(grepl("^11-", sample_name))
+  filter(grepl("^11-", sample_name)) 
+mastersheet_info.sch <- mastersheet_info.sch %>%
+  mutate(sample_name = sub("OninsulinfromSCH26/4/17", "", sample_name, fixed = TRUE))
+
+mastersheet_info.sch <- read_xlsx("data/ExoCF mastersheet_RPA Copenhagen SCH.xlsx",
+                                  sheet = 4)
+#which of these two to use ?
+#the one below has more 
 
 
 #14E
 sample_info.14e <- sample_info %>%
   filter(grepl("^14E_", sample_name))
 length(unique(sample_info.14e$individual_id))
+
+mastersheet_info.14e <- mastersheet_info.rpa_sch_14e %>%
+  filter(grepl("^14E-", sample_name)) %>%
+  mutate(sample_name = gsub("-", "_", sample_name, fixed = TRUE)) %>%
+  mutate(diabetes_status = "HC")
+mastersheet_info.14e <- mastersheet_info.14e %>%
+  select(c(1,2,3,7,9,10))
+colnames(mastersheet_info.14e)[3] <- "pre_post_modulator"
+mastersheet_info.14e <- mastersheet_info.14e %>%
+  mutate(modulator = "", .after = pre_post_modulator)
+
+healthy_info <- sample_info.14e %>%
+  inner_join(mastersheet_info.14e)
+
+write.csv(format(healthy_info, digits = 3), "data/formatted/sample_info_14e.csv", row.names = FALSE)
