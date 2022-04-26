@@ -284,16 +284,122 @@ length(unique(sample_info.sch$individual_id))
 
 mastersheet_info.sch <- mastersheet_info.rpa_sch_14e %>%
   mutate(sample_name = gsub("(SCH)", "", sample_name, fixed = TRUE)) %>%
-  mutate(sample_name = gsub("[[:space:]]", "", sample_name)) %>%
+  mutate(sample_name = gsub("[[:space:]]", "", sample_name)) 
+
+mastersheet_info.sch[c(which(mastersheet_info.sch$diabetes_status == "CFRD"):
+                         (which(mastersheet_info.sch$diabetes_status == "IGT") - 1)), 
+                     "diabetes_status"] <- "CFRD"
+mastersheet_info.sch[c(which(mastersheet_info.sch$diabetes_status == "IGT"):
+                         (which(mastersheet_info.sch$diabetes_status == "NGT") - 1)), 
+                     "diabetes_status"] <- "IGT"
+mastersheet_info.sch[c(which(mastersheet_info.sch$diabetes_status == "NGT"):
+                         (which(mastersheet_info.sch$diabetes_status == "HC") - 1)), 
+                     "diabetes_status"] <- "NGT"
+mastersheet_info.sch[c(which(mastersheet_info.sch$diabetes_status == "HC"):
+                         dim(mastersheet_info.sch)[1]), 
+                     "diabetes_status"] <- "HC"
+
+mastersheet_info.sch <- mastersheet_info.sch %>%
   filter(grepl("^11-", sample_name)) 
+
 mastersheet_info.sch <- mastersheet_info.sch %>%
   mutate(sample_name = sub("OninsulinfromSCH26/4/17", "", sample_name, fixed = TRUE))
 
-mastersheet_info.sch <- read_xlsx("data/ExoCF mastersheet_RPA Copenhagen SCH.xlsx",
-                                  sheet = 4)
-#which of these two to use ?
-#the one below has more 
+mastersheet_info.sch <- mastersheet_info.sch %>%
+  select(c(1:3, 6, 7, 9, 10))
+colnames(mastersheet_info.sch)[3] <- "pre_post_modulator"
+colnames(mastersheet_info.sch)[4] <- "sample_date"
+mastersheet_info.sch <- mastersheet_info.sch %>%
+  mutate(modulator = NA, .before = "age")
+mastersheet_info.sch <- mastersheet_info.sch %>%
+  mutate(sample_date = gsub("-0", "-", sample_date, fixed = TRUE)) %>%
+  mutate(sample_date = gsub("^20", "", sample_date)) %>%
+  separate(sample_date, into = c("sd_year", "sd_month", "sd_date"))
+mastersheet_info.sch <- mastersheet_info.sch %>%
+  mutate(sample_name = paste(sample_name, 
+                             sd_date, sd_month, sd_year,
+                             sep = "-")
+  ) %>%
+  select(-c(sd_date, sd_month, sd_year))
 
+mastersheet_info.sch2 <- read_xlsx("data/ExoCF mastersheet_RPA Copenhagen SCH.xlsx",
+                                  sheet = 4)
+mastersheet_info.sch2 <- mastersheet_info.sch2[3:113,]
+
+mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
+  mutate(Condition = gsub("CF - Pre + Post modulator", "CF_pre_post_modulator", Condition, fixed = TRUE)) %>%
+  mutate(Condition = gsub("CF - non modulator", "CF_non_modulator", Condition, fixed = TRUE)) %>%
+  mutate(Condition = gsub("CF BALF", "CF_BALF", Condition, fixed = TRUE)) %>%
+  mutate(Condition = gsub("HC BALF", "HC_BALF", Condition, fixed = TRUE)) 
+
+mastersheet_info.sch2[c(which(mastersheet_info.sch2$Condition == "CF_pre_post_modulator"):
+                          (which(mastersheet_info.sch2$Condition == "CF_non_modulator") - 1)), 
+                      "Condition"] <- "CF_pre_post_modulator"
+mastersheet_info.sch2[c(which(mastersheet_info.sch2$Condition == "CF_non_modulator"):
+                          (which(mastersheet_info.sch2$Condition == "HC") - 1)), 
+                      "Condition"] <- "CF_non_modulator"
+mastersheet_info.sch2[c(which(mastersheet_info.sch2$Condition == "HC"):
+                          (which(mastersheet_info.sch2$Condition == "CF_BALF") - 1)), 
+                      "Condition"] <- "HC"                     
+mastersheet_info.sch2[c(which(mastersheet_info.sch2$Condition == "CF_BALF"):
+                          (which(mastersheet_info.sch2$Condition == "HC_BALF") - 1)), 
+                      "Condition"] <- "CF_BALF"
+mastersheet_info.sch2[c(which(mastersheet_info.sch2$Condition == "HC_BALF"):
+                          dim(mastersheet_info.sch2)[1]), 
+                      "Condition"] <- "HC_BALF"
+colnames(mastersheet_info.sch2)[2:4] <- c("sample_name", "pre_post_modulator", "modulator")
+mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
+  filter(grepl("^11-", sample_name)) 
+
+mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
+  filter(!grepl("Plasma|BALF", sample_name))
+
+mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
+  mutate(sample_name = gsub(" (serum pink)", "", sample_name, fixed = TRUE))
+
+mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
+  select(c(1:4))
+
+mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
+  mutate("age" = NA, .after = "modulator") %>%
+  mutate("sex" = NA, .after = "age") %>%
+  mutate("FEV1" = NA, .after = "sex")
+colnames(mastersheet_info.sch)[1] <- "condition"
+colnames(mastersheet_info.sch2)[1] <- "condition"
+
+mastersheet_info.sch <- rbind(mastersheet_info.sch, mastersheet_info.sch2)
+mastersheet_info.sch <- mastersheet_info.sch %>%
+  mutate(sample_name = gsub("-", "_", sample_name, fixed = TRUE)) %>%
+  mutate(sample_name = gsub(" ", "_", sample_name, fixed = TRUE)) %>%
+  mutate(sample_name = gsub(".", "_", sample_name, fixed = TRUE)) %>%
+  mutate(sample_name = gsub("/", "_", sample_name, fixed = TRUE))
+
+
+length(unique(sample_info.sch$sample_name))
+length(unique(mastersheet_info.sch$sample_name))
+
+
+multiple_same_sample_names <- mastersheet_info.sch %>%
+  group_by(sample_name) %>%
+  summarise(n = n()) %>%
+  filter(n > 1)
+
+mastersheet_info.sch <- mastersheet_info.sch %>%
+  unique()
+
+sch_info <- sample_info.sch %>%
+  inner_join(mastersheet_info.sch)
+sum(is.na(sch_info$condition))
+
+
+missing_sch <- sample_info.sch %>%
+  anti_join(mastersheet_info.sch)
+
+missing_sch2 <- mastersheet_info.sch %>%
+  anti_join(sample_info.sch)
+
+
+write.csv(missing_sch2, "data/missing_samples_sch2.csv", row.names = FALSE)
 
 #14E
 sample_info.14e <- sample_info %>%
