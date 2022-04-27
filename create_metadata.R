@@ -210,10 +210,10 @@ length(unique(sample_info.rpa$individual_id))
 mastersheet_info.rpa_sch_14e <- read_xlsx("data/ExoCF mastersheet_RPA Copenhagen SCH.xlsx",
                                           sheet = 2)
 mastersheet_info.rpa_sch_14e <- mastersheet_info.rpa_sch_14e %>%
-  select(-c(9:32, 34, 36, 42:44))
+  select(-c(9:23, 25:32, 34, 36, 42:44))
 mastersheet_info.rpa_sch_14e <- mastersheet_info.rpa_sch_14e[3:83,]
 colnames(mastersheet_info.rpa_sch_14e)[1:2] <- c("diabetes_status", "sample_name")
-colnames(mastersheet_info.rpa_sch_14e)[c(7, 9, 10)] <- c("age", "sex", "FEV1")
+colnames(mastersheet_info.rpa_sch_14e)[c(7, 9, 10, 11)] <- c("age", "rna_extraction", "sex", "FEV1")
 
 for(i in c(2:dim(mastersheet_info.rpa_sch_14e)[1])){
   print(i)
@@ -228,7 +228,8 @@ for(i in c(2:dim(mastersheet_info.rpa_sch_14e)[1])){
 }
 
 mastersheet_info.rpa <- mastersheet_info.rpa_sch_14e %>%
-  filter(grepl("^17-", sample_name))
+  filter(grepl("^17-", sample_name)) %>%
+  select(-c("rna_extraction"))
 mastersheet_info.rpa <- mastersheet_info.rpa %>%
   mutate(sample_name = sub("On insulin from SCH 26/4/17", "", sample_name, fixed = TRUE)) %>%
   mutate(sample_name = gsub("-", "_", sample_name, fixed = TRUE)) %>%
@@ -306,7 +307,7 @@ mastersheet_info.sch <- mastersheet_info.sch %>%
   mutate(sample_name = sub("OninsulinfromSCH26/4/17", "", sample_name, fixed = TRUE))
 
 mastersheet_info.sch <- mastersheet_info.sch %>%
-  select(c(1:3, 6, 7, 9, 10))
+  select(c(1:3, 6, 7, 9, 10, 11))
 colnames(mastersheet_info.sch)[3] <- "pre_post_modulator"
 colnames(mastersheet_info.sch)[4] <- "sample_date"
 mastersheet_info.sch <- mastersheet_info.sch %>%
@@ -357,12 +358,13 @@ mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
 mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
   mutate(sample_name = gsub(" (serum pink)", "", sample_name, fixed = TRUE))
 
+colnames(mastersheet_info.sch2)[21] <- c("rna_extraction")
 mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
-  select(c(1:4))
+  select(c(1:4, 21))
 
 mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
   mutate("age" = NA, .after = "modulator") %>%
-  mutate("sex" = NA, .after = "age") %>%
+  mutate("sex" = NA, .after = "rna_extraction") %>%
   mutate("FEV1" = NA, .after = "sex")
 colnames(mastersheet_info.sch)[1] <- "condition"
 colnames(mastersheet_info.sch2)[1] <- "condition"
@@ -375,17 +377,31 @@ mastersheet_info.sch <- mastersheet_info.sch %>%
   mutate(sample_name = gsub("/", "_", sample_name, fixed = TRUE))
 
 
+multiple_same_sample_names <- mastersheet_info.sch %>%
+  group_by(sample_name) %>%
+  summarise(n = n()) %>%
+  filter(n > 1)
+#4 samples
 length(unique(sample_info.sch$sample_name))
+#83
 length(unique(mastersheet_info.sch$sample_name))
+#106
 
+mastersheet_info.sch <- mastersheet_info.sch %>%
+  filter(rna_extraction != "-")
 
 multiple_same_sample_names <- mastersheet_info.sch %>%
   group_by(sample_name) %>%
   summarise(n = n()) %>%
   filter(n > 1)
+#0 samples
+
+length(unique(mastersheet_info.sch$sample_name))
+#89
 
 mastersheet_info.sch <- mastersheet_info.sch %>%
   unique()
+#no change
 
 sch_info <- sample_info.sch %>%
   inner_join(mastersheet_info.sch)
@@ -394,12 +410,41 @@ sum(is.na(sch_info$condition))
 
 missing_sch <- sample_info.sch %>%
   anti_join(mastersheet_info.sch)
+#5 rows
 
 missing_sch2 <- mastersheet_info.sch %>%
   anti_join(sample_info.sch)
+#11 rows
 
+sample_info.sch <- sample_info.sch %>%
+  mutate(sample_name= case_when(sample_name == "11_16_116OC_WAT8086A8" ~ "11_16_116OC_19_9_17",
+                                sample_name == "11_16_162HN_WAT8086A4" ~ "11_16_162HN_15_3_17",
+                                sample_name == "11_16_184EH_WAT8086A10" ~ "11_16_184EH_13_3_18",
+                                sample_name == "11_16_247AF_WAT8061A9" ~ "11_16_247AF_27_2_18",
+                                sample_name == "11_18_403DP_WAT8061A7" ~ "11_18_403DP",
+                                TRUE ~ sample_name))
 
+sch_info <- sample_info.sch %>%
+  inner_join(mastersheet_info.sch)
+sum(is.na(sch_info$condition))
+#0
+
+missing_sch <- sample_info.sch %>%
+  anti_join(mastersheet_info.sch)
+#0 rows
+
+missing_sch2 <- mastersheet_info.sch %>%
+  anti_join(sample_info.sch)
+#6 rows
 write.csv(missing_sch2, "data/missing_samples_sch2.csv", row.names = FALSE)
+
+
+sch_info <- sch_info %>%
+  select(-c(rna_extraction))
+sch_info <- sch_info  %>%
+  mutate(age = as.double(age))
+write.csv(format(sch_info, digits = 3), "data/formatted/sample_info_sch.csv", row.names = FALSE)
+
 
 #14E
 sample_info.14e <- sample_info %>%
