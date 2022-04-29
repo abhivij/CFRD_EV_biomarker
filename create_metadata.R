@@ -274,6 +274,18 @@ rpa_info <- rpa_info %>%
   separate(pre_post_modulator, into = c("pre_post_modulator", "modulator"), sep = "\\[") %>%
   mutate(modulator = gsub("]", "", modulator, fixed = TRUE))
 
+#modifying modulators as per mail thread with Sheila and also for sample 17_18_020DH
+rpa_info <- rpa_info %>%
+  mutate(pre_post_modulator = case_when(sample_name %in% c("17_18_011AS", "17_18_014DM", 
+                                                           "17_18_034MC", "17_18_056SB", 
+                                                           "17_19_064WC") ~ "0",
+                                        TRUE ~ pre_post_modulator)) %>%
+  mutate(modulator = case_when(sample_name %in% c("17_18_011AS", "17_18_014DM", 
+                                                  "17_18_034MC", "17_18_056SB", 
+                                                  "17_19_064WC", "17_18_020DH") ~ NA_character_,
+                               TRUE ~ modulator))
+
+
 write.csv(format(rpa_info, digits = 3), "data/formatted/sample_info_rpa.csv", row.names = FALSE)
 
 
