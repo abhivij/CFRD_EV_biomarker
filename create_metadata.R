@@ -286,9 +286,6 @@ rpa_info <- rpa_info %>%
                                TRUE ~ modulator))
 
 
-write.csv(format(rpa_info, digits = 3), "data/formatted/sample_info_rpa.csv", row.names = FALSE)
-
-
 
 #SCH/NSW
 sample_info.sch <- sample_info %>%
@@ -478,7 +475,32 @@ healthy_info <- sample_info.14e %>%
 
 write.csv(format(healthy_info, digits = 3), "data/formatted/sample_info_14e.csv", row.names = FALSE)
 
+# rpa patients rename
+rpa_info <- rpa_info %>%
+  mutate(patient_initial = str_extract(individual_id, "[^0-9]+$"), .after = individual_id)
 
+rpa_info_temp <- rpa_info %>%
+  group_by(patient_initial) %>%
+  summarise(n = n()) %>%
+  filter(n > 1) %>%
+  arrange(desc(n))
+
+rpa_multiple <- rpa_info %>%
+  select(sample_name, patient_initial) %>%
+  filter(patient_initial %in% c(rpa_info_temp$patient_initial)) %>%
+  arrange(patient_initial)
+
+#AS and SD samples are from different patients 
+rpa_multiple <- rpa_multiple %>%
+  filter(!patient_initial %in% c("AS", "SD"))
+
+rpa_info <- rpa_info %>%
+  mutate(individual_id = case_when(sample_name %in% rpa_multiple$sample_name ~ patient_initial,
+                                   TRUE ~ individual_id)) %>%
+  arrange(individual_id) %>%
+  select(-c(patient_initial))
+
+write.csv(format(rpa_info, digits = 3), "data/formatted/sample_info_rpa.csv", row.names = FALSE)
 ############# combine cohorts
 
 colnames(cph_info)
@@ -536,3 +558,69 @@ levels(factor(meta_data$pre_post_modulator))
 
 summary(meta_data$pre_post_modulator)
 summary(factor(meta_data$pre_post_modulator))
+
+
+summary(factor(meta_data$age))
+summary(factor(meta_data$sex))
+summary(factor(meta_data$FEV1))
+
+meta_data <- meta_data %>%
+  mutate(age = case_when(age == "-" ~ NA_character_,
+                         TRUE ~ age)) %>%
+  mutate(sex = case_when(sex == "-" ~ NA_character_,
+                         TRUE ~ sex)) %>%
+  mutate(FEV1 = case_when(FEV1 == "-" ~ NA_character_,
+                          TRUE ~ FEV1))
+options(digits = 3)
+meta_data <- meta_data %>%
+  mutate(age = as.double(age)) %>%
+  mutate(FEV1 = as.double(FEV1))
+
+
+### add library quality
+prep_outcome <- read_xlsx("data/LibraryPrepOutcome-WAT10166-WAT10180.xlsx")[, 1:4]
+colnames(prep_outcome) <- c("seq_plate", "lims_id", "sample_name", "seq_miR_library_quality")
+
+prep_outcome <- prep_outcome %>%
+  mutate(sample_name = gsub("/", "_", sample_name, fixed = TRUE)) %>%
+  mutate(sample_name = gsub("-", "_", sample_name, fixed = TRUE)) %>%
+  mutate(sample_name = gsub(" ", "_", sample_name, fixed = TRUE)) %>%
+  mutate(sample_name = gsub(".", "_", sample_name, fixed = TRUE)) 
+
+meta_data_with_qual <- meta_data %>%
+  separate(sample_long_name, into = c("sample_name_2", NA), sep = "_S", remove = FALSE)
+
+
+missing1 <- meta_data_with_qual %>%
+  anti_join(prep_outcome, by = c("sample_name_2" = "sample_name"))
+missing2 <-  prep_outcome %>%
+  anti_join(meta_data_with_qual, by = c("sample_name" = "sample_name_2"))
+
+
+meta_data_with_qual <- meta_data_with_qual %>%
+  left_join(prep_outcome %>%
+              select(-c(lims_id)),
+            by = c("sample_name_2" = "sample_name")) %>%
+  select(-c(sample_name_2))
+
+write.csv(format(meta_data_with_qual, digits = 3), "data/formatted/meta_data.csv", row.names = FALSE)
+
+
+
+#check with umi counts
+umi_counts <- read.csv("data/formatted/umi_counts.csv", row.names = 1)
+colnames(umi_counts) <- gsub("^X", "", colnames(umi_counts))
+
+umi_samples <- data.frame(sample_long_name = colnames(umi_counts))
+
+check_combination <- umi_samples %>%
+  inner_join(meta_data_with_qual)
+#272
+
+missing1 <- umi_samples %>%
+  anti_join(meta_data_with_qual)
+#0
+
+missing2 <- meta_data_with_qual %>%
+  anti_join(umi_samples)
+#0
