@@ -468,7 +468,7 @@ mastersheet_info.14e <- mastersheet_info.rpa_sch_14e %>%
   mutate(sample_name = gsub("-", "_", sample_name, fixed = TRUE)) %>%
   mutate(diabetes_status = "HC")
 mastersheet_info.14e <- mastersheet_info.14e %>%
-  select(c(1,2,3,7,9,10))
+  select(c(1,2,3,7,10,11))
 colnames(mastersheet_info.14e)[3] <- "pre_post_modulator"
 mastersheet_info.14e <- mastersheet_info.14e %>%
   mutate(modulator = "", .after = pre_post_modulator)
@@ -477,3 +477,44 @@ healthy_info <- sample_info.14e %>%
   inner_join(mastersheet_info.14e)
 
 write.csv(format(healthy_info, digits = 3), "data/formatted/sample_info_14e.csv", row.names = FALSE)
+
+
+############# combine cohorts
+
+colnames(cph_info)
+colnames(rpa_info)
+colnames(sch_info)
+colnames(healthy_info)
+
+cph_info <- cph_info %>%
+  relocate(age, .before = sex)
+
+colnames(cph_info)
+colnames(rpa_info)
+colnames(sch_info)
+colnames(healthy_info)
+
+colnames(cph_info) <- colnames(sch_info)
+colnames(rpa_info) <- colnames(sch_info)
+colnames(healthy_info) <- colnames(sch_info)
+
+colnames(cph_info)
+colnames(rpa_info)
+colnames(sch_info)
+colnames(healthy_info)
+
+meta_data <- rbind(cph_info, rpa_info, sch_info, healthy_info)
+meta_data <- meta_data %>%
+  rename(c("patient_recruitment_year" = "year"))
+
+levels(factor(meta_data$modulator))
+levels(factor(meta_data$pre_post_modulator))
+
+meta_data <- meta_data %>%
+  mutate(modulator = case_when(modulator %in% c("", "-", "No CFTR-modulator") ~ NA_character_,
+                               TRUE ~ modulator)) %>%
+  mutate(pre_post_modulator = gsub(" ", "", pre_post_modulator)) %>%
+  mutate(pre_post_modulator = case_when((pre_post_modulator == "-" ~ NA_character_,
+                                         TRUE ~ pre_post_modulator)
+                                        )
+         )
