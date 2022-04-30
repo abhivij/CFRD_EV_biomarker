@@ -603,6 +603,14 @@ meta_data_with_qual <- meta_data_with_qual %>%
             by = c("sample_name_2" = "sample_name")) %>%
   select(-c(sample_name_2))
 
+meta_data_with_qual <- meta_data_with_qual %>%
+  mutate(age_group = case_when(cohort == "SCH_NSW" ~ "child",
+                               TRUE ~ "adult"), .after = age)
+
+meta_data_with_qual <- meta_data_with_qual %>%
+  mutate(modulator = case_when(pre_post_modulator == 0 ~ NA_character_,
+                               TRUE ~ modulator))
+
 write.csv(format(meta_data_with_qual, digits = 3), "data/formatted/meta_data.csv", row.names = FALSE)
 
 
