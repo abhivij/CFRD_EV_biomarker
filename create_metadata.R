@@ -503,7 +503,19 @@ colnames(rpa_info)
 colnames(sch_info)
 colnames(healthy_info)
 
-meta_data <- rbind(cph_info, rpa_info, sch_info, healthy_info)
+meta_data <- rbind(cph_info %>%
+                     mutate("cohort" = "CPH", .after = year) %>%
+                     mutate("country" = "DK", .after = cohort), 
+                   rpa_info %>%
+                     mutate("cohort" = "RPA_NSW", .after = year) %>%
+                     mutate("country" = "AU", .after = cohort),
+                   sch_info %>%
+                     mutate("cohort" = "SCH_NSW", .after = year) %>%
+                     mutate("country" = "AU", .after = cohort), 
+                   healthy_info %>%
+                     mutate("cohort" = "UNSW", .after = year) %>%
+                     mutate("country" = "AU", .after = cohort))
+
 meta_data <- meta_data %>%
   rename(c("patient_recruitment_year" = "year"))
 
@@ -514,7 +526,13 @@ meta_data <- meta_data %>%
   mutate(modulator = case_when(modulator %in% c("", "-", "No CFTR-modulator") ~ NA_character_,
                                TRUE ~ modulator)) %>%
   mutate(pre_post_modulator = gsub(" ", "", pre_post_modulator)) %>%
-  mutate(pre_post_modulator = case_when((pre_post_modulator == "-" ~ NA_character_,
-                                         TRUE ~ pre_post_modulator)
-                                        )
-         )
+  mutate(pre_post_modulator = case_when(pre_post_modulator == "-" ~ NA_character_,
+                                        TRUE ~ pre_post_modulator)
+         ) %>%
+  mutate(pre_post_modulator = strtoi(pre_post_modulator))
+
+levels(factor(meta_data$modulator))
+levels(factor(meta_data$pre_post_modulator))
+
+summary(meta_data$pre_post_modulator)
+summary(factor(meta_data$pre_post_modulator))
