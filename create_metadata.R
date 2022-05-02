@@ -610,6 +610,14 @@ meta_data_with_qual <- meta_data_with_qual %>%
 meta_data_with_qual <- meta_data_with_qual %>%
   mutate(modulator = case_when(pre_post_modulator == 0 ~ NA_character_,
                                TRUE ~ modulator))
+levels(factor(meta_data_with_qual$modulator))
+
+#same drugs named differently in AU and EU
+meta_data_with_qual <- meta_data_with_qual %>%
+  mutate(modulator = gsub("Kaftrio", "Trikafta", modulator, fixed = TRUE)) %>%
+  mutate(modulator = gsub("Symkevi", "Symdeko", modulator, fixed = TRUE))
+
+levels(factor(meta_data_with_qual$modulator))
 
 write.csv(format(meta_data_with_qual, digits = 3), "data/formatted/meta_data.csv", row.names = FALSE)
 
