@@ -619,6 +619,12 @@ meta_data_with_qual <- meta_data_with_qual %>%
 
 levels(factor(meta_data_with_qual$modulator))
 
+summary(factor(meta_data_with_qual$seq_miR_library_quality))
+meta_data_with_qual <- meta_data_with_qual %>%
+  mutate(seq_miR_library_quality = case_when(sample_name %in% c("CPH10", "CPH22") ~ "Good",
+                                             TRUE ~ seq_miR_library_quality))
+summary(factor(meta_data_with_qual$seq_miR_library_quality))
+
 write.csv(format(meta_data_with_qual, digits = 3), "data/formatted/meta_data.csv", row.names = FALSE)
 
 
