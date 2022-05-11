@@ -164,7 +164,7 @@ meta_data_subset <- meta_data %>%
   select(sample_long_name, condition) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
-                       plot_title = "CF Vs IGT Vs NGT", 
+                       plot_title = "CFRD Vs IGT Vs NGT", 
                        legend_title = "condition", 
                        plot_file_name = "plots/pca_CFRDVsIGTVsNGT.png")
 
@@ -175,7 +175,7 @@ meta_data_subset <- meta_data %>%
   select(sample_long_name, condition) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
-                       plot_title = "CF Vs IGT Vs NGT good quality samples", 
+                       plot_title = "CFRD Vs IGT Vs NGT good quality samples", 
                        legend_title = "condition", 
                        plot_file_name = "plots/pca_CFRDVsIGTVsNGT_good.png")
 
@@ -188,7 +188,7 @@ meta_data_subset <- meta_data %>%
   select(sample_long_name, condition) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
-                       plot_title = "CF Vs IGT Vs NGT good quality samples from AU", 
+                       plot_title = "CFRD Vs IGT Vs NGT good quality samples from AU", 
                        legend_title = "condition", 
                        plot_file_name = "plots/pca_CFRDVsIGTVsNGT_good_AU.png")
 
@@ -200,7 +200,7 @@ meta_data_subset <- meta_data %>%
   select(sample_long_name, condition) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
-                       plot_title = "CF Vs IGT Vs NGT good quality samples from DK", 
+                       plot_title = "CFRD Vs IGT Vs NGT good quality samples from DK", 
                        legend_title = "condition", 
                        plot_file_name = "plots/pca_CFRDVsIGTVsNGT_good_DK.png")
 
@@ -213,7 +213,7 @@ meta_data_subset <- meta_data %>%
   select(sample_long_name, condition) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
-                       plot_title = "CF Vs IGT Vs NGT good quality samples from AU", 
+                       plot_title = "CFRD Vs IGT Vs NGT good quality samples from AU", 
                        legend_title = "condition", 
                        plot_file_name = "plots/pca_CFRDVsIGTVsNGT_good_AU.png")
 
