@@ -47,27 +47,56 @@ fit <- glmQLFit(y, design)
 
 qlf.2vs1 <- glmQLFTest(fit, coef=2)
 de_rnas <- topTags(qlf.2vs1, n = Inf)$table
-EnhancedVolcano(de_rnas,
-                lab = row.names(de_rnas),
-                x = 'logFC',
-                y = 'FDR', pCutoff = 0.05,
-                title = "CF Vs HC",
-                labSize = 3,
-                col = c("grey", "grey", "blue", "red"),
-                colAlpha = 1)
+# EnhancedVolcano(de_rnas,
+#                 lab = row.names(de_rnas),
+#                 x = 'logFC',
+#                 y = 'FDR', pCutoff = 0.05,
+#                 title = "CF Vs HC",
+#                 labSize = 3,
+#                 col = c("grey", "grey", "blue", "red"),
+#                 colAlpha = 1)
 
 de_rnas <- de_rnas %>%
  rownames_to_column("Molecule")
 
-result = de_rnas
-title = "CF Vs HC"
-file_name = "volcano_CFVsHC.png"
-dir_path = "plots"
-p_val_cutoff = 0.05 
-logFC_cutoff = 5
+# result = de_rnas
+# title = "CF Vs HC"
+# file_name = "volcano_CFVsHC.png"
+# dir_path = "plots"
+# p_val_cutoff = 0.05 
+# logFC_cutoff = 0.5
+# p_val_column = "FDR"
+# k = 5
 
-p_val_column = "FDR"
-k = 5
+create_volcano_plot(
+  result = de_rnas,
+  title = "CF Vs HC",
+  file_name = "volcano_CFVsHC_fdr.png",
+  dir_path = "de_results",
+  p_val_cutoff = 0.05, 
+  logFC_cutoff = 0.5,
+  p_val_column = "FDR",
+  k = 5
+)
+
+create_volcano_plot(
+  result = de_rnas,
+  title = "CF Vs HC",
+  file_name = "volcano_CFVsHC_pval.png",
+  dir_path = "de_results",
+  p_val_cutoff = 0.05, 
+  logFC_cutoff = 0.5,
+  p_val_column = "PValue",
+  k = 5
+)
+
+dir_path <- "de_results"
+file_name <- "DE_CFVsHC.csv"
+significant_de <- de_rnas %>%
+  filter(FDR < 0.05) %>%
+  arrange(logFC)
+write.csv(significant_de, paste(dir_path, file_name, sep = "/"), row.names = FALSE)
+
 
 ###############
 

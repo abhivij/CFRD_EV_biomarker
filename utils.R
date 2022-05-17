@@ -46,13 +46,21 @@ create_volcano_plot <- function(result, title, file_name, dir_path = "",
   colours <- c("red", "blue", "grey")
   names(colours) <- c("UP", "DOWN", "NO")
   
+  # https://stackoverflow.com/questions/20005233/how-to-use-simultaneously-superscript-and-variable-in-a-axis-label-with-ggplot2
+  
+  #just superscript or subscript can be added in axis label using expression
+  #using value from variable along with it requires bquote
+  
   vol_plot <- ggplot(data=result, aes(x=logFC, y=-log10(!!as.symbol(p_val_column)), col=diffexpr, label=de_mol)) +
     geom_point() + 
-    geom_text_repel(max.overlaps = 20, colour = "black") +
+    geom_text_repel(max.overlaps = 20, colour = "black", size = 2) +
     geom_vline(xintercept=c(-logFC_cutoff, logFC_cutoff), col="green", linetype = "dashed") +
     geom_hline(yintercept=-log10(p_val_cutoff), col="green", linetype = "dashed") +
     scale_colour_manual(values = colours) +
-    labs(title = title, colour = "Diff Expr")
+    labs(title = title, colour = "Diff Expr",
+         x = expression(paste(log[2], "FC")),
+         y = bquote(-log[10] ~ .(p_val_column)))
   vol_plot
   ggsave(paste(dir_path, file_name, sep = "/"), vol_plot) 
 }
+
