@@ -60,3 +60,27 @@ sum(colnames(umi_counts) %in% mirnas_of_interest)
 
 umi_counts.moi <- umi_counts[, colnames(umi_counts) %in% mirnas_of_interest]
 sum(colnames(umi_counts.moi) %in% mirnas_of_interest)
+
+validated_mirnas_in_data <- data.frame("id" = colnames(umi_counts.moi))
+write.csv(validated_mirnas_in_data, "data/formatted/validated_mirnas_in_data.csv", row.names = FALSE)
+
+
+predicted_mirnas.data <- predicted_mirnas@data %>%
+  arrange(mature_mirna_id)
+predicted_mirnas.data <- predicted_mirnas.data %>%
+  select(mature_mirna_id, target_symbol, database, score) %>%
+  mutate(mature_mirna_id = gsub("-", ".", mature_mirna_id, fixed = TRUE)) %>%
+  arrange(mature_mirna_id)  
+
+predicted_mirnas_u <- unique(predicted_mirnas.data$mature_mirna_id)
+
+length(colnames(umi_counts) %in% predicted_mirnas_u)
+sum(colnames(umi_counts) %in% predicted_mirnas_u)
+
+umi_counts.pred <- umi_counts[, colnames(umi_counts) %in% predicted_mirnas_u]
+sum(colnames(umi_counts.pred) %in% predicted_mirnas_u)
+
+predicted_mirnas_in_data <- data.frame("id" = colnames(umi_counts.pred))
+write.csv(predicted_mirnas_in_data, "data/formatted/predicted_mirnas_in_data.csv", row.names = FALSE)
+
+intersect(mirnas_of_interest, predicted_mirnas_u)
