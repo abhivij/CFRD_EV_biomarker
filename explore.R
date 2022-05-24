@@ -78,7 +78,7 @@ plot_pca_for_condition(umi_counts, meta_data_subset,
 
 #pca plot CFVsHC
 meta_data_subset <- meta_data %>%
-  filter(condition != "CF_pre_post_modulator", is.na(pre_post_modulator)) %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
   select(sample_long_name, condition) %>%
   mutate(condition = case_when(condition == "HC" ~ condition,
                                TRUE ~ "CF")) %>%
@@ -91,7 +91,8 @@ plot_pca_for_condition(umi_counts, meta_data_subset,
 
 #pca plot CFVsHC good quality
 meta_data_subset <- meta_data %>%
-  filter(condition != "CF_pre_post_modulator", is.na(pre_post_modulator), seq_miR_library_quality == "Good") %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(seq_miR_library_quality == "Good") %>%
   select(sample_long_name, condition) %>%
   mutate(condition = case_when(condition == "HC" ~ condition,
                                TRUE ~ "CF")) %>%
@@ -103,9 +104,8 @@ plot_pca_for_condition(umi_counts, meta_data_subset,
 
 #pca plot CFVsHC good quality AU
 meta_data_subset <- meta_data %>%
-  filter(condition != "CF_pre_post_modulator", is.na(pre_post_modulator), 
-         seq_miR_library_quality == "Good",
-         country == "AU") %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(seq_miR_library_quality == "Good", country == "AU") %>%
   select(sample_long_name, condition) %>%
   mutate(condition = case_when(condition == "HC" ~ condition,
                                TRUE ~ "CF")) %>%
@@ -117,9 +117,8 @@ plot_pca_for_condition(umi_counts, meta_data_subset,
 
 #pca plot CFVsHC good quality DK
 meta_data_subset <- meta_data %>%
-  filter(condition != "CF_pre_post_modulator", is.na(pre_post_modulator),
-         seq_miR_library_quality == "Good",
-         country == "DK") %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(seq_miR_library_quality == "Good", country == "DK") %>%
   select(sample_long_name, condition) %>%
   mutate(condition = case_when(condition == "HC" ~ condition,
                                TRUE ~ "CF")) %>%
@@ -129,10 +128,8 @@ meta_data_subset <- meta_data %>%
 
 #pca plot CFVsHC good quality AU adult
 meta_data_subset <- meta_data %>%
-  filter(condition != "CF_pre_post_modulator", is.na(pre_post_modulator),
-         seq_miR_library_quality == "Good",
-         country == "AU",
-         age_group == "adult") %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(seq_miR_library_quality == "Good", country == "AU", age_group == "adult") %>%
   select(sample_long_name, condition) %>%
   mutate(condition = case_when(condition == "HC" ~ condition,
                                TRUE ~ "CF")) %>%
@@ -144,10 +141,8 @@ plot_pca_for_condition(umi_counts, meta_data_subset,
 
 #pca plot CFVsHC good quality AU child
 meta_data_subset <- meta_data %>%
-  filter(condition != "CF_pre_post_modulator", is.na(pre_post_modulator), 
-         seq_miR_library_quality == "Good",
-         country == "AU",
-         age_group == "child") %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(seq_miR_library_quality == "Good", country == "AU", age_group == "child") %>%
   select(sample_long_name, condition) %>%
   mutate(condition = case_when(condition == "HC" ~ condition,
                                TRUE ~ "CF")) %>%
@@ -160,7 +155,8 @@ plot_pca_for_condition(umi_counts, meta_data_subset,
 
 #pca plot CFRDVsIGTVsNGT
 meta_data_subset <- meta_data %>%
-  filter(condition %in% c("CFRD", "IGT", "NGT"), is.na(pre_post_modulator)) %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(condition %in% c("CFRD", "IGT", "NGT")) %>%
   select(sample_long_name, condition) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
@@ -171,7 +167,8 @@ plot_pca_for_condition(umi_counts, meta_data_subset,
 
 #pca plot CFRDVsIGTVsNGT good quality samples
 meta_data_subset <- meta_data %>%
-  filter(condition %in% c("CFRD", "IGT", "NGT"), is.na(pre_post_modulator), seq_miR_library_quality == "Good") %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(condition %in% c("CFRD", "IGT", "NGT"), seq_miR_library_quality == "Good") %>%
   select(sample_long_name, condition) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
@@ -182,7 +179,8 @@ plot_pca_for_condition(umi_counts, meta_data_subset,
 
 #pca plot CFRDVsIGTVsNGT good quality AU samples
 meta_data_subset <- meta_data %>%
-  filter(condition %in% c("CFRD", "IGT", "NGT"), is.na(pre_post_modulator), 
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(condition %in% c("CFRD", "IGT", "NGT"), 
          seq_miR_library_quality == "Good",
          country == "AU") %>%
   select(sample_long_name, condition) %>%
@@ -194,7 +192,8 @@ plot_pca_for_condition(umi_counts, meta_data_subset,
 
 #pca plot CFRDVsIGTVsNGT good quality DK samples
 meta_data_subset <- meta_data %>%
-  filter(condition %in% c("CFRD", "IGT", "NGT"), is.na(pre_post_modulator), 
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(condition %in% c("CFRD", "IGT", "NGT"), 
          seq_miR_library_quality == "Good",
          country == "DK") %>%
   select(sample_long_name, condition) %>%
@@ -205,18 +204,18 @@ plot_pca_for_condition(umi_counts, meta_data_subset,
                        plot_file_name = "plots/pca_CFRDVsIGTVsNGT_good_DK.png")
 
 
-#pca plot  good quality AU samples
+#####effect of modulator
+
+#pca plot effect of modulator
 meta_data_subset <- meta_data %>%
-  filter(condition %in% c("CFRD", "IGT", "NGT"), is.na(pre_post_modulator), 
-         seq_miR_library_quality == "Good",
-         country == "AU") %>%
-  select(sample_long_name, condition) %>%
+  filter(!is.na(pre_post_modulator)) %>%
+  select(sample_long_name, pre_post_modulator) %>%
+  rename(c("condition" = "pre_post_modulator")) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
-                       plot_title = "CFRD Vs IGT Vs NGT good quality samples from AU", 
-                       legend_title = "condition", 
-                       plot_file_name = "plots/pca_CFRDVsIGTVsNGT_good_AU.png")
-
+                       plot_title = "Pre Vs Post modulator samples", 
+                       legend_title = "pre post modulator", 
+                       plot_file_name = "plots/pca_prepostmodulator.png")
 
 
 #pca plot effect of modulator good quality samples
@@ -226,7 +225,7 @@ meta_data_subset <- meta_data %>%
   rename(c("condition" = "pre_post_modulator")) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
-                       plot_title = "pre post modulator good quality samples", 
+                       plot_title = "Pre Vs Post modulator good quality samples", 
                        legend_title = "pre post modulator", 
                        plot_file_name = "plots/pca_prepostmodulator_good.png")
 
@@ -240,7 +239,7 @@ meta_data_subset <- meta_data %>%
   rename(c("condition" = "pre_post_modulator")) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
-                       plot_title = "pre post modulator good quality samples specific", 
+                       plot_title = "Pre Vs Post modulator good quality samples specific", 
                        legend_title = "pre post modulator", 
                        plot_file_name = "plots/pca_prepostmodulator_good_specific.png")
 
@@ -254,7 +253,7 @@ meta_data_subset <- meta_data %>%
   rename(c("condition" = "pre_post_modulator")) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
-                       plot_title = "pre post modulator good quality adult samples", 
+                       plot_title = "Pre Vs Post modulator good quality adult samples", 
                        legend_title = "pre post modulator", 
                        plot_file_name = "plots/pca_prepostmodulator_good_adult.png")
 
@@ -269,7 +268,7 @@ meta_data_subset <- meta_data %>%
   rename(c("condition" = "pre_post_modulator")) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
-                       plot_title = "pre post modulator good quality adult AU samples", 
+                       plot_title = "Pre Vs Post modulator good quality adult AU samples", 
                        legend_title = "pre post modulator", 
                        plot_file_name = "plots/pca_prepostmodulator_good_adult_AU.png")
 
@@ -283,8 +282,21 @@ meta_data_subset <- meta_data %>%
   rename(c("condition" = "pre_post_modulator")) %>%
   arrange(condition)
 plot_pca_for_condition(umi_counts, meta_data_subset,
-                       plot_title = "pre post modulator adult AU samples", 
+                       plot_title = "Pre Vs Post modulator adult AU samples", 
                        legend_title = "pre post modulator", 
                        plot_file_name = "plots/pca_prepostmodulator_adult_AU.png")
 
 #so selecting good quality samples only doesn't seem to make significant difference
+
+
+meta_data_subset <- meta_data %>%
+  filter(!is.na(pre_post_modulator), 
+         age_group == "child",
+         country == "AU") %>%
+  select(sample_long_name, pre_post_modulator) %>%
+  rename(c("condition" = "pre_post_modulator")) %>%
+  arrange(condition)
+plot_pca_for_condition(umi_counts, meta_data_subset,
+                       plot_title = "Pre Vs Post modulator child AU samples", 
+                       legend_title = "pre post modulator", 
+                       plot_file_name = "plots/pca_prepostmodulator_child_AU.png")
