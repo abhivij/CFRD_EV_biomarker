@@ -40,6 +40,7 @@ de_analysis(
   plot_title = "CF Vs HC",
   p_val_cutoff = 0.05,
   logFC_cutoff = 0.5,
+  contrast = c(0, 1),
   k = 5
 )
 
@@ -145,7 +146,8 @@ de_analysis(
   plot_title = "CF Vs HC child samples",
   p_val_cutoff = 0.05,
   logFC_cutoff = 0.5,
-  k = 5
+  k = 5,
+  contrast = c(0, 1)
 )
 
 
@@ -169,7 +171,8 @@ de_analysis(
   plot_title = "CF Vs HC adult samples",
   p_val_cutoff = 0.05,
   logFC_cutoff = 0.5,
-  k = 5
+  k = 5,
+  contrast = c(0, 1)
 )
 
 
