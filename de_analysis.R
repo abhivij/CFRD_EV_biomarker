@@ -233,6 +233,8 @@ ggvenn(list("CF Vs HC Up Reg" = de_up$Molecule,
 ggsave("de_results/CFVsHC_up_validated.png")
 intersect(de_up$Molecule, moi)
 
+Reduce(intersect, list(de_up$Molecule, de_adult_up$Molecule, de_child_up$Molecule, moi))
+
 ggvenn(list("CF Vs HC Down Reg" = de_down$Molecule, 
             "Validated IGFBP7 miRNAs" = moi),
        stroke_size = 0.1,
@@ -240,6 +242,8 @@ ggvenn(list("CF Vs HC Down Reg" = de_down$Molecule,
        text_size = 3, )
 ggsave("de_results/CFVsHC_down_validated.png")
 intersect(de_down$Molecule, moi)
+
+Reduce(intersect, list(de_down$Molecule, de_adult_down$Molecule, de_child_down$Molecule, moi))
 
 ###############
 
@@ -382,3 +386,5 @@ de_analysis(
   k = 5,
   contrast = c(0, -1)
 )
+
+##################
