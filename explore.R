@@ -14,7 +14,7 @@ umi_counts <- data.frame(t(umi_counts))
 #read metadata
 meta_data <- read.csv("data/formatted/meta_data.csv")
 
-
+sum(is.na(meta_data$seq_plate))
 
 #create pca plots
 
@@ -23,6 +23,14 @@ plot_pca_for_condition <- function(umi_counts, meta_data_subset,
                                    plot_title, legend_title, plot_file_name){
   pca_df <- umi_counts[meta_data_subset$sample_long_name,]
   pca_matrix <- prcomp(pca_df)
+  
+  count_df <- data.frame(count = summary(factor(meta_data_subset$condition))) %>%
+    rownames_to_column("condition")
+
+  meta_data_subset <- meta_data_subset %>%
+    mutate(condition = factor(condition)) %>%
+    inner_join(count_df) %>%
+    mutate(condition = paste0(condition, " (", count, ")"))
   
   fviz_pca_ind(pca_matrix, axes = c(1,2),
                habillage = meta_data_subset$condition,
