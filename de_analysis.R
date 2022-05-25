@@ -51,7 +51,7 @@ de_analysis(
 # logFC_cutoff = 0.5
 # k = 5
 de_analysis <- function(counts, group, results_dir_path,
-                        plot_title, p_val_cutoff, logFC_cutoff, k = 5, coef = 2){
+                        plot_title, p_val_cutoff, logFC_cutoff, contrast, k = 5){
   y <- DGEList(counts = counts, 
                group = group)
   keep <- filterByExpr(y)
@@ -67,8 +67,16 @@ de_analysis <- function(counts, group, results_dir_path,
   
   fit <- glmQLFit(y, design)
   
-  qlf <- glmQLFTest(fit, coef=coef)
+  # contrast = c(0,-1,0,0)
+  qlf <- glmQLFTest(fit, contrast=contrast)
   de_rnas <- topTags(qlf, n = Inf)$table
+  # 
+  # contrast = c(0,-1,0,0)
+  # qlf <- glmQLFTest(fit, contrast=contrast)
+  # de_rnas2 <- topTags(qlf, n = Inf)$table
+  # 
+  # qlf <- glmQLFTest(fit, coef=2)
+  # de_rnas3 <- topTags(qlf, n = Inf)$table
   
   de_rnas <- de_rnas %>%
     rownames_to_column("Molecule")
@@ -208,32 +216,79 @@ Reduce(intersect, list(de_down$Molecule, de_adult_down$Molecule, de_child_down$M
 
 
 
+############
+
+moi <- read.csv("data/formatted/validated_mirnas_in_data.csv")[,1]
+moi <- gsub(".", "-", moi, fixed = TRUE)
+
+
+ggvenn(list("CF Vs HC Up Reg" = de_up$Molecule, 
+            "Validated IGFBP7 miRNAs" = moi),
+       stroke_size = 0.1,
+       set_name_size = 5,
+       text_size = 3, )
+ggsave("de_results/CFVsHC_up_validated.png")
+intersect(de_up$Molecule, moi)
+
+ggvenn(list("CF Vs HC Down Reg" = de_down$Molecule, 
+            "Validated IGFBP7 miRNAs" = moi),
+       stroke_size = 0.1,
+       set_name_size = 5,
+       text_size = 3, )
+ggsave("de_results/CFVsHC_down_validated.png")
+intersect(de_down$Molecule, moi)
+
 ###############
 
 #CFRD Vs IGT
+
 meta_data_subset <- meta_data %>%
-  mutate(de_condition = case_when(!is.na(pre_post_modulator) ~ "CF",
-                                  condition == "CF_pre_post_modulator" ~ "CF",
-                                  condition == "CF_non_modulator" ~ "CF",
-                                  condition == "IND" ~ "CF",
-                                  TRUE ~ condition)) %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(condition %in% c("CFRD", "IGT", "NGT", "HC")) %>%
+  mutate(de_condition = condition) %>%
   arrange(de_condition)
+
 summary(factor(meta_data_subset$de_condition))
 
 
 counts <- umi_counts[, meta_data_subset$sample_long_name]
-group <- factor(meta_data_subset$de_condition, levels = c("CFRD", "IGT", "NGT", "CF", "HC"))
+group <- factor(meta_data_subset$de_condition, levels = c("CFRD", "IGT", "NGT", "HC"))
 
 
-counts = counts
-group = group
-results_dir_path = "de_results"
-plot_title = "CFRD Vs IGT adult samples"
-p_val_cutoff = 0.05
-logFC_cutoff = 0.5
-k = 5
-coef = 1:2
+# counts = counts
+# group = group
+# results_dir_path = "de_results"
+# plot_title = "CFRD Vs IGT"
+# p_val_cutoff = 0.05
+# logFC_cutoff = 0.5
+# k = 5
+# coef = 1:2
 
+de_analysis(
+  counts = counts,
+  group = group,
+  results_dir_path = "de_results",
+  plot_title = "CFRD Vs NGT",
+  p_val_cutoff = 0.05,
+  logFC_cutoff = 0.5,
+  k = 5,
+  contrast = c(0, -1, 0, 0)
+)
+
+# contrast = c(1, -1, 0, 0)
+
+
+#CFRD Vs NGT
+de_analysis(
+  counts = counts,
+  group = group,
+  results_dir_path = "de_results",
+  plot_title = "CFRD Vs NGT",
+  p_val_cutoff = 0.05,
+  logFC_cutoff = 0.5,
+  k = 5,
+  contrast = c(0, 0, -1, 0)
+)
 de_analysis(
   counts = counts,
   group = group,
@@ -242,12 +297,85 @@ de_analysis(
   p_val_cutoff = 0.05,
   logFC_cutoff = 0.5,
   k = 5,
-  coef = 1:2
+  contrast = c(0, -1, 0, 0)
+)
+
+
+#IGT Vs NGT
+de_analysis(
+  counts = counts,
+  group = group,
+  results_dir_path = "de_results",
+  plot_title = "IGT Vs NGT",
+  p_val_cutoff = 0.05,
+  logFC_cutoff = 0.5,
+  k = 5,
+  contrast = c(0, 1, -1, 0)
 )
 
 
 
-#CFRD Vs NGT
+de_c_i <- read.csv("de_results/DE_CFRDVsIGT.csv")
+de_c_n <- read.csv("de_results/DE_CFRDVsNGT.csv")
+de_i_n <- read.csv("de_results/DE_IGTVsNGT.csv")
+
+de_c_i_up <- de_c_i %>%
+  filter(logFC > 0)
+de_c_i_down <- de_c_i %>%
+  filter(logFC < 0)
+
+de_c_n_up <- de_c_n %>%
+  filter(logFC > 0)
+de_c_n_down <- de_c_n %>%
+  filter(logFC < 0)
+
+de_i_n_up <- de_i_n %>%
+  filter(logFC > 0)
+de_i_n_down <- de_i_n %>%
+  filter(logFC < 0)
 
 
-#IGT Vs NGT
+ggvenn(list("CFRD Vs IGT Up Reg" = de_c_i_up$Molecule, 
+            "CFRD Vs NGT Up Reg" = de_c_n_up$Molecule,
+            "IGT Vs NGT Up Reg" = de_i_n_up$Molecule),
+       stroke_size = 0.1,
+       set_name_size = 5,
+       text_size = 3, )
+ggsave("de_results/CFRDVsIGTVsNGT_up_reg_venn.png")
+
+
+ggvenn(list("CFRD Vs IGT Down Reg" = de_c_i_down$Molecule, 
+            "CFRD Vs NGT Down Reg" = de_c_n_down$Molecule,
+            "IGT Vs NGT Down Reg" = de_i_n_down$Molecule),
+       stroke_size = 0.1,
+       set_name_size = 5,
+       text_size = 3, )
+ggsave("de_results/CFRDVsIGTVsNGT_down_reg_venn.png")
+
+
+########################
+#modulator vs premodulator
+
+meta_data_subset <- meta_data %>%
+  filter(!is.na(pre_post_modulator)) %>%
+  mutate(de_condition = factor(pre_post_modulator)) %>%
+  arrange(de_condition)
+levels(meta_data_subset$de_condition) <- c("pre", "post")
+
+summary(factor(meta_data_subset$de_condition))
+
+
+counts <- umi_counts[, meta_data_subset$sample_long_name]
+group <- factor(meta_data_subset$de_condition, levels = c("pre", "post"))
+
+
+de_analysis(
+  counts = counts,
+  group = group,
+  results_dir_path = "de_results",
+  plot_title = "pre Vs post",
+  p_val_cutoff = 0.05,
+  logFC_cutoff = 0.5,
+  k = 5,
+  contrast = c(0, -1)
+)
