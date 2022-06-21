@@ -376,3 +376,180 @@ plot_pca_for_condition(umi_counts, meta_data_subset,
                        plot_title = "Pre Vs Post modulator NGT samples", 
                        legend_title = "pre post modulator", 
                        plot_file_name = "plots/pca_prepostmodulator_NGT.png")
+
+
+
+
+############# multiple factors in pca
+
+
+plot_title <- "CFRD Vs IGT Vs NGT"
+legend_title <- "condition"
+plot_file_name <- "plots/pca_after_norm/pca_CFRDVsIGTVsNGT.png"
+plot_pca_for_condition(umi_counts, meta_data_subset,
+                       plot_title, legend_title, plot_file_name)
+
+
+
+
+plot_pca_2factors <- function(umi_counts, meta_data_subset,
+                              plot_title, legend_title, plot_file_name, norm){
+  
+  count_df <- data.frame(count = summary(factor(meta_data_subset$condition))) %>%
+    rownames_to_column("condition")
+  meta_data_subset <- meta_data_subset %>%
+    mutate(condition = factor(condition)) %>%
+    inner_join(count_df) %>%
+    mutate(condition = paste0(condition, " (", count, ")")) %>%
+    select(-c(count))
+  
+  count_df <- data.frame(count = summary(factor(meta_data_subset$age_group))) %>%
+    rownames_to_column("age_group")
+  meta_data_subset <- meta_data_subset %>%
+    mutate(age_group = factor(age_group)) %>%
+    inner_join(count_df) %>%
+    mutate(age_group = paste0(age_group, " (", count, ")")) %>%
+    select(-c(count))
+  
+  
+  pca_df <- umi_counts[meta_data_subset$sample_long_name,]
+  pca_df <- as.data.frame(t(pca_df))
+
+  
+  if(norm == "znorm_logCPM"){
+
+    pca_df <- edgeR::cpm(pca_df, log=TRUE)
+    pca_df <- as.data.frame(t(pca_df))
+    
+    pca_df <- scale(pca_df)
+    # apply(pca_df, FUN = mean, MARGIN = 2)
+    # apply(pca_df, FUN = sd, MARGIN = 2)
+  } else if (norm == "znorm_logTMM"){
+    
+    group <- sapply(strsplit(meta_data_subset$condition, split = " "), 
+                    FUN = function(x){
+                      return (x[[1]])
+                    })
+    
+    dge <- edgeR::DGEList(counts = pca_df, group = group)
+    dge <- edgeR::calcNormFactors(dge, method = "TMM")
+    tmm <- edgeR::cpm(dge, log = TRUE)
+    
+    pca_df <- as.data.frame(t(tmm))
+    pca_df <- scale(pca_df)
+
+  } else{
+    pca_df <- as.data.frame(t(pca_df))
+  }
+  
+  
+  pca_matrix <- prcomp(pca_df)
+  
+  # propor <- data.frame(summary(pca_matrix)$importance)
+  # rowSums(propor)
+  
+  
+  dim_red_df <- data.frame(pca_matrix$x[, c(1, 2)]) %>%
+    rownames_to_column("sample_long_name") %>%
+    inner_join(meta_data_subset)
+
+  ggplot2::ggplot(dim_red_df,
+                  ggplot2::aes(x = PC1, y = PC2, colour = condition, shape = age_group)) +
+    ggplot2::geom_point() +
+    ggplot2::labs(title = plot_title)
+
+  ggsave(plot_file_name)  
+}
+
+
+
+#all
+
+meta_data_subset <- meta_data %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(condition %in% c("CFRD", "IGT", "NGT")) %>%
+  select(sample_long_name, condition, age_group, sex, country) %>%
+  arrange(condition)
+
+
+
+plot_pca_2factors(umi_counts = umi_counts,
+                  meta_data_subset = meta_data_subset,
+                  plot_title = "CFRD Vs IGT Vs NGT znorm_logCPM",
+                  legend_title = "condition",
+                  norm = "znorm_logCPM",
+                  plot_file_name = "plots/pca_after_norm/pca_CFRDVsIGTVsNGT_znorm_logCPM.png")
+plot_pca_2factors(umi_counts = umi_counts,
+                  meta_data_subset = meta_data_subset,
+                  plot_title = "CFRD Vs IGT Vs NGT znorm_logTMM",
+                  legend_title = "condition",
+                  norm = "znorm_logTMM",
+                  plot_file_name = "plots/pca_after_norm/pca_CFRDVsIGTVsNGT_znorm_logTMM.png")
+plot_pca_2factors(umi_counts = umi_counts,
+                  meta_data_subset = meta_data_subset,
+                  plot_title = "CFRD Vs IGT Vs NGT no norm",
+                  legend_title = "condition",
+                  norm = "",
+                  plot_file_name = "plots/pca_after_norm/pca_CFRDVsIGTVsNGT_nonorm.png")
+
+
+
+
+#AU
+
+meta_data_subset <- meta_data %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(condition %in% c("CFRD", "IGT", "NGT")) %>%
+  filter(country == "AU") %>%
+  select(sample_long_name, condition, age_group, sex, country) %>%
+  arrange(condition)
+
+
+plot_pca_2factors(umi_counts = umi_counts,
+                  meta_data_subset = meta_data_subset,
+                  plot_title = "CFRD Vs IGT Vs NGT AU znorm_logCPM",
+                  legend_title = "condition",
+                  norm = "znorm_logCPM",
+                  plot_file_name = "plots/pca_after_norm/pca_CFRDVsIGTVsNGT_AU_znorm_logCPM.png")
+plot_pca_2factors(umi_counts = umi_counts,
+                  meta_data_subset = meta_data_subset,
+                  plot_title = "CFRD Vs IGT Vs NGT AU znorm_logTMM",
+                  legend_title = "condition",
+                  norm = "znorm_logTMM",
+                  plot_file_name = "plots/pca_after_norm/pca_CFRDVsIGTVsNGT_AU_znorm_logTMM.png")
+plot_pca_2factors(umi_counts = umi_counts,
+                  meta_data_subset = meta_data_subset,
+                  plot_title = "CFRD Vs IGT Vs NGT AU no norm",
+                  legend_title = "condition",
+                  norm = "",
+                  plot_file_name = "plots/pca_after_norm/pca_CFRDVsIGTVsNGT_AU_nonorm.png")
+
+
+#DK
+
+meta_data_subset <- meta_data %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator != 1) %>%
+  filter(condition %in% c("CFRD", "IGT", "NGT")) %>%
+  filter(country == "DK") %>%
+  select(sample_long_name, condition, age_group, sex, country) %>%
+  arrange(condition)
+
+
+plot_pca_2factors(umi_counts = umi_counts,
+                  meta_data_subset = meta_data_subset,
+                  plot_title = "CFRD Vs IGT Vs NGT DK znorm_logCPM",
+                  legend_title = "condition",
+                  norm = "znorm_logCPM",
+                  plot_file_name = "plots/pca_after_norm/pca_CFRDVsIGTVsNGT_DK_znorm_logCPM.png")
+plot_pca_2factors(umi_counts = umi_counts,
+                  meta_data_subset = meta_data_subset,
+                  plot_title = "CFRD Vs IGT Vs NGT DK znorm_logTMM",
+                  legend_title = "condition",
+                  norm = "znorm_logTMM",
+                  plot_file_name = "plots/pca_after_norm/pca_CFRDVsIGTVsNGT_DK_znorm_logTMM.png")
+plot_pca_2factors(umi_counts = umi_counts,
+                  meta_data_subset = meta_data_subset,
+                  plot_title = "CFRD Vs IGT Vs NGT DK no norm",
+                  legend_title = "condition",
+                  norm = "",
+                  plot_file_name = "plots/pca_after_norm/pca_CFRDVsIGTVsNGT_DK_nonorm.png")
