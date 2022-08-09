@@ -186,7 +186,6 @@ plot_features_count_barplot <- function(dparg_vec,
 ##########################
 
 
-setwd("~/UNSW/VafaeeLab/GBMPlasmaEV/")
 library(tidyverse)
 library(viridis)
 library(ComplexHeatmap)
@@ -217,14 +216,16 @@ plot_common_feature_heatmap <- function(dparg_vec,
                           sep = ',', header = TRUE)
   fsm_info <- read.table(paste(results_dir, "fsm_info.csv", sep = "/"),
                          sep = ',', header = TRUE)
-  model_results <- read.table(paste(results_dir, "model_results.csv", sep = "/"),
+  model_results <- read.table(paste(results_dir, "model_results_test.csv", sep = "/"),
                               sep = ',', header = TRUE)
   
   
   dataset_id_vec <- c()
+  classification_criteria <- "" 
   for(id in dparg_vec){
+    classification_criteria <- dataset_pipeline_arguments[[id]]$classification_criteria
     dataset_id <- paste(dataset_pipeline_arguments[[id]]$dataset_id,
-                        dataset_pipeline_arguments[[id]]$classification_criteria,
+                        classification_criteria,
                         sep = "_")
     print(dataset_id)
     dataset_id_vec <- append(dataset_id_vec, dataset_id)
@@ -234,7 +235,8 @@ plot_common_feature_heatmap <- function(dparg_vec,
   model_results <- model_results %>%
     filter(DataSetId %in% dataset_id_vec) %>%
     mutate(DataSetId = gsub(dataset_replace_string, "", DataSetId, fixed = TRUE)) %>%
-    mutate(DataSetId = gsub("GBMPlasmaEV_", "", DataSetId, fixed = TRUE))
+    mutate(DataSetId = gsub(classification_criteria, "", DataSetId)) %>%
+    mutate(DataSetId = gsub("^_|_$", "", DataSetId))
   
   data_to_plot <- model_results %>%
     select(DataSetId, Model, Mean_AUC) %>%
@@ -243,15 +245,17 @@ plot_common_feature_heatmap <- function(dparg_vec,
   data_to_plot <- data.matrix(data_to_plot)
   
   
-  dir_path <- paste0("plots/FEMPipeline/common_heatmap/")
+  dir_path <- paste0("../plots/FEMPipeline_AU_tmm/subset/")
   if(!dir.exists(dir_path)){
     dir.create(dir_path)
   }
   file_path <- paste0(dir_path, heatmap_file_name)
   
-  heatmap_title <- paste("Mean AUC results from selected common features")
+  #classification_criteria obtained from dp_arg is used.
+  #assuming that all classification criterias within the heatmap to be created are the same
+  heatmap_title <- paste("Mean AUC results from selected common features for", classification_criteria)
   
-  png(file_path, units = "cm", width = 20, height = 15, res = 1200)
+  png(file_path, units = "cm", width = 30, height = 25, res = 1200)
   ht <- Heatmap(data_to_plot, name = "Mean AUC",
                 col = magma(5),
                 rect_gp = gpar(col = "white", lwd = 1),
@@ -267,138 +271,18 @@ plot_common_feature_heatmap <- function(dparg_vec,
 }
 
 
-plot_common_feature_heatmap(c(163:165),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "transcriptomic_simple_norm_PREOPEVsMET_",
-                            heatmap_file_name = "tr_PREOPEVsMET.png"
-)
-plot_common_feature_heatmap(c(166:169),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "transcriptomic_simple_norm_PREOPEVsHC_",
-                            heatmap_file_name = "tr_PREOPEVsHC.png"
-)
-plot_common_feature_heatmap(c(170:173),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "transcriptomic_simple_norm_METVsHC_",
-                            heatmap_file_name = "tr_METVsHC.png"
-)
-plot_common_feature_heatmap(c(174:175),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "transcriptomic_simple_norm_PREOPEVsPOSTOPE_T_",
-                            heatmap_file_name = "tr_PREOPEVsPOSTOPE_T.png"
-)
-plot_common_feature_heatmap(c(176:177),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "transcriptomic_simple_norm_PREOPEVsPOSTOPE_P_",
-                            heatmap_file_name = "tr_PREOPEVsPOSTOPE_P.png"
-)
-plot_common_feature_heatmap(c(178:179),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "transcriptomic_simple_norm_POSTOPE_TVsPOSTOPE_P_",
-                            heatmap_file_name = "tr_POSTOPE_TVsPOSTOPE_P.png"
-)
-plot_common_feature_heatmap(c(180:182),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "transcriptomic_simple_norm_POSTOPE_TVsREC_T_",
-                            heatmap_file_name = "tr_POSTOPE_TVsREC_T.png"
-)
-plot_common_feature_heatmap(c(183:184),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "transcriptomic_simple_norm_POSTOPE_PVsREC_P_",
-                            heatmap_file_name = "tr_POSTOPE_PVsREC_P.png"
-)
-plot_common_feature_heatmap(c(185:186),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "transcriptomic_simple_norm_POSTOPE_TVsPREREC_",
-                            heatmap_file_name = "tr_POSTOPE_TVsPREREC.png"
-)
-plot_common_feature_heatmap(c(187:189),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "transcriptomic_simple_norm_PREOPEVsREC_TP_",
-                            heatmap_file_name = "tr_PREOPEVsREC_TP.png"
-)
-
-
-plot_common_feature_heatmap(c(190:192),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "proteomic_impute50fil_quantile_PREOPEVsMET_",
-                            heatmap_file_name = "pr_PREOPEVsMET.png"
-)
-plot_common_feature_heatmap(c(193:198),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "proteomic_impute50fil_quantile_PREOPEVsHC_",
-                            heatmap_file_name = "pr_PREOPEVsHC.png"
-)
-plot_common_feature_heatmap(c(199:201),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "proteomic_impute50fil_quantile_METVsHC_",
-                            heatmap_file_name = "pr_METVsHC.png"
-)
-
-plot_common_feature_heatmap(c(202:205),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "proteomic_impute50fil_quantile_PREOPEVsPOSTOPE_P_",
-                            heatmap_file_name = "pr_PREOPEVsPOSTOPE_P.png"
-)
-plot_common_feature_heatmap(c(206:207),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "proteomic_impute50fil_quantile_POSTOPE_TVsPOSTOPE_P_",
-                            heatmap_file_name = "pr_POSTOPE_TVsPOSTOPE_P.png"
-)
-plot_common_feature_heatmap(c(208:210),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "proteomic_impute50fil_quantile_POSTOPE_TVsREC_T_",
-                            heatmap_file_name = "pr_POSTOPE_TVsREC_T.png"
-)
-plot_common_feature_heatmap(c(211:214),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "proteomic_impute50fil_quantile_POSTOPE_PVsREC_P_",
-                            heatmap_file_name = "pr_POSTOPE_PVsREC_P.png"
-)
-
-plot_common_feature_heatmap(c(215:218),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "proteomic_impute50fil_quantile_PREOPEVsREC_TP_",
-                            heatmap_file_name = "pr_PREOPEVsREC_TP.png"
-)
-
-plot_common_feature_heatmap(c(219:220),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "proteomic_impute50fil_quantile_PREOPEVsPOSTOPE_T_",
-                            heatmap_file_name = "pr_PREOPEVsPOSTOPE_T.png"
-)
-
-plot_common_feature_heatmap(c(221:222),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "proteomic_impute50fil_quantile_POSTOPE_TVsPREREC_",
-                            heatmap_file_name = "pr_POSTOPE_TVsPREREC.png"
-)
+# plot_common_feature_heatmap(c(163:165),
+#                             results_dir = "fem_pipeline_results_subset",
+#                             dataset_replace_string = "transcriptomic_simple_norm_PREOPEVsMET_",
+#                             heatmap_file_name = "tr_PREOPEVsMET.png"
+# )
 
 
 
-plot_common_feature_heatmap(c(243:245),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "transcriptomic_simple_norm_PREOPEVsPOSTOPE_TP_",
-                            heatmap_file_name = "tr_PREOPEVsPOSTOPE_TP.png"
-)
-plot_common_feature_heatmap(c(246:247),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "transcriptomic_simple_norm_POSTOPE_TPVsREC_TP_",
-                            heatmap_file_name = "tr_POSTOPE_TPVsREC_TP.png"
-)
 
 
-plot_common_feature_heatmap(c(248:251),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "proteomic_impute50fil_quantile_PREOPEVsPOSTOPE_TP_",
-                            heatmap_file_name = "pr_PREOPEVsPOSTOPE_TP.png"
-)
 
-plot_common_feature_heatmap(c(252:254),
-                            results_dir = "fem_pipeline_results_subset",
-                            dataset_replace_string = "proteomic_impute50fil_quantile_POSTOPE_TPVsREC_TP_",
-                            heatmap_file_name = "pr_POSTOPE_TPVsREC_TP.png"
-)
+
 # plot_heatmap_and_var_plot(c(31:35), 28)
 # 
 # plot_heatmap_and_var_plot(c(73:74), 29, "fem_pipeline_results_subset")
@@ -528,3 +412,22 @@ plot_features_count_barplot(dparg_vec = c(37, 41, 45),
                             dir_path = "../plots/FEMPipeline_AU_tmm/",
                             results_dir = "../fem_pipeline_results_AU")
 
+
+
+plot_common_feature_heatmap(c(49:54),
+                            results_dir = "../fem_pipeline_results_AU_subset",
+                            dataset_replace_string = "CF_EV_AU_zlogtmm_",
+                            heatmap_file_name = "AU_tmm_CFRDVsIGT.png"
+)
+
+plot_common_feature_heatmap(c(55:56),
+                            results_dir = "../fem_pipeline_results_AU_subset",
+                            dataset_replace_string = "CF_EV_AU_zlogtmm_",
+                            heatmap_file_name = "AU_tmm_CFRDVsNGT.png"
+)
+
+plot_common_feature_heatmap(c(57:58),
+                            results_dir = "../fem_pipeline_results_AU_subset",
+                            dataset_replace_string = "CF_EV_AU_zlogtmm_",
+                            heatmap_file_name = "AU_tmm_IGTVsNGT.png"
+)
