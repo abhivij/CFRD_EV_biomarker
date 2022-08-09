@@ -112,6 +112,18 @@ get_features_from_df <- function(features_df, fsm){
 }
 
 write_subset_file <- function(data, features, subset_file_path){
+  
+  #"-" and "/" both in features are replaced with "."
+  #so replacing "." with "-" alone as done after the below 'for loop' is not sufficient
+  #so special handling for features with "/"
+  features_with_slash <- rownames(data)[grepl("/", rownames(data), fixed = TRUE)] 
+  for(f in features_with_slash){
+    f_replaced <- gsub("/|-", ".", f) 
+    if(f_replaced %in% features){
+      features[features == f_replaced] = f
+    }
+  }
+  
   data_sub <- data[gsub(".", "-", features, fixed = TRUE),]
   print(dim(data_sub))
   print(sum(is.na(data_sub)))
@@ -331,82 +343,6 @@ create_data_subsets <- function(dparg_id,
 #####################################
 
 #initial cohort with new quantified results
-
-
-dparg_id = 1
-dataset_pipeline_arguments = dataset_pipeline_arguments_transcriptomic
-best_fsm_vec = c("t-test")
-min_iter_feature_presence = 28
-results_dir = "fem_pipeline_results_tr"
-dir_path = "plots/FEMPipeline_new_quant/common_features_upset"
-
-
-#t PREOPEVsPOSTOPE_TP
-explore_common_features(dparg_id = 1,
-                        dataset_pipeline_arguments = dataset_pipeline_arguments_transcriptomic,
-                        best_fsm_vec = c("t-test", "mrmr10", 
-                                         "ranger_impu_cor", "mrmr100"),
-                        min_iter_feature_presence = 28,
-                        results_dir = "fem_pipeline_results_tr",
-                        dir_path = "plots/FEMPipeline_new_quant/common_features_upset")
-
-explore_common_features(dparg_id = 1,
-                        dataset_pipeline_arguments = dataset_pipeline_arguments_transcriptomic,
-                        best_fsm_vec = c("t-test", "mrmr10", 
-                                         "ranger_impu_cor", "mrmr100"),
-                        min_iter_feature_presence = 27,
-                        results_dir = "fem_pipeline_results_tr",
-                        dir_path = "plots/FEMPipeline_new_quant/common_features_upset")
-
-explore_common_features(dparg_id = 1,
-                        dataset_pipeline_arguments = dataset_pipeline_arguments_transcriptomic,
-                        best_fsm_vec = c("t-test", "mrmr10", 
-                                         "ranger_impu_cor", "mrmr100"),
-                        min_iter_feature_presence = 25,
-                        results_dir = "fem_pipeline_results_tr",
-                        dir_path = "plots/FEMPipeline_new_quant/common_features_upset")
-
-explore_common_features(dparg_id = 1,
-                        dataset_pipeline_arguments = dataset_pipeline_arguments_transcriptomic,
-                        best_fsm_vec = c("t-test", "mrmr10", 
-                                         "ranger_impu_cor", "mrmr100"),
-                        min_iter_feature_presence = 20,
-                        results_dir = "fem_pipeline_results_tr",
-                        dir_path = "plots/FEMPipeline_new_quant/common_features_upset")
-
-
-# create_data_subsets(dparg_id = 155,
-#                     min_iter_feature_presence = 28,
-#                     subset_creation_criteria <- list("i"= c("wilcoxontest")),
-#                     subset_file_name_substr = "wilcoxontest",
-#                     create_all_common = FALSE)
-
-
-
-#t POSTOPE_TPVSREC_TP
-explore_common_features(dparg_id = 5,
-                        dataset_pipeline_arguments = dataset_pipeline_arguments_transcriptomic,
-                        best_fsm_vec = c("t-test", "mrmr_perc50", 
-                                         "ranger_impu_cor", "mrmr100"),
-                        min_iter_feature_presence = 28,
-                        results_dir = "fem_pipeline_results_tr",
-                        dir_path = "plots/FEMPipeline_new_quant/common_features_upset")
-
-
-#t PREOPEVSREC_TP
-explore_common_features(dparg_id = 9,
-                        dataset_pipeline_arguments = dataset_pipeline_arguments_transcriptomic,
-                        best_fsm_vec = c("mrmr30", "mrmr_perc50", 
-                                         "ranger_impu_cor", "mrmr100"),
-                        min_iter_feature_presence = 28,
-                        results_dir = "fem_pipeline_results_tr",
-                        dir_path = "plots/FEMPipeline_new_quant/common_features_upset")
-
-
-
-
-
-
 
 explore_common_features(dparg_id = 25,
                         dataset_pipeline_arguments = dataset_pipeline_arguments,
