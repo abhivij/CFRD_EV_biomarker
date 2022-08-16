@@ -115,7 +115,7 @@ write_subset_file <- function(data, features, subset_file_path){
   
   #"-" and "/" both in features are replaced with "."
   #so replacing "." with "-" alone as done after the below 'for loop' is not sufficient
-  #so special handling for features with "/"
+  #therefore special handling for features with "/"
   features_with_slash <- rownames(data)[grepl("/", rownames(data), fixed = TRUE)] 
   for(f in features_with_slash){
     f_replaced <- gsub("/|-", ".", f) 
