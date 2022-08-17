@@ -18,6 +18,25 @@ source("prediction_pipeline/cm_rf.R")
 # 
 # result_file_dir = "data/prediction_result/"
 # result_file_name = "CFRDVsIGT.csv"
+# 
+# 
+# comparison = "CFRDVsNGT"
+# classes = c("NGT", "CFRD")
+# best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
+# dataset_replace_str = "CF_EV_AU_zlogtmm_"
+# 
+# result_file_dir = "data/prediction_result/"
+# result_file_name = "CFRDVsNGT.csv"
+# 
+# 
+# 
+# comparison = "IGTVsNGT"
+# classes = c("NGT", "IGT")
+# best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
+# dataset_replace_str = "CF_EV_AU_zlogtmm_"
+# 
+# result_file_dir = "data/prediction_result/"
+# result_file_name = "IGTVsNGT.csv"
 
 
 pipeline <- function(comparison, classes, 
@@ -42,16 +61,24 @@ pipeline <- function(comparison, classes,
   output_labels.train <- phenotype %>%
     rename("Label" = comparison) %>%
     filter(Label %in% classes, country == "AU") %>%
-    dplyr::select(Sample, Label) %>%
+    dplyr::select(Sample, Label, age, age_group, sex, FEV1) %>%
+    dplyr::mutate(Label = factor(Label), age = as.numeric(age), 
+                  age_group = factor(age_group), sex = factor(sex),
+                  FEV1 = as.numeric(FEV1)) %>%
     arrange(Label, Sample)
   data.train <- data[, output_labels.train$Sample]
+  print(summary(output_labels.train))
 
   output_labels.test <- phenotype %>%
     rename("Label" = comparison) %>%
     filter(Label %in% classes, country == "DK") %>%
-    dplyr::select(Sample, Label) %>%
+    dplyr::select(Sample, Label, age, age_group, sex, FEV1) %>%
+    dplyr::mutate(Label = factor(Label), age = as.numeric(age), 
+                  age_group = factor(age_group), sex = factor(sex),
+                  FEV1 = as.numeric(FEV1)) %>%    
     arrange(Label, Sample)
   data.test <- data[, output_labels.test$Sample]
+  print(summary(output_labels.test))
   
   #currently data.train, data.test format : (transcripts x samples)
   
@@ -133,6 +160,30 @@ pipeline(
 )
 
 
+pipeline(
+  comparison = "CFRDVsNGT",
+  classes = c("NGT", "CFRD"),
+  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+  dataset_replace_str = "CF_EV_AU_zlogtmm_",
+  result_file_dir = "data/prediction_result/",
+  result_file_name = "CFRDVsNGT.csv",
+  perform_filter = TRUE,
+  norm = "norm_log_tmm"
+)
+
+
+pipeline(
+  comparison = "IGTVsNGT",
+  classes = c("NGT", "IGT"),
+  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+  dataset_replace_str = "CF_EV_AU_zlogtmm_",
+  result_file_dir = "data/prediction_result/",
+  result_file_name = "IGTVsNGT.csv",
+  perform_filter = TRUE,
+  norm = "norm_log_tmm"
+)
+
+
 
 show_metrics <- function(comparison, classes, result_file_path){
   print(comparison)
@@ -176,3 +227,13 @@ show_metrics <- function(comparison, classes, result_file_path){
 show_metrics(comparison = "CFRDVsIGT",
              classes = c("IGT", "CFRD"),
              result_file_path = "data/prediction_result/CFRDVsIGT.csv")
+
+
+show_metrics(comparison = "CFRDVsNGT",
+             classes = c("NGT", "CFRD"),
+             result_file_path = "data/prediction_result/CFRDVsNGT.csv")
+
+
+show_metrics(comparison = "IGTVsNGT",
+             classes = c("NGT", "IGT"),
+             result_file_path = "data/prediction_result/IGTVsNGT.csv")

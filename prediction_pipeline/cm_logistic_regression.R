@@ -14,8 +14,6 @@ log_reg_model <- function(data.train, label.train, data.test, label.test,
     model_name <- paste("L2 Regularized", model_name)
   }
   
-  #setting default value for metrics, to handle case where unable to train / execute classification model
-  metrics <- c(0, 0) 
   
   try({
     label.train$Label <- ifelse(label.train$Label == classes[1], 0, 1)

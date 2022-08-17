@@ -1,0 +1,72 @@
+# label.train <- output_labels.train
+# label.test <- output_labels.test
+# random_seed <- 1000
+
+rf_model <- function(data.train, label.train, data.test, label.test, 
+                     classes, random_seed = 1000,
+                     ...){
+  
+  model_name <- "Random Forest"
+  
+  try({
+    set.seed(random_seed)
+    if(sum(data.train - colMeans(data.train)) != 0){
+      #ensure that atleast one column is not a constant vector
+      #all columns constant causes the below line to run forever
+      model <- randomForest::randomForest(x = data.train, y = factor(label.train$Label, levels = classes))
+
+      best_acc <- -1
+      best_cut_off <- 0.5
+      for(cut_off in c(0.5, seq(0.4, 0.8, 0.01))){
+        print(cut_off)
+        pred_prob.train <- predict(model, data.train, type = "prob")
+        pred_prob.train <- data.frame(pred_prob.train)[classes[2]]
+        pred.train <- ifelse(pred_prob.train > best_cut_off, classes[2], classes[1])
+        acc <- mean(pred.train == label.train$Label)
+        if(acc > best_acc){
+          best_acc <- acc
+          best_cut_off <- cut_off
+        }
+      }
+      
+      
+      pred_prob.train <- predict(model, data.train, type = "prob")
+      pred_prob.train <- data.frame(pred_prob.train)[classes[2]]
+      pred.train <- ifelse(pred_prob.train > best_cut_off, classes[2], classes[1])
+
+      
+      pred_prob <- predict(model, data.test, type="prob")
+      pred_prob <- data.frame(pred_prob)[classes[2]]
+      pred <- ifelse(pred_prob > best_cut_off, classes[2], classes[1])
+
+      
+      result_df.train <- data.frame("TrueLabel" = label.train$Label,
+                                    "Pred_prob" = pred_prob.train[,1],
+                                    "PredictedLabel" = pred.train[,1],
+                                    "Type" = "train",
+                                    "cutoff" = best_cut_off)
+      
+      result_df.test <- data.frame("TrueLabel" = label.test$Label,
+                                   "Pred_prob" = pred_prob[,1],
+                                   "PredictedLabel" = pred[,1],
+                                   "Type" = "test",
+                                   "cutoff" = best_cut_off)
+      
+      result_df <- rbind(result_df.train %>%
+                           rownames_to_column("sample"), 
+                         result_df.test %>%
+                           rownames_to_column("sample"))
+      
+      result_df <- result_df %>%
+        mutate(Pred_prob = as.double(Pred_prob))
+      
+      
+    } else{
+      print("data to RF : all fields constant!")
+      print(dim(data.train))
+    }
+    
+  })
+  
+  return (result_df)
+}
