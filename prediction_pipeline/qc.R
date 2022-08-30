@@ -126,10 +126,10 @@ use_best_transcripts = TRUE
 best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
 
 #function to plot umap or tsne dimensionality reduction plots of the transcripts in the au and dk cohort
-plot_dim_red_data <- function(filename, title, colour_label,
-                      perplexity = 30, 
-                      best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
-                      groups = NA, shownames = FALSE, text = NA, dim_red = "tsne"){
+plot_dim_red_data <- function(comparison, classes, 
+                              best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                              use_best_transcripts = TRUE,
+                              perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = TRUE){
   
   data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
                      nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
@@ -168,7 +168,6 @@ plot_dim_red_data <- function(filename, title, colour_label,
       keep <- edgeR::filterByExpr(data.test, group = output_labels.test$Label)  
       data.test <- data.test[keep, ] 
     }
-      
   }
   
   
@@ -205,7 +204,7 @@ plot_dim_red_data <- function(filename, title, colour_label,
   if(use_best_transcripts){
     best_features <- read.csv(best_features_file_path)  
     best_features_sub <- best_features %>%
-      mutate(dataset_id = gsub(dataset_replace_str, "", dataset_id)) %>%
+      mutate(dataset_id = gsub("CF_EV_AU_zlogtmm_", "", dataset_id)) %>%
       filter(is_best == 1, dataset_id == comparison)
     
     biomarkers <- strsplit(best_features_sub$biomarkers, split = "|", fixed = TRUE)[[1]]  
@@ -224,27 +223,106 @@ plot_dim_red_data <- function(filename, title, colour_label,
     data.test <- data.test[, biomarkers]    
   }
   
+  if(perform_filter && norm == "norm_log_tmm"){
+    pp = TRUE
+  } else{
+    pp = FALSE
+  }
+  
+  create_dim_red_plots(data = data.train, groups = output_labels.train$Label, 
+                       title_prefix = paste(comparison, 
+                                            "best_transcripts", use_best_transcripts,
+                                            "pp", pp, "train_params", use_train_param,
+                                            "train"), 
+                       dim_red = "UMAP")
+  create_dim_red_plots(data = data.test, groups = output_labels.test$Label, 
+                       title_prefix = paste(comparison, 
+                                            "best_transcripts", use_best_transcripts,
+                                            "pp", pp, "train_params", use_train_param,
+                                            "test"), 
+                       dim_red = "UMAP")  
+  
+  
+  create_dim_red_plots(data = data.train, groups = output_labels.train$Label, 
+                       title_prefix = paste(comparison, 
+                                            "best_transcripts", use_best_transcripts,
+                                            "pp", pp, "train_params", use_train_param,
+                                            "train"), 
+                       dim_red = "tSNE")
+  create_dim_red_plots(data = data.test, groups = output_labels.test$Label, 
+                       title_prefix = paste(comparison, 
+                                            "best_transcripts", use_best_transcripts,
+                                            "pp", pp, "train_params", use_train_param,
+                                            "test"), 
+                       dim_red = "tSNE")  
+  
 }
 
 
-data <- data.train
-groups <- output_labels.train$Label
-perplexity = 5
-shownames = TRUE
-dim_red = "tSNE"
-colour_label = "Condition"
-dim_red = "UMAP"
-data_cohort = "train (AU)"
-use_best_transcripts = FALSE
 
-title_prefix = paste(comparison, "pp", TRUE, "train_params", TRUE,
-                     "best_trascripts", TRUE, "train")
-dim_red = "UMAP"
+plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = FALSE,
+                  perform_filter = FALSE, norm = "none", use_train_param = FALSE)
+
+plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = FALSE,
+                  perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = FALSE)
+
+plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = FALSE,
+                  perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = TRUE)
+
+
+plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = TRUE,
+                  perform_filter = FALSE, norm = "none", use_train_param = FALSE)
+
+plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = TRUE,
+                  perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = FALSE)
+
+plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = TRUE,
+                  perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = TRUE)
+
+# data <- data.train
+# groups <- output_labels.train$Label
+# perplexity = 5
+# shownames = TRUE
+# dim_red = "tSNE"
+# colour_label = "Condition"
+# dim_red = "UMAP"
+# data_cohort = "train (AU)"
+# use_best_transcripts = FALSE
+# 
+# title_prefix = paste(comparison, 
+#                      "best_transcripts", FALSE,
+#                      "pp", TRUE, "train_params", TRUE,
+#                     "train")
+# dim_red = "UMAP"
 
 create_dim_red_plots <- function(data, groups,
                                  title_prefix = "",
                                  dim_red = "UMAP",
-                                 perplexity = 5){
+                                 perplexity = 5,
+                                 shownames = FALSE){
+  
+  groups_modified <- groups
+  summa <- summary(factor(groups))
+  
+  groups_modified <- gsub(pattern = names(summa)[1], 
+                          replacement = paste0(names(summa)[1], "(", summa[1], ")"),
+                          groups_modified)
+  groups_modified <- gsub(pattern = names(summa)[2], 
+                          replacement = paste0(names(summa)[2], "(", summa[2], ")"),
+                          groups_modified)
+  groups <- factor(groups_modified)
   
   if(shownames){
     text <- rownames(data)
@@ -294,7 +372,7 @@ create_dim_red_plots <- function(data, groups,
     dim_red_plot
   }
   
-  dir_path <- "prediction_pipeline/plots/"
+  dir_path <- "prediction_pipeline/plots"
   file_name <- paste0(gsub(title, pattern = " ", replacement = "-"), ".jpg")
   file_path <- paste(dir_path, file_name, sep = "/")
   ggplot2::ggsave(file_path, dim_red_plot)
