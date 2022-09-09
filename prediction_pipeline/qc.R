@@ -118,15 +118,15 @@ write.table(count_df, "data/formatted/summary.csv", sep = ",", row.names = FALSE
 
 comparison = "CFRDVsIGT"
 classes = c("IGT", "CFRD")
-perform_filter = FALSE
-use_train_param = TRUE
-norm = "none"
+perform_filter = TRUE
+use_train_param = FALSE
+#norm = "none"
 norm = "norm_log_tmm"
 use_best_transcripts = TRUE
 best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
 
 #function to plot umap or tsne dimensionality reduction plots of the transcripts in the au and dk cohort
-plot_dim_red_data <- function(comparison, classes, 
+plot_data <- function(comparison, classes, 
                               best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
                               use_best_transcripts = TRUE,
                               perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = TRUE){
@@ -229,64 +229,76 @@ plot_dim_red_data <- function(comparison, classes,
     pp = FALSE
   }
   
-  create_dim_red_plots(data = data.train, groups = output_labels.train$Label, 
-                       title_prefix = paste(comparison, 
-                                            "best_transcripts", use_best_transcripts,
-                                            "pp", pp, "train_params", use_train_param,
-                                            "train"), 
-                       dim_red = "UMAP")
-  create_dim_red_plots(data = data.test, groups = output_labels.test$Label, 
-                       title_prefix = paste(comparison, 
-                                            "best_transcripts", use_best_transcripts,
-                                            "pp", pp, "train_params", use_train_param,
-                                            "test"), 
-                       dim_red = "UMAP")  
+  # create_dim_red_plots(data = data.train, groups = output_labels.train$Label, 
+  #                      title_prefix = paste(comparison, 
+  #                                           "best_transcripts", use_best_transcripts,
+  #                                           "pp", pp, "train_params", use_train_param,
+  #                                           "train"), 
+  #                      dim_red = "UMAP")
+  # create_dim_red_plots(data = data.test, groups = output_labels.test$Label, 
+  #                      title_prefix = paste(comparison, 
+  #                                           "best_transcripts", use_best_transcripts,
+  #                                           "pp", pp, "train_params", use_train_param,
+  #                                           "test"), 
+  #                      dim_red = "UMAP")  
+  # 
+  # 
+  # create_dim_red_plots(data = data.train, groups = output_labels.train$Label, 
+  #                      title_prefix = paste(comparison, 
+  #                                           "best_transcripts", use_best_transcripts,
+  #                                           "pp", pp, "train_params", use_train_param,
+  #                                           "train"), 
+  #                      dim_red = "tSNE")
+  # create_dim_red_plots(data = data.test, groups = output_labels.test$Label, 
+  #                      title_prefix = paste(comparison, 
+  #                                           "best_transcripts", use_best_transcripts,
+  #                                           "pp", pp, "train_params", use_train_param,
+  #                                           "test"), 
+  #                      dim_red = "tSNE")  
+  # 
   
-  
-  create_dim_red_plots(data = data.train, groups = output_labels.train$Label, 
-                       title_prefix = paste(comparison, 
-                                            "best_transcripts", use_best_transcripts,
-                                            "pp", pp, "train_params", use_train_param,
-                                            "train"), 
-                       dim_red = "tSNE")
-  create_dim_red_plots(data = data.test, groups = output_labels.test$Label, 
-                       title_prefix = paste(comparison, 
-                                            "best_transcripts", use_best_transcripts,
-                                            "pp", pp, "train_params", use_train_param,
-                                            "test"), 
-                       dim_red = "tSNE")  
+  create_box_plot(data = data.train, groups = output_labels.train$Label, 
+                  title_prefix = paste(comparison, 
+                                       "best_transcripts", use_best_transcripts,
+                                       "pp", pp, "train_params", use_train_param,
+                                       "train"))
+  create_box_plot(data = data.test, groups = output_labels.test$Label, 
+                  title_prefix = paste(comparison, 
+                                       "best_transcripts", use_best_transcripts,
+                                       "pp", pp, "train_params", use_train_param,
+                                       "test"))
   
 }
 
 
+# does not work
+# plot_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+#                   best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+#                   use_best_transcripts = FALSE,
+#                   perform_filter = FALSE, norm = "none", use_train_param = FALSE)
 
-plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
-                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
-                  use_best_transcripts = FALSE,
-                  perform_filter = FALSE, norm = "none", use_train_param = FALSE)
-
-plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+plot_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
                   best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
                   use_best_transcripts = FALSE,
                   perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = FALSE)
 
-plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+plot_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
                   best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
                   use_best_transcripts = FALSE,
                   perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = TRUE)
 
+#does not work
+# plot_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+#                   best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+#                   use_best_transcripts = TRUE,
+#                   perform_filter = FALSE, norm = "none", use_train_param = FALSE)
 
-plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
-                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
-                  use_best_transcripts = TRUE,
-                  perform_filter = FALSE, norm = "none", use_train_param = FALSE)
-
-plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+plot_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
                   best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
                   use_best_transcripts = TRUE,
                   perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = FALSE)
 
-plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+plot_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
                   best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
                   use_best_transcripts = TRUE,
                   perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = TRUE)
@@ -301,16 +313,20 @@ plot_dim_red_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"),
 # data_cohort = "train (AU)"
 # use_best_transcripts = FALSE
 # 
-# title_prefix = paste(comparison, 
+# title_prefix = paste(comparison,
 #                      "best_transcripts", FALSE,
 #                      "pp", TRUE, "train_params", TRUE,
 #                     "train")
 # dim_red = "UMAP"
 
+
+#data and groups expected to be matching
+#should be ensured from the caller function
 create_dim_red_plots <- function(data, groups,
                                  title_prefix = "",
                                  dim_red = "UMAP",
                                  perplexity = 5,
+                                 colour_label = "Condition",
                                  shownames = FALSE){
   
   groups_modified <- groups
@@ -375,5 +391,105 @@ create_dim_red_plots <- function(data, groups,
   dir_path <- "prediction_pipeline/plots"
   file_name <- paste0(gsub(title, pattern = " ", replacement = "-"), ".jpg")
   file_path <- paste(dir_path, file_name, sep = "/")
-  ggplot2::ggsave(file_path, dim_red_plot)
+  ggplot2::ggsave(file_path, dim_red_plot, units = "cm", width = 30)
 }
+
+
+#data and groups expected to be matching
+#should be ensured from the caller function
+create_box_plot <- function(data, groups,
+                            title_prefix = ""){
+  data_to_plot <- cbind(data, "label" = groups) %>%
+    rownames_to_column("sample_name")
+  data_to_plot <- data_to_plot %>%
+    pivot_longer(!c(sample_name, label), names_to = "transcripts") %>%
+    arrange(label)
+  data_to_plot <- data_to_plot %>%
+    mutate(sample_name = factor(sample_name, levels = unique(data_to_plot$sample_name)))
+  
+  ggplot(data_to_plot, aes(x = sample_name, y = value)) +
+    geom_boxplot(aes(fill = label)) +
+    xlab("Sample Name") +
+    ylab("Expression across transcripts") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+    ggtitle(title_prefix)
+  
+  title <- paste(title_prefix, "boxplot")
+  
+  dir_path <- "prediction_pipeline/plots"
+  file_name <- paste0(gsub(title, pattern = " ", replacement = "-"), ".jpg")
+  file_path <- paste(dir_path, file_name, sep = "/")
+  ggplot2::ggsave(file_path, units = "cm", width = 20)
+  
+}
+
+
+
+
+
+# does not work
+# plot_data(comparison = "CFRDVsNGT", classes = c("NGT", "CFRD"), 
+#                   best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+#                   use_best_transcripts = FALSE,
+#                   perform_filter = FALSE, norm = "none", use_train_param = FALSE)
+
+plot_data(comparison = "CFRDVsNGT", classes = c("NGT", "CFRD"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = FALSE,
+                  perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = FALSE)
+
+plot_data(comparison = "CFRDVsNGT", classes = c("NGT", "CFRD"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = FALSE,
+                  perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = TRUE)
+
+#does not work
+# plot_data(comparison = "CFRDVsNGT", classes = c("NGT", "CFRD"), 
+#                   best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+#                   use_best_transcripts = TRUE,
+#                   perform_filter = FALSE, norm = "none", use_train_param = FALSE)
+
+plot_data(comparison = "CFRDVsNGT", classes = c("NGT", "CFRD"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = TRUE,
+                  perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = FALSE)
+
+plot_data(comparison = "CFRDVsNGT", classes = c("NGT", "CFRD"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = TRUE,
+                  perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = TRUE)
+
+
+
+
+# does not work
+# plot_data(comparison = "IGTVsNGT", classes = c("NGT", "IGT"), 
+#                   best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+#                   use_best_transcripts = FALSE,
+#                   perform_filter = FALSE, norm = "none", use_train_param = FALSE)
+
+plot_data(comparison = "IGTVsNGT", classes = c("NGT", "IGT"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = FALSE,
+                  perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = FALSE)
+
+plot_data(comparison = "IGTVsNGT", classes = c("NGT", "IGT"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = FALSE,
+                  perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = TRUE)
+
+#does not work
+# plot_data(comparison = "IGTVsNGT", classes = c("NGT", "IGT"), 
+#                   best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+#                   use_best_transcripts = TRUE,
+#                   perform_filter = FALSE, norm = "none", use_train_param = FALSE)
+
+plot_data(comparison = "IGTVsNGT", classes = c("NGT", "IGT"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = TRUE,
+                  perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = FALSE)
+
+plot_data(comparison = "IGTVsNGT", classes = c("NGT", "IGT"), 
+                  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                  use_best_transcripts = TRUE,
+                  perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = TRUE)
