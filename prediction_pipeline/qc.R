@@ -516,7 +516,7 @@ data_to_plot <- data_of_interest %>%
   select(Sample, condition, country, FEV1)
 ggplot(data_to_plot, aes(x = condition, y = FEV1)) +
   geom_boxplot(aes(fill = country)) +
-  xlab("Sample Name") +
+  xlab("Condition") +
   ylab("FEV1") +
   #specifying 10 here causes nearest good value to 10 to be chosen for number of breaks in y-axis
   scale_y_continuous(n.breaks = 10)
@@ -540,12 +540,52 @@ data_to_plot <- data_of_interest %>%
   select(Sample, condition, country, FEV1)
 ggplot(data_to_plot, aes(x = condition, y = FEV1)) +
   geom_boxplot(aes(fill = country)) +
-  xlab("Sample Name") +
+  xlab("Condition") +
   ylab("FEV1") +
   #specifying 10 here causes nearest good value to 10 to be chosen for number of breaks in y-axis
   scale_y_continuous(n.breaks = 10)
 ggsave("prediction_pipeline/plots/other_features/FEV1_afterreplacebymean.jpg")
 
 
+data_of_interest <- data_of_interest %>%
+  select(-c(mean_FEV1))
+data_to_plot <- data_of_interest %>%
+  select(Sample, condition, country, age)
+ggplot(data_to_plot, aes(x = condition, y = age)) +
+  geom_boxplot(aes(fill = country)) +
+  xlab("Condition") +
+  ylab("Age") +
+  #specifying 10 here causes nearest good value to 10 to be chosen for number of breaks in y-axis
+  scale_y_continuous(n.breaks = 10)
+ggsave("prediction_pipeline/plots/other_features/age.jpg")
 
-#Sex stays missing
+
+#NA values in Sex column not replaced
+data_to_plot <- data_of_interest %>%
+  select(Sample, condition, country, sex)
+ggplot(data_to_plot, aes(x = condition)) +
+  geom_bar(position = "dodge", aes(fill = country)) +
+  xlab("Condition") +
+  facet_wrap(~sex) +
+  scale_y_continuous(n.breaks = 10)
+ggsave("prediction_pipeline/plots/other_features/sex.jpg")
+
+
+data_to_plot <- data_of_interest %>%
+  select(Sample, condition, country, patient_recruitment_year)
+ggplot(data_to_plot, aes(x = condition)) +
+  geom_bar(position = "dodge", aes(fill = country)) +
+  xlab("Condition") +
+  facet_wrap(~patient_recruitment_year) +
+  scale_y_continuous(n.breaks = 10)
+ggsave("prediction_pipeline/plots/other_features/patient_recruitment_year.jpg")
+
+
+data_to_plot <- data_of_interest %>%
+  select(Sample, condition, country, age_group)
+ggplot(data_to_plot, aes(x = condition)) +
+  geom_bar(position = "dodge", aes(fill = country)) +
+  xlab("Condition") +
+  facet_wrap(~age_group) +
+  scale_y_continuous(n.breaks = 5)
+ggsave("prediction_pipeline/plots/other_features/age_group.jpg")
