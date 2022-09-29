@@ -493,3 +493,59 @@ plot_data(comparison = "IGTVsNGT", classes = c("NGT", "IGT"),
                   best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
                   use_best_transcripts = TRUE,
                   perform_filter = TRUE, norm = "norm_log_tmm", use_train_param = TRUE)
+
+
+
+###############
+
+
+#plots for FEV1, Age, Agegroup, Sex, PatientRecruitmentYear
+
+data_of_interest <- phenotype %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator == 0) %>%
+  filter(condition %in% c("CFRD", "IGT", "NGT")) %>%
+  select(Sample, condition, country, patient_recruitment_year, age, age_group, sex, FEV1) %>%
+  mutate(age = as.numeric(str_trim(age)), FEV1 = as.numeric(str_trim(FEV1)))
+
+#FEV1 and Sex missing for child samples
+
+
+#plot FEV1
+
+data_to_plot <- data_of_interest %>%
+  select(Sample, condition, country, FEV1)
+ggplot(data_to_plot, aes(x = condition, y = FEV1)) +
+  geom_boxplot(aes(fill = country)) +
+  xlab("Sample Name") +
+  ylab("FEV1") +
+  #specifying 10 here causes nearest good value to 10 to be chosen for number of breaks in y-axis
+  scale_y_continuous(n.breaks = 10)
+ggsave("prediction_pipeline/plots/other_features/FEV1_original.jpg")
+
+
+#FEV1 replace missing with average
+mean_values <- data_of_interest %>% filter(country == "AU") %>%
+  group_by(condition) %>%
+  summarise(mean_FEV1 = mean(FEV1, na.rm = TRUE))
+
+#manually verified that DK samples have no missing
+#so replacing NAs does not affect DK samples
+data_of_interest <- data_of_interest %>%
+  inner_join(mean_values, by = "condition")
+data_of_interest <- data_of_interest %>%
+  mutate(FEV1 = case_when(is.na(FEV1) ~ mean_FEV1,
+                          TRUE ~ FEV1))
+
+data_to_plot <- data_of_interest %>%
+  select(Sample, condition, country, FEV1)
+ggplot(data_to_plot, aes(x = condition, y = FEV1)) +
+  geom_boxplot(aes(fill = country)) +
+  xlab("Sample Name") +
+  ylab("FEV1") +
+  #specifying 10 here causes nearest good value to 10 to be chosen for number of breaks in y-axis
+  scale_y_continuous(n.breaks = 10)
+ggsave("prediction_pipeline/plots/other_features/FEV1_afterreplacebymean.jpg")
+
+
+
+#Sex stays missing
