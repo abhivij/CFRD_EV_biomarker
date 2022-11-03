@@ -417,3 +417,82 @@ create_data_subsets(dparg_id = 45,
                     subset_creation_criteria <- list("i"= c("mrmr75")),
                     subset_file_name_substr = "mrmr75",
                     create_all_common = FALSE)
+
+
+
+
+#######################
+#All tmm : CFRDVsIGT
+explore_common_features(dparg_id = 13,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("ga_rf", "mrmr75",
+                                         "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results",
+                        dir_path = "../plots/FEMPipeline_tmm_all/common_features_upset")
+
+#All tmm : CFRDVsNGT
+explore_common_features(dparg_id = 17,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("mrmr10", "RF_RFE",
+                                         "mrmr75", "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results",
+                        dir_path = "../plots/FEMPipeline_tmm_all/common_features_upset")
+
+# included ranger_pos_impu_cor in above because out of other 3 only mrmr75 has non-zero features, 
+#        and atleast 2 non-zero groups are required to create upset plot
+
+
+#All tmm : IGTVsNGT
+explore_common_features(dparg_id = 21,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("ga_rf", "mrmr_perc50",
+                                         "ranger_pos_impu_cor", "RF_RFE", "mrmr10",
+                                         "t-test", "mrmr75", "wilcoxontest"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results",
+                        dir_path = "../plots/FEMPipeline_tmm_all/common_features_upset")
+#using multiple methods because the top 3 didn't give good number of features.
+#mrmr_perc50 had large number of features, others very few features
+
+explore_common_features(dparg_id = 21,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("ga_rf", "mrmr_perc50",
+                                         "ranger_pos_impu_cor", "RF_RFE", "mrmr10",
+                                         "t-test", "mrmr75", "wilcoxontest"),
+                        min_iter_feature_presence = 27,
+                        results_dir = "../fem_pipeline_results",
+                        dir_path = "../plots/FEMPipeline_tmm_all/common_features_upset")
+
+explore_common_features(dparg_id = 21,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("ga_rf", "mrmr_perc50",
+                                         "ranger_pos_impu_cor", "RF_RFE", "mrmr10",
+                                         "t-test", "mrmr75", "wilcoxontest"),
+                        min_iter_feature_presence = 29,
+                        results_dir = "../fem_pipeline_results",
+                        dir_path = "../plots/FEMPipeline_tmm_all/common_features_upset")
+
+
+
+create_data_subsets(dparg_id = 13,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE)
+
+create_data_subsets(dparg_id = 17,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE)
+
+create_data_subsets(dparg_id = 21,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE)
