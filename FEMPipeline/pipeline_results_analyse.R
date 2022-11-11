@@ -33,7 +33,7 @@ plot_heatmap <- function(dparg_vec,
   dataset_id_vec 
   
   replaced_dataset_id_vec <- gsub(dataset_replace_string, "", 
-                                  replaced_dataset_id_vec, fixed = TRUE)
+                                  dataset_id_vec, fixed = TRUE)
   
   model_results <- model_results %>%
     filter(DataSetId %in% dataset_id_vec) %>%
@@ -245,9 +245,9 @@ plot_common_feature_heatmap <- function(dparg_vec,
   data_to_plot <- data.matrix(data_to_plot)
   
   
-  dir_path <- paste0("../plots/FEMPipeline_AU_tmm/subset/")
+  dir_path <- paste0("../plots/FEMPipeline_tmm_all/subset/")
   if(!dir.exists(dir_path)){
-    dir.create(dir_path)
+    dir.create(dir_path, recursive = TRUE)
   }
   file_path <- paste0(dir_path, heatmap_file_name)
   
@@ -269,84 +269,6 @@ plot_common_feature_heatmap <- function(dparg_vec,
   draw(ht, column_title = heatmap_title)
   dev.off()
 }
-
-
-# plot_common_feature_heatmap(c(163:165),
-#                             results_dir = "fem_pipeline_results_subset",
-#                             dataset_replace_string = "transcriptomic_simple_norm_PREOPEVsMET_",
-#                             heatmap_file_name = "tr_PREOPEVsMET.png"
-# )
-
-
-
-
-
-
-
-# plot_heatmap_and_var_plot(c(31:35), 28)
-# 
-# plot_heatmap_and_var_plot(c(73:74), 29, "fem_pipeline_results_subset")
-# 
-# plot_heatmap_and_var_plot(c(31:35), 28, "fem_pipeline_results_Nov18/fem_pipeline_results")
-# plot_heatmap_and_var_plot(c(36:40), 29, "fem_pipeline_results_Nov18/fem_pipeline_results")
-# 
-# plot_heatmap_and_var_plot(c(75:79), 28, "fem_pipeline_results_Nov18/fem_pipeline_results")
-# plot_heatmap_and_var_plot(c(80:84), 29, "fem_pipeline_results_Nov18/fem_pipeline_results")
-# 
-# plot_heatmap_and_var_plot(c(85:89), 28, "fem_pipeline_results_Nov18/fem_pipeline_results")
-# plot_heatmap_and_var_plot(c(90:94), 29, "fem_pipeline_results_Nov18/fem_pipeline_results")
-# 
-# plot_heatmap_and_var_plot(c(95:99), 28, "fem_pipeline_results_Nov18/fem_pipeline_results")
-# plot_heatmap_and_var_plot(c(100:104), 29, "fem_pipeline_results_Nov18/fem_pipeline_results")
-# 
-# plot_heatmap_and_var_plot(c(105:109), 28, "fem_pipeline_results_Nov18/fem_pipeline_results")
-# plot_heatmap_and_var_plot(c(110:114), 29, "fem_pipeline_results_Nov18/fem_pipeline_results")
-# 
-# plot_heatmap_and_var_plot(c(115:119), 28, "fem_pipeline_results_Nov18/fem_pipeline_results")
-# plot_heatmap_and_var_plot(c(120:124), 29, "fem_pipeline_results_Nov18/fem_pipeline_results")
-
-
-fsm <- "ranger"
-min_iter_feature_presence <- 28
-file_name <- "fem_pipeline_results/GBMPlasmaEV_transcriptomic_PREOPEVsMET_ranger_impu_cor_28_PREOPEVsMET_feature_imp.csv" 
-
-
-plot_feature_imp <- function(fsm, min_iter_feature_presence, file_name){
-  feature_imp_data <- read.table(file_name,
-                                 sep = ",", header = TRUE)
-  feature_imp_data <- feature_imp_data %>%
-    select(-c(FSM))
-  
-  data_to_plot <- feature_imp_data
-  
-  ggplot(data_to_plot, aes(x = feature, 
-                           y = MeanDecreaseGini)) +
-    geom_boxplot() +
-    ggtitle(paste0("Common features selected by ", fsm, " across ", min_iter_feature_presence, " iterations")) +
-    theme(axis.text.x = element_text(size=rel(1.2), angle = 90, hjust = 1),
-          axis.text.y = element_text(size=rel(1.2)),
-          axis.title.x = element_text(size=rel(1.5)),
-          axis.title.y = element_text(size=rel(1.5))) 
-  
-  dir_path <- paste0("plots/FEMPipeline/feature_imp/")
-  if(!dir.exists(dir_path)){
-    dir.create(dir_path, recursive = TRUE)
-  }
-  
-  plot_file_name <- paste0(dir_path,
-                           fsm, "_", min_iter_feature_presence,
-                           ".png")
-  ggsave(plot_file_name)
-  
-}
-
-
-plot_feature_imp("ranger", 28, 
-                 "fem_pipeline_results/GBMPlasmaEV_transcriptomic_PREOPEVsMET_ranger_impu_cor_28_PREOPEVsMET_feature_imp.csv")
-
-plot_feature_imp("ranger", 29, 
-                 "fem_pipeline_results/GBMPlasmaEV_transcriptomic_PREOPEVsMET_ranger_impu_cor_29_PREOPEVsMET_feature_imp.csv")
-
 
 
 
@@ -430,4 +352,33 @@ plot_common_feature_heatmap(c(57:58),
                             results_dir = "../fem_pipeline_results_AU_subset",
                             dataset_replace_string = "CF_EV_AU_zlogtmm_",
                             heatmap_file_name = "AU_tmm_IGTVsNGT.png"
+)
+
+
+plot_common_feature_heatmap(c(59, 60),
+                            results_dir = "../fem_pipeline_results_subset",
+                            dataset_replace_string = "CF_EV_zlogtmm_",
+                            heatmap_file_name = "tmm_CFRDVsIGT.png"
+)
+
+plot_common_feature_heatmap(c(61, 62),
+                            results_dir = "../fem_pipeline_results_subset",
+                            dataset_replace_string = "CF_EV_zlogtmm_",
+                            heatmap_file_name = "tmm_CFRDVsNGT.png"
+)
+
+plot_common_feature_heatmap(c(63, 64),
+                            results_dir = "../fem_pipeline_results_subset",
+                            dataset_replace_string = "CF_EV_zlogtmm_",
+                            heatmap_file_name = "tmm_IGTVsNGT.png"
+)
+
+
+
+plot_heatmap(
+  dparg_vec = c(65, 69, 73),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_AU_logtmm",
+  dir_path = "../plots/FEMPipeline_AU_noscaling_tmm/",
+  dataset_replace_string = "CF_EV_"
 )
