@@ -211,7 +211,8 @@ plot_common_feature_heatmap(c(163:165),
 plot_common_feature_heatmap <- function(dparg_vec, 
                                         results_dir = "fem_pipeline_results",
                                         dataset_replace_string = "",
-                                        heatmap_file_name){
+                                        heatmap_file_name,
+                                        plot_dir_path = "../plots/FEMPipeline_tmm_all/subset/"){
   data_info <- read.table(paste(results_dir, "data_info.csv", sep = "/"), 
                           sep = ',', header = TRUE)
   fsm_info <- read.table(paste(results_dir, "fsm_info.csv", sep = "/"),
@@ -244,12 +245,10 @@ plot_common_feature_heatmap <- function(dparg_vec,
     column_to_rownames("Model")
   data_to_plot <- data.matrix(data_to_plot)
   
-  
-  dir_path <- paste0("../plots/FEMPipeline_tmm_all/subset/")
-  if(!dir.exists(dir_path)){
-    dir.create(dir_path, recursive = TRUE)
+  if(!dir.exists(plot_dir_path)){
+    dir.create(plot_dir_path, recursive = TRUE)
   }
-  file_path <- paste0(dir_path, heatmap_file_name)
+  file_path <- paste0(plot_dir_path, heatmap_file_name)
   
   #classification_criteria obtained from dp_arg is used.
   #assuming that all classification criterias within the heatmap to be created are the same
@@ -380,5 +379,37 @@ plot_heatmap(
   dataset_pipeline_arguments = dataset_pipeline_arguments,
   results_dir = "../fem_pipeline_results_AU_logtmm",
   dir_path = "../plots/FEMPipeline_AU_noscaling_tmm/",
+  dataset_replace_string = "CF_EV_"
+)
+
+plot_common_feature_heatmap(c(77, 78),
+                            results_dir = "../fem_pipeline_results_AU_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_zlogtmm_",
+                            heatmap_file_name = "AU_noscale_tmm_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/FEMPipeline_AU_noscaling_tmm/subset/"
+)
+
+plot_common_feature_heatmap(c(79, 80),
+                            results_dir = "../fem_pipeline_results_AU_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_zlogtmm_",
+                            heatmap_file_name = "AU_noscale_tmm_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/FEMPipeline_AU_noscaling_tmm/subset/"
+)
+
+plot_common_feature_heatmap(c(81, 82),
+                            results_dir = "../fem_pipeline_results_AU_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_zlogtmm_",
+                            heatmap_file_name = "AU_noscale_tmm_IGTVsNGT.png",
+                            plot_dir_path = "../plots/FEMPipeline_AU_noscaling_tmm/subset/"
+)
+
+
+
+
+plot_heatmap(
+  dparg_vec = c(83, 87, 91),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_AU_adult_logtmm",
+  dir_path = "../plots/fem_pipeline_results_AU_adult_logtmm/",
   dataset_replace_string = "CF_EV_"
 )
