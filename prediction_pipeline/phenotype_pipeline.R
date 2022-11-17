@@ -3,6 +3,8 @@ library(tidyverse)
 base_dir <- "~/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
 setwd(base_dir)
 
+source("prediction_pipeline/cm_logistic_regression.R")
+source("prediction_pipeline/cm_svm.R")
 source("prediction_pipeline/cm_rf.R")
 
 comparison = "CFRDVsIGT"
@@ -59,12 +61,31 @@ phenotype_pipeline <- function(comparison, classes,
     select(condition) %>%
     rename("Label" = condition)
   
-  #normalize
+  #normalize 
+  
+  #uncomment this to not normalize one-hot encoded features i.e. col 3, 4)
+  # x.train.norm_part <- x.train[, c(1:2)]
+  # x.train.rest <- x.train[, c(3:4)]
+  # 
+  # x.test.norm_part <- x.test[, c(1:2)]
+  # x.test.rest <- x.test[, c(3:4)]
+  # 
+  # normparam <- caret::preProcess(x.train.norm_part) 
+  # x.train.norm_part <- predict(normparam, x.train.norm_part)
+  # normparam <- caret::preProcess(x.test.norm_part) 
+  # x.test.norm_part <- predict(normparam, x.test.norm_part) 
+  # 
+  # x.train <- cbind(x.train.norm_part, x.train.rest)
+  # x.test <- cbind(x.test.norm_part, x.test.rest)
+  
   normparam <- caret::preProcess(x.train) 
   x.train <- predict(normparam, x.train)
-  x.test <- predict(normparam, x.test) 
+  x.test <- predict(normparam, x.test)
   
   result_df <- rf_model(x.train, y.train, x.test, y.test, classes)
+  
+  # radial kernel SVM doesn't give good results 
+  # result_df <- svm_model(x.train, y.train, x.test, y.test, classes, kernel = "radial")
   
   if(!dir.exists(result_file_dir)){
     dir.create(result_file_dir, recursive = TRUE)

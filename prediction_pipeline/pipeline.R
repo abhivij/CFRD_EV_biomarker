@@ -11,36 +11,19 @@ source("prediction_pipeline/cm_rf.R")
 ######################################################################
 
 
-# comparison = "CFRDVsIGT"
-# classes = c("IGT", "CFRD")
-# best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
-# dataset_replace_str = "CF_EV_AU_zlogtmm_"
-# 
-# result_file_dir = "data/prediction_result/"
-# result_file_name = "CFRDVsIGT.csv"
-# 
-# 
-# comparison = "CFRDVsNGT"
-# classes = c("NGT", "CFRD")
-# best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
-# dataset_replace_str = "CF_EV_AU_zlogtmm_"
-# 
-# result_file_dir = "data/prediction_result/"
-# result_file_name = "CFRDVsNGT.csv"
-# 
-# 
-# 
-# comparison = "IGTVsNGT"
-# classes = c("NGT", "IGT")
-# best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
-# dataset_replace_str = "CF_EV_AU_zlogtmm_"
-# 
-# result_file_dir = "data/prediction_result/"
-# result_file_name = "IGTVsNGT.csv"
-
+comparison = "CFRDVsIGT"
+classes = c("IGT", "CFRD")
+best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
+only_adults = TRUE
+dataset_replace_str = "CF_EV_AU_adult_logtmm_"
+result_file_dir = "data/prediction_result_adult/"
+result_file_name = "CFRDVsIGT.csv"
+perform_filter = TRUE
+norm = "log_tmm"
 
 pipeline <- function(comparison, classes, 
                      best_features_file_path,
+                     only_adults = FALSE,
                      dataset_replace_str = "CF_EV_AU_zlogtmm_",
                      result_file_dir = "data/prediction_result/",
                      result_file_name = "CFRDVsIGT.csv",
@@ -57,6 +40,10 @@ pipeline <- function(comparison, classes,
   data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
                      nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
   phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")
+  
+  if(only_adults){
+    phenotype <- phenotype %>% filter(age_group == "adult")
+  }
   
   output_labels.train <- phenotype %>%
     rename("Label" = comparison) %>%
@@ -107,9 +94,23 @@ pipeline <- function(comparison, classes,
     #normalizing the data
     normparam <- caret::preProcess(data.train) 
     data.train <- predict(normparam, data.train)
-    data.test <- predict(normparam, data.test) #normalizing test data using params from train data    
+    data.test <- predict(normparam, data.test) #normalizing test data using params from train data   
+    
+  } else if(norm == "log_tmm"){
+    #calculating norm log tmm
+    dge <- edgeR::DGEList(counts = data.train, group = output_labels.train$Label)
+    dge <- edgeR::calcNormFactors(dge, method = "TMM")
+    tmm <- edgeR::cpm(dge, log = TRUE)
+    data.train <- tmm
+    
+    dge <- edgeR::DGEList(counts = data.test, group = output_labels.test$Label)
+    dge <- edgeR::calcNormFactors(dge, method = "TMM")
+    tmm <- edgeR::cpm(dge, log = TRUE)
+    data.test <- tmm
+    
+    data.train <- as.data.frame(t(as.matrix(data.train)))
+    data.test <- as.data.frame(t(as.matrix(data.test)))  
   }
-  
   #now data.train, data.test format : (samples x transcripts)
   
   #get best biomarkers only
@@ -128,15 +129,27 @@ pipeline <- function(comparison, classes,
   data.train <- data.train[, biomarkers]
   data.test <- data.test[, biomarkers]
 
+  #for old biomarkers identified - i.e. on AU adult+child with norm_log_tmm
+  # if(comparison == "CFRDVsIGT"){
+  #   #l2 log reg
+  #   result_df <- log_reg_model(data.train, output_labels.train, data.test, output_labels.test, classes, regularize = "l2") 
+  # } else if(comparison == "CFRDVsNGT"){
+  #   #sigmoid kernel svm
+  #   result_df <- svm_model(data.train, output_labels.train, data.test, output_labels.test, classes, kernel = "sigmoid")
+  # } else if(comparison == "IGTVsNGT"){
+  #   #random forest
+  #   result_df <- rf_model(data.train, output_labels.train, data.test, output_labels.test, classes)
+  # }
+  
   if(comparison == "CFRDVsIGT"){
-    #l2 log reg
-    result_df <- log_reg_model(data.train, output_labels.train, data.test, output_labels.test, classes, regularize = "l2") 
-  } else if(comparison == "CFRDVsNGT"){
-    #sigmoid kernel svm
-    result_df <- svm_model(data.train, output_labels.train, data.test, output_labels.test, classes, kernel = "sigmoid")
-  } else if(comparison == "IGTVsNGT"){
     #random forest
     result_df <- rf_model(data.train, output_labels.train, data.test, output_labels.test, classes)
+  } else if(comparison == "CFRDVsNGT"){
+    #radial kernel svm
+    result_df <- svm_model(data.train, output_labels.train, data.test, output_labels.test, classes, kernel = "radial")
+  } else if(comparison == "IGTVsNGT"){
+    #radial kernel svm
+    result_df <- svm_model(data.train, output_labels.train, data.test, output_labels.test, classes, kernel = "radial")
   }
 
   if(!dir.exists(result_file_dir)){
@@ -185,7 +198,8 @@ pipeline(
 
 
 
-show_metrics <- function(comparison, classes, result_file_path){
+show_metrics <- function(comparison, classes, result_file_path,
+                         metric_output_file_path = "data/prediction_result/metrics.csv"){
   print(comparison)
   result_df <- read.csv(result_file_path)  
   
@@ -209,9 +223,8 @@ show_metrics <- function(comparison, classes, result_file_path){
                         TestAccuracy = acc.test,
                         TestAUC = auc.test)
   
-  file_path = "data/prediction_result/metrics.csv"
-  write.table(x = metrics, file = file_path, append = TRUE, 
-              col.names = !file.exists(file_path), sep = ",",
+  write.table(x = metrics, file = metric_output_file_path, append = TRUE, 
+              col.names = !file.exists(metric_output_file_path), sep = ",",
               row.names = FALSE)
     
 }
@@ -237,3 +250,61 @@ show_metrics(comparison = "CFRDVsNGT",
 show_metrics(comparison = "IGTVsNGT",
              classes = c("NGT", "IGT"),
              result_file_path = "data/prediction_result/IGTVsNGT.csv")
+
+
+
+
+#############################
+#only adults with logtmm
+
+pipeline(
+  comparison = "CFRDVsIGT",
+  classes = c("IGT", "CFRD"),
+  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+  only_adults = TRUE,
+  dataset_replace_str = "CF_EV_AU_adult_logtmm_",
+  result_file_dir = "data/prediction_result_adult/",
+  result_file_name = "CFRDVsIGT.csv",
+  perform_filter = TRUE,
+  norm = "log_tmm"
+)
+
+
+pipeline(
+  comparison = "CFRDVsNGT",
+  classes = c("NGT", "CFRD"),
+  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+  only_adults = TRUE,
+  dataset_replace_str = "CF_EV_AU_adult_logtmm_",
+  result_file_dir = "data/prediction_result_adult/",
+  result_file_name = "CFRDVsNGT.csv",
+  perform_filter = TRUE,
+  norm = "log_tmm"
+)
+
+
+pipeline(
+  comparison = "IGTVsNGT",
+  classes = c("NGT", "IGT"),
+  best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+  only_adults = TRUE,
+  dataset_replace_str = "CF_EV_AU_adult_logtmm_",
+  result_file_dir = "data/prediction_result_adult/",
+  result_file_name = "IGTVsNGT.csv",
+  perform_filter = TRUE,
+  norm = "log_tmm"
+)
+
+show_metrics(comparison = "CFRDVsIGT",
+             classes = c("IGT", "CFRD"),
+             result_file_path = "data/prediction_result_adult/CFRDVsIGT.csv",
+             metric_output_file_path = "data/prediction_result_adult/metrics.csv")
+show_metrics(comparison = "CFRDVsNGT",
+             classes = c("NGT", "CFRD"),
+             result_file_path = "data/prediction_result_adult/CFRDVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_adult/metrics.csv")
+show_metrics(comparison = "IGTVsNGT",
+             classes = c("NGT", "IGT"),
+             result_file_path = "data/prediction_result_adult/IGTVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_adult/metrics.csv")
+

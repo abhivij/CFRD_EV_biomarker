@@ -3,7 +3,7 @@
 # kernel <- "sigmoid"
 
 svm_model <- function(data.train, label.train, data.test, label.test, 
-                      classes, kernel = "sigmoid", 
+                      classes, kernel = "sigmoid", random_seed = 1000,
                       ...){
   
   kernel_name <- paste(toupper(substring(kernel, 1, 1)), substring(kernel, 2), sep = "")
@@ -11,6 +11,7 @@ svm_model <- function(data.train, label.train, data.test, label.test,
 
   
   try({
+    set.seed(random_seed)
     model <- e1071::svm(data.train, factor(label.train$Label, levels = classes), 
                         probability = TRUE, kernel = kernel)
     
