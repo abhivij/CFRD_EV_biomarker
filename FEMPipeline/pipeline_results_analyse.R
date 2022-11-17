@@ -260,7 +260,7 @@ plot_common_feature_heatmap <- function(dparg_vec,
                 rect_gp = gpar(col = "white", lwd = 1),
                 column_names_rot = 60,
                 column_names_gp = gpar(fontsize = 10),
-                row_title = "Feature Selection Methods",
+                row_title = "Classification Models",
                 row_names_side = "left",
                 cell_fun = function(j, i, x, y, width, height, fill) {
                   grid.text(sprintf("%.4f", data_to_plot[i, j]), x, y, gp = gpar(fontsize = 10, col = "slateblue3"))
@@ -412,4 +412,33 @@ plot_heatmap(
   results_dir = "../fem_pipeline_results_AU_adult_logtmm",
   dir_path = "../plots/fem_pipeline_results_AU_adult_logtmm/",
   dataset_replace_string = "CF_EV_"
+)
+
+
+plot_common_feature_heatmap(c(95, 96),
+                            results_dir = "../fem_pipeline_results_AU_adult_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_noscale_tmm_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_logtmm/subset/"
+)
+
+plot_common_feature_heatmap(c(97, 98),
+                            results_dir = "../fem_pipeline_results_AU_adult_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_noscale_tmm_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_logtmm/subset/"
+)
+
+plot_common_feature_heatmap(c(99, 100),
+                            results_dir = "../fem_pipeline_results_AU_adult_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_noscale_tmm_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_logtmm/subset/"
+)
+
+plot_common_feature_heatmap(c(99, 100, 101, 102),
+                            results_dir = "../fem_pipeline_results_AU_adult_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_noscale_tmm_IGTVsNGT_all.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_logtmm/subset/"
 )
