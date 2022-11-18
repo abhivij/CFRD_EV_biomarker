@@ -600,3 +600,53 @@ create_data_subsets(dparg_id = 91,
                     subset_creation_criteria <- list("i"= c("mrmr75")),
                     subset_file_name_substr = "mrmr75",
                     create_all_common = FALSE)
+
+
+
+#######################
+
+#DK adult log tmm : CFRDVsIGT
+explore_common_features(dparg_id = 103,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("ga_rf", "ranger_pos_impu_cor", "mrmr_perc50", "t-test", "mrmr100"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_DK_adult_logtmm",
+                        dir_path = "../plots/fem_pipeline_results_DK_adult_logtmm/common_features_upset")
+
+#DK adult log tmm : CFRDVsNGT
+explore_common_features(dparg_id = 107,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("ranger_pos_impu_cor", "mrmr10", "mrmr_perc50",
+                                         "mrmr75"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_DK_adult_logtmm",
+                        dir_path = "../plots/fem_pipeline_results_DK_adult_logtmm/common_features_upset")
+
+#DK adult log tmm : IGTVsNGT
+explore_common_features(dparg_id = 111,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("t-test", "wilcoxontest", "mrmr10", "mrmr_perc50",
+                                         "ranger_pos_impu_cor", "mrmr100"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_DK_adult_logtmm",
+                        dir_path = "../plots/fem_pipeline_results_DK_adult_logtmm/common_features_upset")
+
+
+create_data_subsets(dparg_id = 103,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE)
+create_data_subsets(dparg_id = 107,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE)
+create_data_subsets(dparg_id = 111,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE)

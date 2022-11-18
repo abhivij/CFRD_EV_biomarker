@@ -442,3 +442,17 @@ plot_common_feature_heatmap(c(99, 100, 101, 102),
                             heatmap_file_name = "AU_noscale_tmm_IGTVsNGT_all.png",
                             plot_dir_path = "../plots/fem_pipeline_results_AU_adult_logtmm/subset/"
 )
+
+
+
+##########
+
+#train on DK adult
+
+plot_heatmap(
+  dparg_vec = c(103, 107, 111),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_DK_adult_logtmm",
+  dir_path = "../plots/fem_pipeline_results_DK_adult_logtmm/",
+  dataset_replace_string = "CF_EV_"
+)
