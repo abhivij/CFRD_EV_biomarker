@@ -14,7 +14,6 @@ log_reg_model <- function(data.train, label.train, data.test, label.test,
     model_name <- paste("L2 Regularized", model_name)
   }
   
-  
   try({
     label.train$Label <- ifelse(label.train$Label == classes[1], 0, 1)
     label.test$Label <- ifelse(label.test$Label == classes[1], 0, 1)
@@ -36,8 +35,8 @@ log_reg_model <- function(data.train, label.train, data.test, label.test,
       lambda_1se <- model$lambda.1se
       
       best_acc <- -1
-      best_cut_off <- 0.3
-      for(cut_off in seq(0.2, 0.8, 0.01)){
+      best_cut_off <- 0.5
+      for(cut_off in c(0.5, seq(0.2, 0.8, 0.01))){
         print(cut_off)
         pred_prob.train <- predict(model, newx = as.matrix(data.train), s = lambda_1se, type = 'response')
         pred.train <- ifelse(pred_prob.train > cut_off, 1, 0)

@@ -17,7 +17,7 @@ rf_model <- function(data.train, label.train, data.test, label.test,
 
       best_acc <- -1
       best_cut_off <- 0.5
-      for(cut_off in c(0.5, seq(0.4, 0.8, 0.01))){
+      for(cut_off in c(0.5, seq(0.2, 0.8, 0.01))){
         print(cut_off)
         pred_prob.train <- predict(model, data.train, type = "prob")
         pred_prob.train <- data.frame(pred_prob.train)[classes[2]]
