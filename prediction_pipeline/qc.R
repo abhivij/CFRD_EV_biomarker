@@ -4,6 +4,8 @@
 library(tidyverse)
 library(ggrepel)
 library(umap)
+library(ggvenn)
+
 
 base_dir <- "~/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
 setwd(base_dir)
@@ -589,3 +591,41 @@ ggplot(data_to_plot, aes(x = condition)) +
   facet_wrap(~age_group) +
   scale_y_continuous(n.breaks = 5)
 ggsave("prediction_pipeline/plots/other_features/age_group.jpg")
+
+
+###############
+#compare best biomarker set from AU and DK
+
+best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
+comparison = "CFRDVsIGT"
+
+plot_best_biomarker_venn <- function(comparison,
+                                     plot_dir_path = "plots/best_biomarkers",
+                                     best_features_file_path = "data/selected_features/best_features_with_is_best.csv"){
+  best_features <- read.csv(best_features_file_path)  
+  
+  #from AU
+  best_features_sub <- best_features %>%
+    filter(is_best == 1, dataset_id == paste0("CF_EV_AU_adult_logtmm_", comparison))
+  biomarkers_AU <- strsplit(best_features_sub$biomarkers, split = "|", fixed = TRUE)[[1]]  
+  
+  #from DK
+  best_features_sub <- best_features %>%
+    filter(is_best == 1, dataset_id == paste0("CF_EV_DK_adult_logtmm_", comparison))
+  biomarkers_DK <- strsplit(best_features_sub$biomarkers, split = "|", fixed = TRUE)[[1]]  
+  
+  ggvenn(list("AU" = biomarkers_AU,
+              "DK" = biomarkers_DK),
+         stroke_size = 0.1,
+         set_name_size = 4,
+         text_size = 3,
+         fill_color = c("#F8766D", "#00BFC4")) +
+    ggtitle(paste("Best biomarkers in ", sub("Vs", " Vs ", comparison))) +
+    theme(plot.title = element_text(vjust = - 20, hjust = 0.5))
+  file_name <- paste0("plots/best_biomarkers/", comparison, ".png")
+  ggsave(file_name)
+}
+
+plot_best_biomarker_venn("CFRDVsIGT")
+plot_best_biomarker_venn("CFRDVsNGT")
+plot_best_biomarker_venn("IGTVsNGT")
