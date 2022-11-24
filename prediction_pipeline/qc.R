@@ -634,8 +634,8 @@ plot_best_biomarker_venn("IGTVsNGT")
 ###############
 #create box plots of best biomarker sets and all transcripts
 
-comparison = "CFRDVsIGT"
-classes = c("IGT", "CFRD")
+comparison = "CFRDVsNGT"
+classes = c("NGT", "CFRD")
 use_best_features = TRUE
 norm = "log_tmm"
 best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
@@ -709,7 +709,7 @@ create_transcript_box_plots <- function(comparison,
     
     biomarkers <- strsplit(best_features_sub$biomarkers, split = "|", fixed = TRUE)[[1]]     
     
-    features_with_slash <- colnames(data)[grepl("/", colnames(data), fixed = TRUE)] 
+    features_with_slash <- colnames(train.tra_data)[grepl("/", colnames(train.tra_data), fixed = TRUE)] 
     for(f in features_with_slash){
       f_replaced <- gsub("/|-", ".", f) 
       if(f_replaced %in% biomarkers){
@@ -726,10 +726,10 @@ create_transcript_box_plots <- function(comparison,
   data_to_plot <- rbind(
     cbind(train.tra_data, 
           "label" = train.output_labels$Label,
-          "country" = "AU"),
+          "country" = train_cohort_country),
     cbind(test.tra_data,
           "label" = test.output_labels$Label,
-          "country" = "DK")
+          "country" = test_cohort_country)
   ) %>%
     mutate(label = paste(country, label, sep = "_")) %>%
     select(-c(country)) %>%
@@ -776,13 +776,11 @@ create_transcript_box_plots <- function(comparison,
   }
   plot
   
-  title <- paste("boxplot", plot_title)
-  
   dir_path <- "prediction_pipeline/plots/box_plots"
   if(!dir.exists(dir_path)){
     dir.create(dir_path, recursive = TRUE)
   }
-  file_name <- paste0(gsub(title, pattern = " ", replacement = "-"), ".png")
+  file_name <- paste0(gsub(plot_title, pattern = " ", replacement = "-"), ".png")
   file_path <- paste(dir_path, file_name, sep = "/")
   ggplot2::ggsave(file_path, units = "cm", width = plot_width_cm)
 }
@@ -817,30 +815,143 @@ create_transcript_box_plots(comparison = "CFRDVsIGT",
                             perform_filter = TRUE)
 create_transcript_box_plots(comparison = "CFRDVsIGT",
                             classes = c("IGT", "CFRD"),
-                            use_best_features = FALSE, plot_width = 40,
+                            use_best_features = FALSE, plot_width = 80,
                             train_cohort_country = "AU",
                             norm = "log_tmm",
                             best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
                             perform_filter = TRUE)
 create_transcript_box_plots(comparison = "CFRDVsIGT",
                             classes = c("IGT", "CFRD"),
-                            use_best_features = FALSE, plot_width = 40,
+                            use_best_features = FALSE, plot_width = 80,
                             train_cohort_country = "DK",
                             norm = "log_tmm",
                             best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
                             perform_filter = TRUE)
 create_transcript_box_plots(comparison = "CFRDVsIGT",
                             classes = c("IGT", "CFRD"),
-                            use_best_features = FALSE, plot_width = 40,
+                            use_best_features = FALSE, plot_width = 80,
                             train_cohort_country = "AU",
                             norm = "none",
                             best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
                             perform_filter = TRUE)
 create_transcript_box_plots(comparison = "CFRDVsIGT",
                             classes = c("IGT", "CFRD"),
-                            use_best_features = FALSE, plot_width = 40,
+                            use_best_features = FALSE, plot_width = 80,
                             train_cohort_country = "DK",
                             norm = "none",
                             best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
                             perform_filter = TRUE)
 
+create_transcript_box_plots(comparison = "CFRDVsNGT",
+                            classes = c("NGT", "CFRD"),
+                            use_best_features = TRUE,
+                            train_cohort_country = "AU",
+                            norm = "log_tmm",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "CFRDVsNGT",
+                            classes = c("NGT", "CFRD"),
+                            use_best_features = TRUE,
+                            train_cohort_country = "DK",
+                            norm = "log_tmm",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "CFRDVsNGT",
+                            classes = c("NGT", "CFRD"),
+                            use_best_features = TRUE,
+                            train_cohort_country = "AU",
+                            norm = "none",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "CFRDVsNGT",
+                            classes = c("NGT", "CFRD"),
+                            use_best_features = TRUE,
+                            train_cohort_country = "DK",
+                            norm = "none",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "CFRDVsNGT",
+                            classes = c("NGT", "CFRD"),
+                            use_best_features = FALSE, plot_width = 80,
+                            train_cohort_country = "AU",
+                            norm = "log_tmm",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "CFRDVsNGT",
+                            classes = c("NGT", "CFRD"),
+                            use_best_features = FALSE, plot_width = 80,
+                            train_cohort_country = "DK",
+                            norm = "log_tmm",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "CFRDVsNGT",
+                            classes = c("NGT", "CFRD"),
+                            use_best_features = FALSE, plot_width = 80,
+                            train_cohort_country = "AU",
+                            norm = "none",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "CFRDVsNGT",
+                            classes = c("NGT", "CFRD"),
+                            use_best_features = FALSE, plot_width = 80,
+                            train_cohort_country = "DK",
+                            norm = "none",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+
+create_transcript_box_plots(comparison = "IGTVsNGT",
+                            classes = c("NGT", "IGT"),
+                            use_best_features = TRUE,
+                            train_cohort_country = "AU",
+                            norm = "log_tmm",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "IGTVsNGT",
+                            classes = c("NGT", "IGT"),
+                            use_best_features = TRUE,
+                            train_cohort_country = "DK",
+                            norm = "log_tmm",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "IGTVsNGT",
+                            classes = c("NGT", "IGT"),
+                            use_best_features = TRUE,
+                            train_cohort_country = "AU",
+                            norm = "none",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "IGTVsNGT",
+                            classes = c("NGT", "IGT"),
+                            use_best_features = TRUE,
+                            train_cohort_country = "DK",
+                            norm = "none",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "IGTVsNGT",
+                            classes = c("NGT", "IGT"),
+                            use_best_features = FALSE, plot_width = 80,
+                            train_cohort_country = "AU",
+                            norm = "log_tmm",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "IGTVsNGT",
+                            classes = c("NGT", "IGT"),
+                            use_best_features = FALSE, plot_width = 80,
+                            train_cohort_country = "DK",
+                            norm = "log_tmm",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "IGTVsNGT",
+                            classes = c("NGT", "IGT"),
+                            use_best_features = FALSE, plot_width = 80,
+                            train_cohort_country = "AU",
+                            norm = "none",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
+create_transcript_box_plots(comparison = "IGTVsNGT",
+                            classes = c("NGT", "IGT"),
+                            use_best_features = FALSE, plot_width = 80,
+                            train_cohort_country = "DK",
+                            norm = "none",
+                            best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
+                            perform_filter = TRUE)
