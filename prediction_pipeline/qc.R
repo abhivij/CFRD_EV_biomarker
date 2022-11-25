@@ -322,79 +322,81 @@ plot_data(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"),
 # dim_red = "UMAP"
 
 
+#THE FUNCTION BELOW WAS CREATED PREVIOUSLY
+#NO LONGER USED
 #data and groups expected to be matching
 #should be ensured from the caller function
-create_dim_red_plots <- function(data, groups,
-                                 title_prefix = "",
-                                 dim_red = "UMAP",
-                                 perplexity = 5,
-                                 colour_label = "Condition",
-                                 shownames = FALSE){
-  
-  groups_modified <- groups
-  summa <- summary(factor(groups))
-  
-  groups_modified <- gsub(pattern = names(summa)[1], 
-                          replacement = paste0(names(summa)[1], "(", summa[1], ")"),
-                          groups_modified)
-  groups_modified <- gsub(pattern = names(summa)[2], 
-                          replacement = paste0(names(summa)[2], "(", summa[2], ")"),
-                          groups_modified)
-  groups <- factor(groups_modified)
-  
-  if(shownames){
-    text <- rownames(data)
-  } else{
-    text <- ""
-  }
-  set.seed(1)
-  if(dim_red == "tSNE"){
-    result <- Rtsne::Rtsne(data, perplexity = perplexity)
-    dim_red_df <- data.frame(x = result$Y[,1], y = result$Y[,2], 
-                             Colour = groups, 
-                             Sample = text)    
-    xlab <- "tSNE 1"
-    ylab <- "tSNE 2"
-  } else if(dim_red == "UMAP"){
-    print(dim(data)[1])
-    # n_neighbors <- max(floor(dim(data)[1] / 4), 2)
-    # print(n_neighbors)
-    # result <- umap(data, n_neighbors = n_neighbors)
-    result <- umap(data)
-    dim_red_df <- data.frame(x = result$layout[,1], y = result$layout[,2], 
-                             Colour = groups, 
-                             Sample = text)  
-    xlab <- "UMAP 1"
-    ylab <- "UMAP 2"
-  }
-  
-  title <- paste(title_prefix, dim_red)
-  
-  if (shownames) {
-    dim_red_plot <- ggplot2::ggplot(dim_red_df,
-                                    ggplot2::aes(x = x, y = y, colour = Colour)) +
-      ggplot2::geom_point() +
-      geom_text_repel(aes(label=Sample)) +
-      ggplot2::labs(title = title, colour = colour_label) +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      labs(caption = paste("Data dimension :", paste(dim(data), collapse = "x")))
-    dim_red_plot
-  } else {
-    dim_red_plot <- ggplot2::ggplot(dim_red_df) +
-      ggplot2::geom_point(ggplot2::aes(x = x, y = y, colour = Colour)) +
-      ggplot2::labs(title = title, colour = colour_label) +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      labs(caption = paste("Data dimension :", paste(dim(data), collapse = "x")))
-    dim_red_plot
-  }
-  
-  dir_path <- "prediction_pipeline/plots"
-  file_name <- paste0(gsub(title, pattern = " ", replacement = "-"), ".jpg")
-  file_path <- paste(dir_path, file_name, sep = "/")
-  ggplot2::ggsave(file_path, dim_red_plot, units = "cm", width = 30)
-}
+# create_dim_red_plots <- function(data, groups,
+#                                  title_prefix = "",
+#                                  dim_red = "UMAP",
+#                                  perplexity = 5,
+#                                  colour_label = "Condition",
+#                                  shownames = FALSE){
+#   
+#   groups_modified <- groups
+#   summa <- summary(factor(groups))
+#   
+#   groups_modified <- gsub(pattern = names(summa)[1], 
+#                           replacement = paste0(names(summa)[1], "(", summa[1], ")"),
+#                           groups_modified)
+#   groups_modified <- gsub(pattern = names(summa)[2], 
+#                           replacement = paste0(names(summa)[2], "(", summa[2], ")"),
+#                           groups_modified)
+#   groups <- factor(groups_modified)
+#   
+#   if(shownames){
+#     text <- rownames(data)
+#   } else{
+#     text <- ""
+#   }
+#   set.seed(1)
+#   if(dim_red == "tSNE"){
+#     result <- Rtsne::Rtsne(data, perplexity = perplexity)
+#     dim_red_df <- data.frame(x = result$Y[,1], y = result$Y[,2], 
+#                              Colour = groups, 
+#                              Sample = text)    
+#     xlab <- "tSNE 1"
+#     ylab <- "tSNE 2"
+#   } else if(dim_red == "UMAP"){
+#     print(dim(data)[1])
+#     # n_neighbors <- max(floor(dim(data)[1] / 4), 2)
+#     # print(n_neighbors)
+#     # result <- umap(data, n_neighbors = n_neighbors)
+#     result <- umap(data)
+#     dim_red_df <- data.frame(x = result$layout[,1], y = result$layout[,2], 
+#                              Colour = groups, 
+#                              Sample = text)  
+#     xlab <- "UMAP 1"
+#     ylab <- "UMAP 2"
+#   }
+#   
+#   title <- paste(title_prefix, dim_red)
+#   
+#   if (shownames) {
+#     dim_red_plot <- ggplot2::ggplot(dim_red_df,
+#                                     ggplot2::aes(x = x, y = y, colour = Colour)) +
+#       ggplot2::geom_point() +
+#       geom_text_repel(aes(label=Sample)) +
+#       ggplot2::labs(title = title, colour = colour_label) +
+#       ggplot2::xlab(xlab) +
+#       ggplot2::ylab(ylab) +
+#       labs(caption = paste("Data dimension :", paste(dim(data), collapse = "x")))
+#     dim_red_plot
+#   } else {
+#     dim_red_plot <- ggplot2::ggplot(dim_red_df) +
+#       ggplot2::geom_point(ggplot2::aes(x = x, y = y, colour = Colour)) +
+#       ggplot2::labs(title = title, colour = colour_label) +
+#       ggplot2::xlab(xlab) +
+#       ggplot2::ylab(ylab) +
+#       labs(caption = paste("Data dimension :", paste(dim(data), collapse = "x")))
+#     dim_red_plot
+#   }
+#   
+#   dir_path <- "prediction_pipeline/plots"
+#   file_name <- paste0(gsub(title, pattern = " ", replacement = "-"), ".jpg")
+#   file_path <- paste(dir_path, file_name, sep = "/")
+#   ggplot2::ggsave(file_path, dim_red_plot, units = "cm", width = 30)
+# }
 
 
 #data and groups expected to be matching
@@ -955,3 +957,121 @@ create_transcript_box_plots(comparison = "IGTVsNGT",
                             norm = "none",
                             best_features_file_path = "data/selected_features/best_features_with_is_best.csv",
                             perform_filter = TRUE)
+
+
+
+#############
+#create dim_red plots with both AU and DK cohort in one figure
+#this is to check if there are separate clusters for AU and DK within each of the pairs of CFRD, IGT, NGT
+only_adults = TRUE
+comparison = "CFRDVsIGT" #this will be NA if 3 classes are involved
+                         #in that case non-modulator sample filtering will be seprately done too
+classes = c("NGT", "CFRD")
+
+comparison <- NA
+classes = c("CFRD", "IGT", "NGT")
+dim_red = "UMAP"
+shownames = FALSE
+norm = "log_tmm"
+create_dim_red_plots <- function(data, groups,
+                                 title_prefix = "",
+                                 dim_red = "UMAP",
+                                 perplexity = 5,
+                                 colour_label = "Condition",
+                                 shownames = FALSE){
+  
+  data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                     nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+  phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")
+  if(only_adults){
+    phenotype <- phenotype %>% filter(age_group == "adult")
+  }
+  if(!is.na(comparison)){
+    output_labels <- phenotype %>%
+      rename("Label" = comparison)
+  } else{
+    output_labels <- phenotype %>%
+      rename("Label" = "condition") %>%
+      filter(is.na(pre_post_modulator) | pre_post_modulator == 0)
+  }
+  output_labels <- output_labels %>%
+    filter(Label %in% classes) %>%
+    dplyr::select(Sample, Label, country, age_group) %>%
+    dplyr::mutate(Label = factor(Label)) %>%
+    arrange(Label, Sample)
+
+  group_counts <- output_labels %>%
+    dplyr::mutate(Label = paste(country, Label, sep = "_")) %>%
+    group_by(Label) %>%
+    summarise(n = n())
+  
+  group_counts_text <- paste(apply(group_counts, MARGIN = 1, FUN = function(x){paste(x[1], x[2], sep = ":")}),
+                             collapse = " ")
+  
+  data <- data[, output_labels$Sample]
+  
+  #currently data format : (transcripts x samples)
+  if(perform_filter){
+    keep <- edgeR::filterByExpr(data, group = output_labels$Label)
+    data <- data[keep, ]
+  }
+  
+  if(norm == "log_tmm"){
+    dge <- edgeR::DGEList(counts = data, group = output_labels$Label)
+    dge <- edgeR::calcNormFactors(dge, method = "TMM")
+    tmm <- edgeR::cpm(dge, log = TRUE)
+    data <- tmm
+  }else if(norm == "log"){
+    data <- log2(data)
+  }
+  data <- as.data.frame(t(as.matrix(data)))
+  
+  if(shownames){
+    text <- rownames(data)
+  } else{
+    text <- ""
+  }
+  set.seed(1)
+  if(dim_red == "PCA"){
+    result <- prcomp(data)
+    dim_red_df <- data.frame(x = result$x[,1], y = result$x[,2])    
+    xlab <- "PCA 1"
+    ylab <- "PCA 2"  
+  } else if(dim_red == "UMAP"){
+    result <- umap(data)
+    dim_red_df <- data.frame(x = result$layout[,1], y = result$layout[,2])  
+    xlab <- "UMAP 1"
+    ylab <- "UMAP 2"
+  }
+  
+  title <- paste0(dim_red, " plot of ", paste(classes, collapse = ", "), " samples from ", norm, " data")
+  
+  if (shownames) {
+    dim_red_plot <- ggplot2::ggplot(dim_red_df,
+                                    ggplot2::aes(x = x, y = y)) +
+      ggplot2::geom_point(ggplot2::aes(shape = output_labels$country)) +
+      geom_text_repel(aes(label = rownames(dim_red_df))) +
+      ggplot2::labs(title = title, colour = "", shape = "") +
+      ggplot2::xlab(xlab) +
+      ggplot2::ylab(ylab) +
+      labs(caption = paste("Data dimension :", paste(dim(data), collapse = "x")))
+    dim_red_plot
+  } else {
+    ggplot2::ggplot(dim_red_df,
+                                    ggplot2::aes(x = x, y = y)) +
+      ggplot2::geom_point(ggplot2::aes(shape = output_labels$age_group,
+                                       fill = output_labels$country,
+                                       colour = output_labels$Label), size = 2) +
+      ggplot2::scale_shape_manual(values = c(15, 16)) +
+      ggplot2::labs(title = title, colour = "", shape = "Age Group") +
+      ggplot2::xlab(xlab) +
+      ggplot2::ylab(ylab) +
+      labs(caption = paste("Data dimension :", paste(dim(data), collapse = "x")))
+    dim_red_plot
+  }
+  
+  dir_path <- "prediction_pipeline/plots"
+  file_name <- paste0(gsub(title, pattern = " ", replacement = "-"), ".jpg")
+  file_path <- paste(dir_path, file_name, sep = "/")
+  ggplot2::ggsave(file_path, dim_red_plot, units = "cm", width = 30)
+}
