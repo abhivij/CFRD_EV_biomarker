@@ -1060,10 +1060,15 @@ create_dim_red_plots <- function(data, groups,
     ggplot2::ggplot(dim_red_df,
                                     ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_point(ggplot2::aes(shape = output_labels$age_group,
-                                       fill = output_labels$country,
-                                       colour = output_labels$Label), size = 2) +
-      ggplot2::scale_shape_manual(values = c(15, 16)) +
-      ggplot2::labs(title = title, colour = "", shape = "Age Group") +
+                                       colour = output_labels$country,
+                                       fill = output_labels$Label), size = 3) +
+      ggplot2::scale_shape_manual(values = c(21, 22)) +
+      ggplot2::scale_colour_manual(values = c("blue", "green")) +
+      ggplot2::scale_fill_manual(values = c("red", "orange", "yellow")) +
+      ggplot2::labs(title = title, 
+                    colour = "Country", 
+                    shape = "Age Group",
+                    fill = "Condition") +
       ggplot2::xlab(xlab) +
       ggplot2::ylab(ylab) +
       labs(caption = paste("Data dimension :", paste(dim(data), collapse = "x")))
