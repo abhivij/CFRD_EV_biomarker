@@ -963,35 +963,41 @@ create_transcript_box_plots(comparison = "IGTVsNGT",
 #############
 #create dim_red plots with both AU and DK cohort in one figure
 #this is to check if there are separate clusters for AU and DK within each of the pairs of CFRD, IGT, NGT
-only_adults = TRUE
-comparison = "CFRDVsIGT" #this will be NA if 3 classes are involved
-                         #in that case non-modulator sample filtering will be seprately done too
-classes = c("NGT", "CFRD")
+# comparison = "CFRDVsIGT" #this will be NA if 3 classes are involved
+#                          #in that case non-modulator sample filtering will be seprately done too
+# classes = c("NGT", "CFRD")
+# 
+# comparison <- NA
+# classes = c("CFRD", "IGT", "NGT")
+# dim_red = "UMAP"
+# shownames = FALSE
+# norm = "log_tmm"
 
-comparison <- NA
-classes = c("CFRD", "IGT", "NGT")
-dim_red = "UMAP"
-shownames = FALSE
-norm = "log_tmm"
-create_dim_red_plots <- function(data, groups,
-                                 title_prefix = "",
-                                 dim_red = "UMAP",
-                                 perplexity = 5,
-                                 colour_label = "Condition",
+# comparison = "CFRDVsIGT"
+# classes = c("CFRD", "IGT")
+# class_colours = c("red", "orange")
+# dim_red = "UMAP"
+# norm = "log"
+# shownames = FALSE
+
+create_dim_red_plots <- function(comparison, classes,
+                                 class_colours,
+                                 dim_red, norm,
                                  shownames = FALSE){
-  
   data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
                      nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
   phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")
-  if(only_adults){
-    phenotype <- phenotype %>% filter(age_group == "adult")
-  }
+  
   if(!is.na(comparison)){
     output_labels <- phenotype %>%
       rename("Label" = comparison)
   } else{
+    #this case is to include greater than 2 conditions in the plot
     output_labels <- phenotype %>%
       rename("Label" = "condition") %>%
+      #ensure that samples on modulator are not chosen
+      #using comparison field does not require the below, because comparison field creation 
+      #                 incorporates this filter
       filter(is.na(pre_post_modulator) | pre_post_modulator == 0)
   }
   output_labels <- output_labels %>%
@@ -1006,8 +1012,7 @@ create_dim_red_plots <- function(data, groups,
     summarise(n = n())
   
   group_counts_text <- paste(apply(group_counts, MARGIN = 1, FUN = function(x){paste(x[1], x[2], sep = ":")}),
-                             collapse = " ")
-  
+                             collapse = "  ")
   data <- data[, output_labels$Sample]
   
   #currently data format : (transcripts x samples)
@@ -1022,6 +1027,10 @@ create_dim_red_plots <- function(data, groups,
     tmm <- edgeR::cpm(dge, log = TRUE)
     data <- tmm
   }else if(norm == "log"){
+    #taking log of 0, causes UMAP/PCA computation to fail
+    #so replace 0 with aribitrary small number
+    #min value in this data other than 0 is 10
+    data[data == 0] <- 2^-30
     data <- log2(data)
   }
   data <- as.data.frame(t(as.matrix(data)))
@@ -1046,37 +1055,153 @@ create_dim_red_plots <- function(data, groups,
   
   title <- paste0(dim_red, " plot of ", paste(classes, collapse = ", "), " samples from ", norm, " data")
   
-  if (shownames) {
-    dim_red_plot <- ggplot2::ggplot(dim_red_df,
-                                    ggplot2::aes(x = x, y = y)) +
-      ggplot2::geom_point(ggplot2::aes(shape = output_labels$country)) +
-      geom_text_repel(aes(label = rownames(dim_red_df))) +
-      ggplot2::labs(title = title, colour = "", shape = "") +
+  ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
+      ggplot2::geom_point(ggplot2::aes(fill = output_labels$Label,
+                                       shape = output_labels$country,
+                                       colour = output_labels$age_group), size = 3) +
+      geom_text_repel(aes(label = text)) +
+      ggplot2::scale_fill_manual(name = "Condition", values = class_colours) +
+      ggplot2::guides(fill = guide_legend(override.aes = list(shape = 21,
+                                                              colour = class_colours))) +
+      ggplot2::scale_shape_manual(name = "Country", values = c(21, 22)) +
+      ggplot2::guides(shape = guide_legend(override.aes = list(fill = c("black", "black")))) +
+      ggplot2::scale_colour_manual(name = "Age group", values = c("black", "green")) +
+      ggplot2::guides(colour = guide_legend(override.aes = list(shape = 1))) +
+      ggplot2::labs(title = title) +
       ggplot2::xlab(xlab) +
       ggplot2::ylab(ylab) +
-      labs(caption = paste("Data dimension :", paste(dim(data), collapse = "x")))
-    dim_red_plot
-  } else {
-    ggplot2::ggplot(dim_red_df,
-                                    ggplot2::aes(x = x, y = y)) +
-      ggplot2::geom_point(ggplot2::aes(shape = output_labels$age_group,
-                                       colour = output_labels$country,
-                                       fill = output_labels$Label), size = 3) +
-      ggplot2::scale_shape_manual(values = c(21, 22)) +
-      ggplot2::scale_colour_manual(values = c("blue", "green")) +
-      ggplot2::scale_fill_manual(values = c("red", "orange", "yellow")) +
-      ggplot2::labs(title = title, 
-                    colour = "Country", 
-                    shape = "Age Group",
-                    fill = "Condition") +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      labs(caption = paste("Data dimension :", paste(dim(data), collapse = "x")))
-    dim_red_plot
-  }
+      labs(caption = paste(paste("Data dimension :", paste(dim(data), collapse = "x")), "\n",
+                           group_counts_text))
   
-  dir_path <- "prediction_pipeline/plots"
-  file_name <- paste0(gsub(title, pattern = " ", replacement = "-"), ".jpg")
+  dir_path <- "prediction_pipeline/plots/dim_red"
+  file_name <- paste0(gsub(title, pattern = " |,", replacement = "-"), ".jpg")
   file_path <- paste(dir_path, file_name, sep = "/")
-  ggplot2::ggsave(file_path, dim_red_plot, units = "cm", width = 30)
+  ggplot2::ggsave(file_path, units = "cm", width = 30)
 }
+
+
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "non-normalized",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "PCA",
+                     norm = "log_tmm",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "PCA",
+                     norm = "log",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "PCA",
+                     norm = "non-normalized",
+                     shownames = FALSE)
+
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "non-normalized",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "PCA",
+                     norm = "log_tmm",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "PCA",
+                     norm = "log",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "PCA",
+                     norm = "non-normalized",
+                     shownames = FALSE)
+
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "non-normalized",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "PCA",
+                     norm = "log_tmm",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "PCA",
+                     norm = "log",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "PCA",
+                     norm = "non-normalized",
+                     shownames = FALSE)
+
+create_dim_red_plots(comparison = NA,
+                     classes = c("CFRD", "IGT", "NGT"), class_colours = c("red", "orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = NA,
+                     classes = c("CFRD", "IGT", "NGT"), class_colours = c("red", "orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = NA,
+                     classes = c("CFRD", "IGT", "NGT"), class_colours = c("red", "orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "non-normalized",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = NA,
+                     classes = c("CFRD", "IGT", "NGT"), class_colours = c("red", "orange", "yellow"),
+                     dim_red = "PCA",
+                     norm = "log_tmm",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = NA,
+                     classes = c("CFRD", "IGT", "NGT"), class_colours = c("red", "orange", "yellow"),
+                     dim_red = "PCA",
+                     norm = "log",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = NA,
+                     classes = c("CFRD", "IGT", "NGT"), class_colours = c("red", "orange", "yellow"),
+                     dim_red = "PCA",
+                     norm = "non-normalized",
+                     shownames = FALSE)
+
+
