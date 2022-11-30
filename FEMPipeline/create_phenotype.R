@@ -29,6 +29,16 @@ phenotype <- phenotype %>%
                                 TRUE ~ NA_character_))
 summary(factor(phenotype$IGTVsNGT))
 
+phenotype <- phenotype %>%
+  mutate("CFVsHC" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                condition == "HC" ~ "HC",
+                                TRUE ~ "CF"))
+summary(factor(phenotype$CFVsHC))
+
+phenotype <- phenotype %>%
+  mutate("PreModulatorVsPostModulator" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ "PostModulator",
+                              TRUE ~ "PreModulator"))
+
 write.table(phenotype, 
             file = "data/formatted/phenotype.txt", quote=FALSE, sep="\t", row.names=FALSE)
 
@@ -37,7 +47,7 @@ p2 <- read.table("data/formatted/phenotype.txt", header = TRUE)
 all.equal(phenotype, p2)
 #types of age, FEV1 differ - that's okay
 
-all.equal(p2, p2_new)
+all.equal(p2, p2_new %>% select(-c(CFVsHC, PreModulatorVsPostModulator)))
 
 
 
