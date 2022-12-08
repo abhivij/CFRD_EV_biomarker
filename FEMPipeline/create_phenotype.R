@@ -39,16 +39,18 @@ phenotype <- phenotype %>%
   mutate("PreModulatorVsPostModulator" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ "PostModulator",
                               TRUE ~ "PreModulator"))
 
+#two samples are not prepended with X in the data file. Replicating that here
+phenotype <- phenotype %>%
+  mutate(Sample = sub("XCPH10_S271", "CPH10_S271", Sample)) %>%
+  mutate(Sample = sub("XCPH22_S272", "CPH22_S272", Sample))
+
+
 write.table(phenotype, 
-            file = "data/formatted/phenotype.txt", quote=FALSE, sep="\t", row.names=FALSE)
+            file = "data/formatted/phenotype.txt", sep="\t", row.names=FALSE)
 
 p2 <- read.table("data/formatted/phenotype.txt", header = TRUE)
 
 all.equal(phenotype, p2)
-#types of age, FEV1 differ - that's okay
-
-all.equal(p2, p2_new %>% select(-c(CFVsHC, PreModulatorVsPostModulator)))
-
 
 
 

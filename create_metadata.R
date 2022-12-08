@@ -669,19 +669,28 @@ summary(factor(meta_data_with_qual$seq_miR_library_quality))
 summary(factor(meta_data_with_qual$mutation1))
 summary(factor(meta_data_with_qual$mutation2))
 
+meta_data_with_qual[meta_data_with_qual["individual_id"] == "115CS", "mutation1"] <- "N1303K"
+meta_data_with_qual[meta_data_with_qual["individual_id"] == "115CS", "mutation2"] <- "F508del"   
+
 meta_data_with_qual <- meta_data_with_qual %>%
   mutate(mutation1 = gsub("Andet", "unknown", mutation1)) %>%
   mutate(mutation2 = gsub("Andet", "unknown", mutation2)) %>%
   mutate(mutation = case_when(is.na(mutation1) ~ NA_character_,
+                              mutation1 == "F508del" ~ paste0("F508del___", mutation2),
+                              mutation2 == "F508del" ~ paste0("F508del___", mutation1),
                               mutation1 < mutation2 ~ paste(mutation1, mutation2, sep = "___"),
                               TRUE ~ paste(mutation2, mutation1, sep = "___")))
 meta_data_with_qual <- meta_data_with_qual %>%
   select(-c(mutation1, mutation2))
 
-summary(factor(meta_data_with_qual$mutation))
+summa <- data.frame(summary(factor(meta_data_with_qual$mutation)))
+colnames(summa) <- "count"
+summa <- summa %>%
+  arrange(desc(count))
+
+write.csv(summa, "data/mutation_count_summary.csv")
 
 write.csv(format(meta_data_with_qual, digits = 3), "data/formatted/meta_data.csv", row.names = FALSE)
-
 
 
 #check with umi counts
