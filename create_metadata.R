@@ -60,16 +60,16 @@ sample_info <- sample_info %>%
 
 
 
-write.csv(sample_info, "data/formatted/sample_info_temp.txt", row.names = FALSE)
-
-proteomic_metadata <- read.table("data/proteomics_sinfo.txt", header = TRUE, sep = "\t") %>%
-  mutate(individualid = gsub("CPH0", "CPH", individualid, fixed = TRUE)) %>%
-  filter(!individualid %in% c("glufib", "QC")) %>%
-  select(c(rawfile, label, individualid, condition, cohort, 
-           agegroup, modulator, biotype, year, technicalreplicate, FEV1)) 
-
-proteomic_metadata <- proteomic_metadata %>%
-  filter(technicalreplicate == "t1")
+# write.csv(sample_info, "data/formatted/sample_info_temp.txt", row.names = FALSE)
+# 
+# proteomic_metadata <- read.table("data/proteomics_sinfo.txt", header = TRUE, sep = "\t") %>%
+#   mutate(individualid = gsub("CPH0", "CPH", individualid, fixed = TRUE)) %>%
+#   filter(!individualid %in% c("glufib", "QC")) %>%
+#   select(c(rawfile, label, individualid, condition, cohort, 
+#            agegroup, modulator, biotype, year, technicalreplicate, FEV1)) 
+# 
+# proteomic_metadata <- proteomic_metadata %>%
+#   filter(technicalreplicate == "t1")
 
 # proteomic_metadata_multiple_entries <- proteomic_metadata %>%
 #   group_by(individualid, year) %>%
@@ -185,13 +185,18 @@ cph_info <- sample_info.cph %>%
 
 summary(factor(cph_info$`Sex 1=male, 2=female`))
 
-cph_info <- cph_info[,-c(9:11, 16:19)]
-colnames(cph_info)[9:13] <- c("pre_post_modulator", "cftr_modulator_2020", "sex", "age", "FEV1")
+cph_info <- cph_info[,-c(9:11, 18:19)]
+colnames(cph_info)[9:15] <- c("pre_post_modulator", "cftr_modulator_2020", "sex", "age", 
+                              "mutation1", "mutation2",
+                              "FEV1")
 
 cph_info <- cph_info %>%
   mutate(sex = case_when(sex == 1 ~ "M",
                          sex == 2 ~ "F",
                          TRUE ~ NA_character_))
+
+cph_info <- cph_info %>%
+  relocate(FEV1, .before = mutation1)
   
 summary(factor(cph_info$sex))
 
@@ -214,6 +219,7 @@ mastersheet_info.rpa_sch_14e <- mastersheet_info.rpa_sch_14e %>%
 mastersheet_info.rpa_sch_14e <- mastersheet_info.rpa_sch_14e[3:83,]
 colnames(mastersheet_info.rpa_sch_14e)[1:2] <- c("diabetes_status", "sample_name")
 colnames(mastersheet_info.rpa_sch_14e)[c(7, 9, 10, 11)] <- c("age", "rna_extraction", "sex", "FEV1")
+colnames(mastersheet_info.rpa_sch_14e)[c(12, 13)] <- c("mutation1", "mutation2")
 
 for(i in c(2:dim(mastersheet_info.rpa_sch_14e)[1])){
   print(i)
@@ -224,6 +230,14 @@ for(i in c(2:dim(mastersheet_info.rpa_sch_14e)[1])){
   if(!is.na(mastersheet_info.rpa_sch_14e[i, "FEV1"]) &
      mastersheet_info.rpa_sch_14e[i, "FEV1"] == "See above"){
     mastersheet_info.rpa_sch_14e[i, "FEV1"] <- mastersheet_info.rpa_sch_14e[(i-1), "FEV1"]
+  }
+  if(!is.na(mastersheet_info.rpa_sch_14e[i, "mutation1"]) &
+     mastersheet_info.rpa_sch_14e[i, "mutation1"] == "See above"){
+    mastersheet_info.rpa_sch_14e[i, "mutation1"] <- mastersheet_info.rpa_sch_14e[(i-1), "mutation1"]
+  }
+  if(!is.na(mastersheet_info.rpa_sch_14e[i, "mutation2"]) &
+     mastersheet_info.rpa_sch_14e[i, "mutation2"] == "See above"){
+    mastersheet_info.rpa_sch_14e[i, "mutation2"] <- mastersheet_info.rpa_sch_14e[(i-1), "mutation2"]
   }
 }
 
@@ -267,7 +281,7 @@ rpa_info <- sample_info.rpa %>%
 sum(is.na(rpa_info$diabetes_status))
 
 rpa_info <- rpa_info %>%
-  select(-c(10:12, 14, 17:21))
+  select(-c(10:12, 14, 19:21))
 colnames(rpa_info)[9] <- "pre_post_modulator"
 
 rpa_info <- rpa_info %>%
@@ -452,6 +466,28 @@ sch_info <- sch_info %>%
   select(-c(rna_extraction))
 sch_info <- sch_info  %>%
   mutate(age = as.double(age))
+
+
+#get mutation info
+mutation_info.sch <- read_xlsx("data/SCH_CFTR mutations.xlsx",
+                                   sheet = 1) 
+colnames(mutation_info.sch) <- c("sample_id", "mutation1", "mutation2")
+
+mutation_info.sch <- mutation_info.sch %>%
+  mutate(sample_id = gsub("-", "_", sample_id, fixed = TRUE))
+sch_info <- sch_info %>%
+  separate(sample_name, into = c("s1", "s2", "s3", NA, NA, NA), sep = "_", remove = FALSE) %>%
+  mutate(sample_id = paste(s1, s2, s3, sep = "_")) %>%
+  select(-c(s1, s2, s3))
+
+missing_mutation_info <- sch_info %>%
+  anti_join(mutation_info.sch)
+write.csv(missing_mutation_info, "data/missing_sch_mutation.csv", row.names = FALSE)
+
+sch_info <- sch_info %>%
+  left_join(mutation_info.sch) %>%
+  select(-c(sample_id))
+
 write.csv(format(sch_info, digits = 3), "data/formatted/sample_info_sch.csv", row.names = FALSE)
 
 
@@ -465,7 +501,7 @@ mastersheet_info.14e <- mastersheet_info.rpa_sch_14e %>%
   mutate(sample_name = gsub("-", "_", sample_name, fixed = TRUE)) %>%
   mutate(diabetes_status = "HC")
 mastersheet_info.14e <- mastersheet_info.14e %>%
-  select(c(1,2,3,7,10,11))
+  select(c(1,2,3,7,10,11,12,13))
 colnames(mastersheet_info.14e)[3] <- "pre_post_modulator"
 mastersheet_info.14e <- mastersheet_info.14e %>%
   mutate(modulator = "", .after = pre_post_modulator)
@@ -570,7 +606,11 @@ meta_data <- meta_data %>%
   mutate(sex = case_when(sex == "-" ~ NA_character_,
                          TRUE ~ sex)) %>%
   mutate(FEV1 = case_when(FEV1 == "-" ~ NA_character_,
-                          TRUE ~ FEV1))
+                          TRUE ~ FEV1)) %>%
+  mutate(mutation1 = case_when(mutation1 == "-" ~ NA_character_,
+                          TRUE ~ mutation1)) %>%
+  mutate(mutation2 = case_when(mutation2 == "-" ~ NA_character_,
+                               TRUE ~ mutation2))
 options(digits = 3)
 meta_data <- meta_data %>%
   mutate(age = as.double(age)) %>%
@@ -624,6 +664,21 @@ meta_data_with_qual <- meta_data_with_qual %>%
   mutate(seq_miR_library_quality = case_when(sample_name %in% c("CPH10", "CPH22") ~ "Good",
                                              TRUE ~ seq_miR_library_quality))
 summary(factor(meta_data_with_qual$seq_miR_library_quality))
+
+
+summary(factor(meta_data_with_qual$mutation1))
+summary(factor(meta_data_with_qual$mutation2))
+
+meta_data_with_qual <- meta_data_with_qual %>%
+  mutate(mutation1 = gsub("Andet", "unknown", mutation1)) %>%
+  mutate(mutation2 = gsub("Andet", "unknown", mutation2)) %>%
+  mutate(mutation = case_when(is.na(mutation1) ~ NA_character_,
+                              mutation1 < mutation2 ~ paste(mutation1, mutation2, sep = "___"),
+                              TRUE ~ paste(mutation2, mutation1, sep = "___")))
+meta_data_with_qual <- meta_data_with_qual %>%
+  select(-c(mutation1, mutation2))
+
+summary(factor(meta_data_with_qual$mutation))
 
 write.csv(format(meta_data_with_qual, digits = 3), "data/formatted/meta_data.csv", row.names = FALSE)
 
