@@ -3,6 +3,8 @@
 library(tidyverse)
 library(readxl)
 
+library(sva)
+
 base_dir <- "/home/abhivij/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
 setwd(base_dir)
 
@@ -85,3 +87,14 @@ dim(quantification_batch)
 write.csv(combined_data, "data/formatted/umi_counts.csv", row.names = FALSE)
 write.csv(pirna_mapping_all, "data/formatted/pirna_mapping.csv", row.names = FALSE)
 write.csv(quantification_batch, "data/formatted/quantification_batch.csv", row.names = FALSE)
+
+
+#create combat-seq transformed data file
+data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                   nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")
+output_labels <- phenotype %>%
+  select(Sample, country)
+data.combat_seq <- ComBat_seq(counts = as.matrix(data),
+                              batch = factor(output_labels$country))
+write.csv(data.combat_seq, "data/formatted/umi_counts_combat_seq.csv")
