@@ -5,6 +5,7 @@ library(tidyverse)
 library(ggrepel)
 library(umap)
 library(ggvenn)
+library(sva)
 
 
 base_dir <- "~/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
@@ -973,20 +974,37 @@ create_transcript_box_plots(comparison = "IGTVsNGT",
 # shownames = FALSE
 # norm = "log_tmm"
 
-# comparison = "CFRDVsIGT"
-# classes = c("CFRD", "IGT")
-# class_colours = c("red", "orange")
+comparison = "CFRDVsIGT"
+classes = c("CFRD", "IGT")
+class_colours = c("red", "orange")
+dim_red = "UMAP"
+norm = "log"
+shownames = FALSE
+fill_column = "mutation"
+fill_column = NA
+
+combat_seq = FALSE
+combat_seq_specify_group = FALSE
+
+# comparison = "PreModulatorVsPostModulator"
+# classes = c("PreModulator", "PostModulator")
+# class_colours = c("brown", "skyblue")
 # dim_red = "UMAP"
-# norm = "log"
+# norm = "log_tmm"
 # shownames = FALSE
 
 create_dim_red_plots <- function(comparison, classes,
                                  class_colours,
                                  dim_red, norm,
-                                 shownames = FALSE){
+                                 fill_column = NA,
+                                 combat_seq = FALSE, combat_seq_specify_group = FALSE,
+                                 shownames = FALSE,
+                                 perform_filter = TRUE){
   data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
                      nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
   phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")
+  
+  title <- paste0(dim_red, " plot of ", paste(classes, collapse = ", "), " samples from ", norm, " data")
   
   if(!is.na(comparison)){
     output_labels <- phenotype %>%
@@ -1002,9 +1020,19 @@ create_dim_red_plots <- function(comparison, classes,
   }
   output_labels <- output_labels %>%
     filter(Label %in% classes) %>%
-    dplyr::select(Sample, Label, country, age_group) %>%
+    dplyr::select(Sample, Label, country, age_group, mutation, 
+                  sex, cohort, patient_recruitment_year,
+                  seq_plate, seq_miR_library_quality,
+                  quant_batch) %>%
     dplyr::mutate(Label = factor(Label)) %>%
+    dplyr::mutate(seq_plate = factor(seq_plate), quant_batch = factor(quant_batch)) %>%
     arrange(Label, Sample)
+  
+  if(!is.na(fill_column)){
+    output_labels <- output_labels %>%
+      rename("fill_column" = fill_column)
+    title <- paste0(title, " based on ", fill_column)
+  }
 
   group_counts <- output_labels %>%
     dplyr::mutate(Label = paste(country, Label, sep = "_")) %>%
@@ -1019,6 +1047,24 @@ create_dim_red_plots <- function(comparison, classes,
   if(perform_filter){
     keep <- edgeR::filterByExpr(data, group = output_labels$Label)
     data <- data[keep, ]
+  }
+  
+  if(combat_seq){
+    if(combat_seq_specify_group){
+      data.combat_seq <- ComBat_seq(counts = as.matrix(data),
+                                    batch = factor(output_labels$country),
+                                    group = factor(output_labels$Label))  
+      title <- paste0(title, " after combat seq with group")
+    } else{
+      data.combat_seq <- ComBat_seq(counts = as.matrix(data),
+                                    batch = factor(output_labels$country))
+      title <- paste0(title, " after combat seq")
+    }
+    # dim(data)
+    # dim(data.combat_seq)
+    # all.equal(rownames(data), rownames(data.combat_seq))
+    # all.equal(colnames(data), colnames(data.combat_seq))
+    data <- data.combat_seq
   }
   
   if(norm == "log_tmm"){
@@ -1053,9 +1099,8 @@ create_dim_red_plots <- function(comparison, classes,
     ylab <- "UMAP 2"
   }
   
-  title <- paste0(dim_red, " plot of ", paste(classes, collapse = ", "), " samples from ", norm, " data")
-  
-  ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
+  if(is.na(fill_column)){
+    ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_point(ggplot2::aes(fill = output_labels$Label,
                                        shape = output_labels$country,
                                        colour = output_labels$age_group), size = 3) +
@@ -1071,137 +1116,62 @@ create_dim_red_plots <- function(comparison, classes,
       ggplot2::xlab(xlab) +
       ggplot2::ylab(ylab) +
       labs(caption = paste(paste("Data dimension :", paste(dim(data), collapse = "x")), "\n",
-                           group_counts_text))
+                           group_counts_text),
+           fill = fill_column)    
+  } else{
+    ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
+      ggplot2::geom_point(ggplot2::aes(fill = output_labels$fill_column,
+                                       shape = output_labels$country,
+                                       colour = output_labels$Label), size = 3) +
+      geom_text_repel(aes(label = text)) +
+      ggplot2::guides(fill = guide_legend(override.aes = list(shape = 21))) +
+      ggplot2::scale_shape_manual(name = "Country", values = c(21, 22)) +
+      ggplot2::guides(shape = guide_legend(override.aes = list(fill = c("black", "black")))) +
+      ggplot2::scale_colour_manual(name = "Condition", values = class_colours) +
+      ggplot2::guides(colour = guide_legend(override.aes = list(shape = 1))) +
+      ggplot2::labs(title = title) +
+      ggplot2::xlab(xlab) +
+      ggplot2::ylab(ylab) +
+      labs(caption = paste(paste("Data dimension :", paste(dim(data), collapse = "x")), "\n",
+                           group_counts_text),
+           fill = fill_column)    
+  }
+
   
-  dir_path <- "prediction_pipeline/plots/dim_red"
+  dir_path <- paste0("prediction_pipeline/plots/dim_red/", fill_column)
+  if(!dir.exists(dir_path)){
+    dir.create(dir_path, recursive = TRUE)
+  }
   file_name <- paste0(gsub(title, pattern = " |,", replacement = "-"), ".jpg")
   file_path <- paste(dir_path, file_name, sep = "/")
   ggplot2::ggsave(file_path, units = "cm", width = 30)
 }
 
 
-create_dim_red_plots(comparison = "CFRDVsIGT",
-                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
-                     dim_red = "UMAP",
-                     norm = "log_tmm",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "CFRDVsIGT",
-                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
-                     dim_red = "UMAP",
-                     norm = "log",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "CFRDVsIGT",
-                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
-                     dim_red = "UMAP",
-                     norm = "non-normalized",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "CFRDVsIGT",
-                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
-                     dim_red = "PCA",
-                     norm = "log_tmm",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "CFRDVsIGT",
-                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
-                     dim_red = "PCA",
-                     norm = "log",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "CFRDVsIGT",
-                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
-                     dim_red = "PCA",
-                     norm = "non-normalized",
-                     shownames = FALSE)
 
-create_dim_red_plots(comparison = "CFRDVsNGT",
-                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
-                     dim_red = "UMAP",
-                     norm = "log_tmm",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "CFRDVsNGT",
-                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
-                     dim_red = "UMAP",
-                     norm = "log",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "CFRDVsNGT",
-                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
-                     dim_red = "UMAP",
-                     norm = "non-normalized",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "CFRDVsNGT",
-                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
-                     dim_red = "PCA",
-                     norm = "log_tmm",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "CFRDVsNGT",
-                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
-                     dim_red = "PCA",
-                     norm = "log",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "CFRDVsNGT",
-                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
-                     dim_red = "PCA",
-                     norm = "non-normalized",
-                     shownames = FALSE)
+#plot mutation
+phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")
+summary(factor(phenotype$condition))
 
-create_dim_red_plots(comparison = "IGTVsNGT",
-                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
-                     dim_red = "UMAP",
-                     norm = "log_tmm",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "IGTVsNGT",
-                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
-                     dim_red = "UMAP",
-                     norm = "log",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "IGTVsNGT",
-                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
-                     dim_red = "UMAP",
-                     norm = "non-normalized",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "IGTVsNGT",
-                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
-                     dim_red = "PCA",
-                     norm = "log_tmm",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "IGTVsNGT",
-                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
-                     dim_red = "PCA",
-                     norm = "log",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = "IGTVsNGT",
-                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
-                     dim_red = "PCA",
-                     norm = "non-normalized",
-                     shownames = FALSE)
-
-create_dim_red_plots(comparison = NA,
-                     classes = c("CFRD", "IGT", "NGT"), class_colours = c("red", "orange", "yellow"),
-                     dim_red = "UMAP",
-                     norm = "log_tmm",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = NA,
-                     classes = c("CFRD", "IGT", "NGT"), class_colours = c("red", "orange", "yellow"),
-                     dim_red = "UMAP",
-                     norm = "log",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = NA,
-                     classes = c("CFRD", "IGT", "NGT"), class_colours = c("red", "orange", "yellow"),
-                     dim_red = "UMAP",
-                     norm = "non-normalized",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = NA,
-                     classes = c("CFRD", "IGT", "NGT"), class_colours = c("red", "orange", "yellow"),
-                     dim_red = "PCA",
-                     norm = "log_tmm",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = NA,
-                     classes = c("CFRD", "IGT", "NGT"), class_colours = c("red", "orange", "yellow"),
-                     dim_red = "PCA",
-                     norm = "log",
-                     shownames = FALSE)
-create_dim_red_plots(comparison = NA,
-                     classes = c("CFRD", "IGT", "NGT"), class_colours = c("red", "orange", "yellow"),
-                     dim_red = "PCA",
-                     norm = "non-normalized",
-                     shownames = FALSE)
+data_of_interest <- phenotype %>%
+  filter(is.na(pre_post_modulator) | pre_post_modulator == 0) %>%
+  filter(condition %in% c("CFRD", "IGT", "NGT")) %>%
+  select(Sample, condition, country, patient_recruitment_year, age, age_group, sex, FEV1,
+         mutation) %>%
+  mutate(age = as.numeric(str_trim(age)), FEV1 = as.numeric(str_trim(FEV1)))
+ggplot(data_of_interest, aes(x = mutation)) +
+  geom_bar(position = "dodge", aes(fill = country)) +
+  facet_wrap(~condition) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = rel(0.8)))
+ggsave("prediction_pipeline/plots/other_features/mutation_cfrd_igt_ngt.jpg")
 
 
+data_of_interest <- phenotype %>%
+  select(Sample, condition, country, patient_recruitment_year, age, age_group, sex, FEV1,
+         mutation) %>%
+  mutate(age = as.numeric(str_trim(age)), FEV1 = as.numeric(str_trim(FEV1)))
+
+ggplot(data_of_interest, aes(x = mutation)) +
+  geom_bar(position = "dodge", aes(fill = country)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+ggsave("prediction_pipeline/plots/other_features/mutation_country.jpg")
