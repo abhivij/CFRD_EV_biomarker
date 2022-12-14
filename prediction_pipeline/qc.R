@@ -1025,7 +1025,9 @@ create_dim_red_plots <- function(comparison, classes,
                   seq_plate, seq_miR_library_quality,
                   quant_batch) %>%
     dplyr::mutate(Label = factor(Label)) %>%
-    dplyr::mutate(seq_plate = factor(seq_plate), quant_batch = factor(quant_batch)) %>%
+    dplyr::mutate(seq_plate = factor(seq_plate), 
+                  quant_batch = factor(quant_batch),
+                  patient_recruitment_year = factor(patient_recruitment_year)) %>%
     arrange(Label, Sample)
   
   if(!is.na(fill_column)){
@@ -1078,6 +1080,8 @@ create_dim_red_plots <- function(comparison, classes,
     #min value in this data other than 0 is 10
     data[data == 0] <- 2^-30
     data <- log2(data)
+  } else if(norm == "log_cpm"){
+    data <- edgeR::cpm(data, log = TRUE)
   }
   data <- as.data.frame(t(as.matrix(data)))
   
@@ -1175,3 +1179,73 @@ ggplot(data_of_interest, aes(x = mutation)) +
   geom_bar(position = "dodge", aes(fill = country)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 ggsave("prediction_pipeline/plots/other_features/mutation_country.jpg")
+
+
+###compare filter_by_expr
+
+compare_transcripts_from_filter_by_expr <- function(comparison, classes, combat_seq = FALSE){
+  if(combat_seq){
+    data <- read.table("data/formatted/umi_counts_combat_seq.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                       nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+  } else{
+    data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                       nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+  }
+  phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")
+  output_labels <- phenotype %>%
+    rename("Label" = comparison) %>%
+    filter(Label %in% classes) %>%
+    select(Sample, Label, country)
+  
+  au.output_labels <- output_labels %>%
+    filter(country == "AU") %>%
+    select(-c(country))
+  dk.output_labels <- output_labels %>%
+    filter(country == "DK") %>%
+    select(-c(country))
+  
+  au.data <- data[, au.output_labels$Sample]
+  dk.data <- data[, dk.output_labels$Sample]
+  
+  keep <- edgeR::filterByExpr(au.data, group = au.output_labels$Label)
+  au.data <- au.data[keep, ]
+  
+  keep <- edgeR::filterByExpr(dk.data, group = dk.output_labels$Label)
+  dk.data <- dk.data[keep, ]
+  
+  title <- paste("Filtered transcripts in samples from", sub("Vs", " Vs ", comparison))
+  if(combat_seq){
+    title <- paste(title, "after combat_seq")
+  }
+  
+  ggvenn(list("AU" = rownames(au.data),
+              "DK" = rownames(dk.data)),
+         stroke_size = 0.1,
+         set_name_size = 4,
+         text_size = 3,
+         fill_color = c("#F8766D", "#00BFC4")) +
+    ggtitle(title) +
+    theme(plot.title = element_text(vjust = - 20, hjust = 0.5))
+  file_name <- paste0("prediction_pipeline/plots/filtered_transcripts/", 
+                      comparison, "combat_seq", combat_seq, ".png")
+  ggsave(file_name)
+}
+
+compare_transcripts_from_filter_by_expr(comparison = "CFRDVsIGT", 
+                                        classes = c("CFRD", "IGT"), 
+                                        combat_seq = FALSE)
+compare_transcripts_from_filter_by_expr(comparison = "CFRDVsNGT", 
+                                        classes = c("CFRD", "NGT"), 
+                                        combat_seq = FALSE)
+compare_transcripts_from_filter_by_expr(comparison = "IGTVsNGT", 
+                                        classes = c("IGT", "NGT"), 
+                                        combat_seq = FALSE)
+compare_transcripts_from_filter_by_expr(comparison = "CFRDVsIGT", 
+                                        classes = c("CFRD", "IGT"), 
+                                        combat_seq = TRUE)
+compare_transcripts_from_filter_by_expr(comparison = "CFRDVsNGT", 
+                                        classes = c("CFRD", "NGT"), 
+                                        combat_seq = TRUE)
+compare_transcripts_from_filter_by_expr(comparison = "IGTVsNGT", 
+                                        classes = c("IGT", "NGT"), 
+                                        combat_seq = TRUE)
