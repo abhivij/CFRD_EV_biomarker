@@ -1881,6 +1881,799 @@ list(phenotype_file_name = "data/formatted/phenotype.txt",
      filter_expression = expression(country == 'DK' & age_group == 'adult'),
      norm = "log_tmm",
      fems_to_run = c("all"),
-     random_seed = 2000)
+     random_seed = 2000),
+
+
+#AU adult samples with just log cpm i.e. no scaling after log cpm 
+
+#1
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_impu_cor",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("ga_rf")),  
+
+
+#1
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_impu_cor",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("ga_rf")),    
+
+
+
+#1
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_impu_cor",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("ga_rf")),
+
+
+#AU adult samples with just log
+
+#1
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_log",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_log",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_impu_cor",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_log",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_log",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_log",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_log",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_log",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_log",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log",
+     fems_to_run = c("ga_rf")),  
+
+
+#1
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_log",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_log",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_impu_cor",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_log",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_log",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_log",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_log",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_log",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_log",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log",
+     fems_to_run = c("ga_rf")),    
+
+
+
+#1
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_log",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_log",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_impu_cor",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_log",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_log",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_log",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_log",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_log",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_log",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log",
+     fems_to_run = c("ga_rf")),
+
+
+#AU adult samples with combat seq + log cpm 
+
+#1
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_impu_cor",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("ga_rf")),  
+
+
+#1
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_impu_cor",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("ga_rf")),    
+
+
+
+#1
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_impu_cor",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logcpm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logcpm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_cpm",
+     fems_to_run = c("ga_rf")),
+
+
+#AU adult samples with combat seq + log tmm 
+
+#1
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logtmm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logtmm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_impu_cor",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logtmm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logtmm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logtmm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logtmm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logtmm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logtmm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("ga_rf")),  
+
+
+#1
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logtmm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logtmm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_impu_cor",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logtmm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logtmm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logtmm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logtmm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logtmm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logtmm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("ga_rf")),    
+
+
+
+#1
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logtmm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logtmm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_impu_cor",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logtmm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logtmm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logtmm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logtmm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_combat_seq.csv",
+     sep = ",",
+     dataset_id = "CF_EV_AU_adult_logtmm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     results_dir_path = "fem_pipeline_results_AU_adult_logtmm",
+     filter_expression = expression(country == 'AU' & age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("ga_rf"))
+
 
 )  
