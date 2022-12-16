@@ -456,3 +456,76 @@ plot_heatmap(
   dir_path = "../plots/fem_pipeline_results_DK_adult_logtmm/",
   dataset_replace_string = "CF_EV_"
 )
+
+plot_common_feature_heatmap(c(115, 116),
+                            results_dir = "../fem_pipeline_results_DK_adult_logtmm_subset",
+                            dataset_replace_string = "CF_EV_DK_",
+                            heatmap_file_name = "DK_noscale_tmm_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_DK_adult_logtmm/subset/"
+)
+
+plot_common_feature_heatmap(c(117, 118),
+                            results_dir = "../fem_pipeline_results_DK_adult_logtmm_subset",
+                            dataset_replace_string = "CF_EV_DK_",
+                            heatmap_file_name = "DK_noscale_tmm_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_DK_adult_logtmm/subset/"
+)
+
+plot_common_feature_heatmap(c(119, 120),
+                            results_dir = "../fem_pipeline_results_DK_adult_logtmm_subset",
+                            dataset_replace_string = "CF_EV_DK_",
+                            heatmap_file_name = "DK_noscale_tmm_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_DK_adult_logtmm/subset/"
+)
+
+
+##########
+
+#AU adult logcpm
+
+plot_heatmap(
+  dparg_vec = c(121, 125, 129),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_AU_adult_logcpm",
+  dir_path = "../plots/fem_pipeline_results_AU_adult_logcpm/",
+  dataset_replace_string = "CF_EV_"
+)
+
+
+##########
+
+#AU adult log
+
+plot_heatmap(
+  dparg_vec = c(133, 137, 141),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_AU_adult_log",
+  dir_path = "../plots/fem_pipeline_results_AU_adult_log/",
+  dataset_replace_string = "CF_EV_"
+)
+
+
+##########
+
+#AU adult combatseq logcpm
+
+plot_heatmap(
+  dparg_vec = c(145, 149, 153),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_AU_adult_combat_logcpm",
+  dir_path = "../plots/fem_pipeline_results_AU_adult_combat_logcpm/",
+  dataset_replace_string = "CF_EV_"
+)
+
+
+##########
+
+#AU adult combatseq logtmm
+
+plot_heatmap(
+  dparg_vec = c(157, 161, 165),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_AU_adult_combat_logtmm",
+  dir_path = "../plots/fem_pipeline_results_AU_adult_combat_logtmm/",
+  dataset_replace_string = "CF_EV_"
+)
