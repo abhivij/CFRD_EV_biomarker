@@ -491,6 +491,27 @@ plot_heatmap(
   dataset_replace_string = "CF_EV_"
 )
 
+plot_common_feature_heatmap(c(169, 170),
+                            results_dir = "../fem_pipeline_results_AU_adult_logcpm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_logcpm_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_logcpm/subset/"
+)
+
+plot_common_feature_heatmap(c(171, 172),
+                            results_dir = "../fem_pipeline_results_AU_adult_logcpm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_logcpm_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_logcpm/subset/"
+)
+
+plot_common_feature_heatmap(c(173, 174),
+                            results_dir = "../fem_pipeline_results_AU_adult_logcpm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_logcpm_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_logcpm/subset/"
+)
+
 
 ##########
 
@@ -504,6 +525,27 @@ plot_heatmap(
   dataset_replace_string = "CF_EV_"
 )
 
+
+plot_common_feature_heatmap(c(175, 176),
+                            results_dir = "../fem_pipeline_results_AU_adult_log_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_log_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_log/subset/"
+)
+
+plot_common_feature_heatmap(c(177, 178),
+                            results_dir = "../fem_pipeline_results_AU_adult_log_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_log_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_log/subset/"
+)
+
+plot_common_feature_heatmap(c(179, 180, 181, 182),
+                            results_dir = "../fem_pipeline_results_AU_adult_log_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_log_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_log/subset/"
+)
 
 ##########
 
