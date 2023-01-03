@@ -1181,8 +1181,7 @@ ggplot(data_of_interest, aes(x = mutation)) +
 ggsave("prediction_pipeline/plots/other_features/mutation_country.jpg")
 
 
-###compare filter_by_expr
-
+###compare transcripts after filter_by_expr b/w AU and DK cohorts
 compare_transcripts_from_filter_by_expr <- function(comparison, classes, combat_seq = FALSE){
   if(combat_seq){
     data <- read.table("data/formatted/umi_counts_combat_seq.csv", header=TRUE, sep=",", row.names=1, skip=0,
@@ -1249,3 +1248,103 @@ compare_transcripts_from_filter_by_expr(comparison = "CFRDVsNGT",
 compare_transcripts_from_filter_by_expr(comparison = "IGTVsNGT", 
                                         classes = c("IGT", "NGT"), 
                                         combat_seq = TRUE)
+
+
+
+comparison = "CFRDVsIGT"
+classes = c("IGT", "CFRD")
+dataset_replace_str = "CF_EV_AU_adult_combat_logtmm_"
+combat_seq = TRUE
+best_features_file_path  = "data/selected_features/best_features_with_is_best.csv"
+
+#compare best transcripts identified from AU with AU+DK filtered transcripts
+compare_filtered_transcripts_with_best_biomarkers <- function(comparison, 
+                                                              classes, 
+                                                              dataset_replace_str,
+                                                              combat_seq = FALSE,
+                                                              best_features_file_path  = "data/selected_features/best_features_with_is_best.csv"){
+  
+  best_features <- read.csv(best_features_file_path)  
+  best_features_sub <- best_features %>%
+    mutate(dataset_id = gsub(dataset_replace_str, "", dataset_id)) %>%
+    filter(is_best == 1, dataset_id == comparison)
+  biomarkers <- strsplit(best_features_sub$biomarkers, split = "|", fixed = TRUE)[[1]]  
+  
+  if(combat_seq){
+    data <- read.table("data/formatted/umi_counts_combat_seq.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                       nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+  } else{
+    data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                       nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+  }
+  phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")
+  output_labels <- phenotype %>%
+    rename("Label" = comparison) %>%
+    filter(Label %in% classes) %>%
+    select(Sample, Label)
+  
+  data <- data[, output_labels$Sample]
+  
+  keep <- edgeR::filterByExpr(data, group = output_labels$Label)
+  data <- data[keep, ]
+  
+  features_with_slash <- rownames(data)[grepl("/", rownames(data), fixed = TRUE)] 
+  for(f in features_with_slash){
+    f_replaced <- gsub("/|-", ".", f) 
+    if(f_replaced %in% biomarkers){
+      biomarkers[biomarkers == f_replaced] = f
+    }
+  }
+  biomarkers <- gsub(".", "-", biomarkers, fixed = TRUE)
+
+  title <- paste("Filtered transcripts against best biomarkers",
+                 gsub("_$", "", gsub("CF_EV_", "", dataset_replace_str)),
+                 " in samples from", sub("Vs", " Vs ", comparison))
+  
+  ggvenn(list("AU + DK filtered" = rownames(data),
+              "Best biomarkers" = biomarkers),
+         stroke_size = 0.1,
+         set_name_size = 4,
+         text_size = 3,
+         fill_color = c("#F8766D", "#00BFC4")) +
+    ggtitle(title) +
+    theme(plot.title = element_text(vjust = - 20, hjust = 0.5))
+  file_name <- paste0("prediction_pipeline/plots/filtered_transcripts_with_best_biomarkers/", 
+                      comparison, "_",
+                      gsub("_$", "", gsub("CF_EV_", "", dataset_replace_str)), 
+                      ".png")
+  ggsave(file_name)
+}
+
+
+compare_filtered_transcripts_with_best_biomarkers(comparison = "CFRDVsIGT",
+                                                  classes = c("IGT", "CFRD"),
+                                                  dataset_replace_str = "CF_EV_AU_adult_combat_logtmm_",
+                                                  combat_seq = TRUE,
+                                                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
+compare_filtered_transcripts_with_best_biomarkers(comparison = "CFRDVsNGT",
+                                                  classes = c("NGT", "CFRD"),
+                                                  dataset_replace_str = "CF_EV_AU_adult_combat_logtmm_",
+                                                  combat_seq = TRUE,
+                                                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
+compare_filtered_transcripts_with_best_biomarkers(comparison = "IGTVsNGT",
+                                                  classes = c("NGT", "IGT"),
+                                                  dataset_replace_str = "CF_EV_AU_adult_combat_logtmm_",
+                                                  combat_seq = TRUE,
+                                                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
+
+compare_filtered_transcripts_with_best_biomarkers(comparison = "CFRDVsIGT",
+                                                  classes = c("IGT", "CFRD"),
+                                                  dataset_replace_str = "CF_EV_AU_adult_logtmm_",
+                                                  combat_seq = FALSE,
+                                                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
+compare_filtered_transcripts_with_best_biomarkers(comparison = "CFRDVsNGT",
+                                                  classes = c("NGT", "CFRD"),
+                                                  dataset_replace_str = "CF_EV_AU_adult_logtmm_",
+                                                  combat_seq = FALSE,
+                                                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
+compare_filtered_transcripts_with_best_biomarkers(comparison = "IGTVsNGT",
+                                                  classes = c("NGT", "IGT"),
+                                                  dataset_replace_str = "CF_EV_AU_adult_logtmm_",
+                                                  combat_seq = FALSE,
+                                                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
