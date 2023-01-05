@@ -578,6 +578,11 @@ create_dim_red_plots(comparison = "CFRDVsIGT",
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
+                     norm = "log_cpm",
+                     shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
                      norm = "log",
                      shownames = FALSE)
 create_dim_red_plots(comparison = "CFRDVsIGT",
@@ -598,6 +603,12 @@ create_dim_red_plots(comparison = "CFRDVsIGT",
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
+                     norm = "log_cpm",
+                     shownames = FALSE,
+                     fill_column = "mutation")
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
                      norm = "log",
                      shownames = FALSE,
                      fill_column = "mutation")
@@ -613,51 +624,80 @@ create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "log_tmm",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "sex")
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     shownames = FALSE,
+                     fill_column = "sex")
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "log",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "sex")
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "non-normalized",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "sex")
 
 ######cohort
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "log_tmm",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "cohort")
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     shownames = FALSE,
+                     fill_column = "cohort")
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "log",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "cohort")
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "non-normalized",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "cohort")
+
 
 ######patient_recruitment_year
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "log_tmm",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "patient_recruitment_year")
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     shownames = FALSE,
+                     fill_column = "patient_recruitment_year")
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "log",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "patient_recruitment_year")
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "non-normalized",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "patient_recruitment_year")
+
 
 
 ######seq_plate
@@ -665,48 +705,114 @@ create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "log_tmm",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "seq_plate")
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     shownames = FALSE,
+                     fill_column = "seq_plate")
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "log",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "seq_plate")
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "non-normalized",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "seq_plate")
+
+
 
 ######seq_miR_library_quality
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "log_tmm",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "seq_miR_library_quality")
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     shownames = FALSE,
+                     fill_column = "seq_miR_library_quality")
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "log",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "seq_miR_library_quality")
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "non-normalized",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "seq_miR_library_quality")
+
+
 
 ######quant_batch
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "log_tmm",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "quant_batch")
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     shownames = FALSE,
+                     fill_column = "quant_batch")
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "log",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "quant_batch")
 create_dim_red_plots(comparison = "CFRDVsIGT",
                      classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
                      dim_red = "UMAP",
                      norm = "non-normalized",
-                     shownames = FALSE)
+                     shownames = FALSE,
+                     fill_column = "quant_batch")
+
+
+#logcpm without combat
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = FALSE, combat_seq_specify_group = FALSE, shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = FALSE, combat_seq_specify_group = FALSE, shownames = FALSE)
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = FALSE, combat_seq_specify_group = FALSE, shownames = FALSE)
+
+#logcpm with combat
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = TRUE, combat_seq_specify_group = FALSE, shownames = FALSE)
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = TRUE, combat_seq_specify_group = FALSE, shownames = FALSE)
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = TRUE, combat_seq_specify_group = FALSE, shownames = FALSE)
