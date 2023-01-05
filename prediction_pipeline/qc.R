@@ -1313,7 +1313,7 @@ compare_filtered_transcripts_with_best_biomarkers <- function(comparison,
                       comparison, "_",
                       gsub("_$", "", gsub("CF_EV_", "", dataset_replace_str)), 
                       ".png")
-  ggsave(file_name)
+  ggsave(file_name, units = "cm", height = 20, width = 30)
 }
 
 
@@ -1348,3 +1348,38 @@ compare_filtered_transcripts_with_best_biomarkers(comparison = "IGTVsNGT",
                                                   dataset_replace_str = "CF_EV_AU_adult_logtmm_",
                                                   combat_seq = FALSE,
                                                   best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
+
+
+
+compare_filtered_transcripts_with_best_biomarkers(comparison = "CFRDVsIGT",
+                                                  classes = c("IGT", "CFRD"),
+                                                  dataset_replace_str = "CF_EV_AU_adult_combat_logcpm_",
+                                                  combat_seq = TRUE,
+                                                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
+compare_filtered_transcripts_with_best_biomarkers(comparison = "CFRDVsNGT",
+                                                  classes = c("NGT", "CFRD"),
+                                                  dataset_replace_str = "CF_EV_AU_adult_combat_logcpm_",
+                                                  combat_seq = TRUE,
+                                                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
+compare_filtered_transcripts_with_best_biomarkers(comparison = "IGTVsNGT",
+                                                  classes = c("NGT", "IGT"),
+                                                  dataset_replace_str = "CF_EV_AU_adult_combat_logcpm_",
+                                                  combat_seq = TRUE,
+                                                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
+
+compare_filtered_transcripts_with_best_biomarkers(comparison = "CFRDVsIGT",
+                                                  classes = c("IGT", "CFRD"),
+                                                  dataset_replace_str = "CF_EV_AU_adult_logcpm_",
+                                                  combat_seq = FALSE,
+                                                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
+compare_filtered_transcripts_with_best_biomarkers(comparison = "CFRDVsNGT",
+                                                  classes = c("NGT", "CFRD"),
+                                                  dataset_replace_str = "CF_EV_AU_adult_logcpm_",
+                                                  combat_seq = FALSE,
+                                                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
+compare_filtered_transcripts_with_best_biomarkers(comparison = "IGTVsNGT",
+                                                  classes = c("NGT", "IGT"),
+                                                  dataset_replace_str = "CF_EV_AU_adult_logcpm_",
+                                                  combat_seq = FALSE,
+                                                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv")
+
