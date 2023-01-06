@@ -98,3 +98,36 @@ output_labels <- phenotype %>%
 data.combat_seq <- ComBat_seq(counts = as.matrix(data),
                               batch = factor(output_labels$country))
 write.csv(data.combat_seq, "data/formatted/umi_counts_combat_seq.csv")
+
+
+
+#create combined filter (AU + DK) filtered together + combatseq datasets
+
+create_combined_filter_with_combat_seq_files <- function(comparison, classes){
+  data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                     nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+  phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")  
+  
+  output_labels <- phenotype %>%
+    rename("Label" = comparison) %>%
+    filter(Label %in% classes, age_group == "adult") %>%
+    dplyr::select(Sample, Label, country, age_group)
+  
+  data <- data[, output_labels$Sample]
+
+  keep <- edgeR::filterByExpr(data, group = output_labels$Label)
+  data <- data[keep, ]
+
+  data.combat_seq <- ComBat_seq(counts = as.matrix(data),
+                                batch = factor(output_labels$country))
+  file_path <- paste0("data/formatted/", comparison, "_umi_counts_combat_seq.csv")
+  write.csv(data.combat_seq, file_path)
+}
+
+create_combined_filter_with_combat_seq_files(comparison = "CFRDVsIGT", 
+                                             classes = c("CFRD", "IGT"))
+create_combined_filter_with_combat_seq_files(comparison = "CFRDVsNGT", 
+                                             classes = c("CFRD", "NGT"))
+create_combined_filter_with_combat_seq_files(comparison = "IGTVsNGT", 
+                                             classes = c("IGT", "NGT"))
+
