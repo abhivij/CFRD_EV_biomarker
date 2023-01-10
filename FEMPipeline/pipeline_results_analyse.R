@@ -5,7 +5,11 @@ library(ComplexHeatmap)
 source("dataset_pipeline_arguments.R")
 source("utils.R")
 
-
+dparg_vec = c(199, 203, 207)
+dataset_pipeline_arguments = dataset_pipeline_arguments
+results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logtmm"
+dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logtmm/"
+dataset_replace_string = "CF_EV_"
 plot_heatmap <- function(dparg_vec,
                          dataset_pipeline_arguments = dataset_pipeline_arguments,
                          results_dir = "fem_pipeline_results",
@@ -559,6 +563,27 @@ plot_heatmap(
   dataset_replace_string = "CF_EV_"
 )
 
+plot_common_feature_heatmap(c(183, 184, 185, 186),
+                            results_dir = "../fem_pipeline_results_AU_adult_combat_logcpm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_logcpm_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_combat_logcpm/subset/"
+)
+
+plot_common_feature_heatmap(c(187, 188),
+                            results_dir = "../fem_pipeline_results_AU_adult_combat_logcpm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_logcpm_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_combat_logcpm/subset/"
+)
+
+plot_common_feature_heatmap(c(189, 190),
+                            results_dir = "../fem_pipeline_results_AU_adult_combat_logcpm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_logcpm_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_combat_logcpm/subset/"
+)
+
 
 ##########
 
@@ -569,5 +594,50 @@ plot_heatmap(
   dataset_pipeline_arguments = dataset_pipeline_arguments,
   results_dir = "../fem_pipeline_results_AU_adult_combat_logtmm",
   dir_path = "../plots/fem_pipeline_results_AU_adult_combat_logtmm/",
+  dataset_replace_string = "CF_EV_"
+)
+
+plot_common_feature_heatmap(c(191, 192, 193, 194),
+                            results_dir = "../fem_pipeline_results_AU_adult_combat_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_logtmm_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_combat_logtmm/subset/"
+)
+
+plot_common_feature_heatmap(c(195, 196),
+                            results_dir = "../fem_pipeline_results_AU_adult_combat_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_logtmm_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_combat_logtmm/subset/"
+)
+
+plot_common_feature_heatmap(c(197, 198),
+                            results_dir = "../fem_pipeline_results_AU_adult_combat_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_",
+                            heatmap_file_name = "AU_logtmm_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_combat_logtmm/subset/"
+)
+
+##################################################
+
+#AU adult prefiltered combatseq logtmm
+
+plot_heatmap(
+  dparg_vec = c(199, 203, 207),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logtmm",
+  dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logtmm/",
+  dataset_replace_string = "CF_EV_"
+)
+
+
+
+#AU adult prefiltered combatseq logcpm
+
+plot_heatmap(
+  dparg_vec = c(211, 215, 219),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logcpm",
+  dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logcpm/",
   dataset_replace_string = "CF_EV_"
 )

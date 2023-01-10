@@ -145,7 +145,8 @@ create_data_subsets <- function(dparg_id,
                                 subset_file_name_substr = "common3",
                                 combat = FALSE,
                                 create_all_common = TRUE,
-                                dataset_pipeline_arguments = dataset_pipeline_arguments){
+                                dataset_pipeline_arguments = dataset_pipeline_arguments,
+                                data_file_path = NA){
   
   ds <- dataset_pipeline_arguments[[dparg_id]]
   dataset_id <- paste(ds$dataset_id, ds$classification_criteria, sep = "_")
@@ -159,12 +160,13 @@ create_data_subsets <- function(dparg_id,
     filter(datasetid == dataset_id) %>%
     filter(miniter_feature_presence == min_iter_feature_presence)
   
-  if(!combat){
-    data_file_path = "../data/formatted/umi_counts.csv"  
-  } else{
-    data_file_path = "../data/formatted/umi_counts_combat_seq.csv"
+  if(is.na(data_file_path)){
+    if(!combat){
+      data_file_path = "../data/formatted/umi_counts.csv"  
+    } else{
+      data_file_path = "../data/formatted/umi_counts_combat_seq.csv"
+    }    
   }
-  
   
   ######create new data subsets
   
@@ -862,4 +864,102 @@ create_data_subsets(dparg_id = 165,
                     subset_creation_criteria <- list("i"= c("mrmr75")),
                     subset_file_name_substr = "mrmr75",
                     create_all_common = FALSE, combat = TRUE)
+
 #######################
+
+#AU adult prefiltered combat seq log tmm 
+#CFRDVsIGT
+explore_common_features(dparg_id = 199,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("mrmr100", "mrmr75", "wilcoxontest", "mrmr10"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logtmm",
+                        dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logtmm/common_features_upset")
+
+#CFRDVsNGT
+explore_common_features(dparg_id = 203,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("mrmr75", "mrmr100", "mrmr10", "RF_RFE"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logtmm",
+                        dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logtmm/common_features_upset")
+
+#IGTVsNGT
+explore_common_features(dparg_id = 207,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("RF_RFE", "mrmr75", "mrmr100", "mrmr10"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logtmm",
+                        dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logtmm/common_features_upset")
+
+#######################
+
+#AU adult prefiltered combat seq log cpm 
+#CFRDVsIGT
+explore_common_features(dparg_id = 211,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("mrmr75", "ranger_pos_impu_cor", "ga_rf", "mrmr100"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logcpm",
+                        dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logcpm/common_features_upset")
+
+#CFRDVsNGT
+explore_common_features(dparg_id = 215,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("mrmr75", "mrmr100", "mrmr_perc50", "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logcpm",
+                        dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logcpm/common_features_upset")
+
+#IGTVsNGT
+explore_common_features(dparg_id = 219,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("mrmr100", "mrmr10", "wilcoxontest", "mrmr75", "RF_RFE"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logcpm",
+                        dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logcpm/common_features_upset")
+
+
+create_data_subsets(dparg_id = 199,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/CFRDVsIGT_umi_counts_combat_seq.csv")
+create_data_subsets(dparg_id = 203,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/CFRDVsNGT_umi_counts_combat_seq.csv")
+create_data_subsets(dparg_id = 207,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/IGTVsNGT_umi_counts_combat_seq.csv")
+
+create_data_subsets(dparg_id = 211,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/CFRDVsIGT_umi_counts_combat_seq.csv")
+create_data_subsets(dparg_id = 215,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/CFRDVsNGT_umi_counts_combat_seq.csv")
+create_data_subsets(dparg_id = 219,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/IGTVsNGT_umi_counts_combat_seq.csv")
