@@ -630,6 +630,24 @@ plot_heatmap(
   dataset_replace_string = "CF_EV_"
 )
 
+plot_common_feature_heatmap(c(223, 224),
+                            results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_prefiltered_adult_combat",
+                            heatmap_file_name = "AU_logtmm_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logtmm/subset/"
+)
+plot_common_feature_heatmap(c(225, 226),
+                            results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_prefiltered_adult_combat",
+                            heatmap_file_name = "AU_logtmm_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logtmm/subset/"
+)
+plot_common_feature_heatmap(c(227, 228),
+                            results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logtmm_subset",
+                            dataset_replace_string = "CF_EV_AU_prefiltered_adult_combat",
+                            heatmap_file_name = "AU_logtmm_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logtmm/subset/"
+)
 
 
 #AU adult prefiltered combatseq logcpm
@@ -640,4 +658,23 @@ plot_heatmap(
   results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logcpm",
   dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logcpm/",
   dataset_replace_string = "CF_EV_"
+)
+
+plot_common_feature_heatmap(c(229, 230),
+                            results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logcpm_subset",
+                            dataset_replace_string = "CF_EV_AU_prefiltered_adult_combat",
+                            heatmap_file_name = "AU_logcpm_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logcpm/subset/"
+)
+plot_common_feature_heatmap(c(231, 232),
+                            results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logcpm_subset",
+                            dataset_replace_string = "CF_EV_AU_prefiltered_adult_combat",
+                            heatmap_file_name = "AU_logcpm_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logcpm/subset/"
+)
+plot_common_feature_heatmap(c(233, 234),
+                            results_dir = "../fem_pipeline_results_AU_prefiltered_adult_combat_logcpm_subset",
+                            dataset_replace_string = "CF_EV_AU_prefiltered_adult_combat",
+                            heatmap_file_name = "AU_logcpm_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logcpm/subset/"
 )
