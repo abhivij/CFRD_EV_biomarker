@@ -10,19 +10,20 @@ source("prediction_pipeline/cm_rf.R")
 
 ######################################################################
 
-
-comparison = "CFRDVsNGT"
-classes = c("NGT", "CFRD")
+comparison = "IGTVsNGT"
+classes = c("NGT", "IGT")
 best_features_file_path  = "data/selected_features/best_features_with_is_best.csv"
 only_adults = TRUE
 train_cohort_country = "AU"
 use_phenotype_info = FALSE
-dataset_replace_str = "CF_EV_AU_adult_logcpm_"
-result_file_dir = "data/prediction_result_adult_AU/"
-result_file_name = "CFRDVsNGT.csv"
+dataset_replace_str = "CF_EV_AU_adult_combat_logcpm_"
+result_file_dir = "data/prediction_result_adult_AU_adult_combat_logcpm/"
+result_file_name = "IGTVsNGT.csv"
 perform_filter = TRUE
 norm = "log_cpm"
+model = "log_reg"
 upsample = FALSE
+combat = FALSE
 
 combined_pipeline <- function(comparison, classes, 
                      best_features_file_path,
@@ -33,9 +34,12 @@ combined_pipeline <- function(comparison, classes,
                      result_file_dir = "data/prediction_result/",
                      result_file_name = "CFRDVsIGT.csv",
                      perform_filter = TRUE,
+                     combined_filter = FALSE,
                      norm = "norm_log_tmm",
                      model = "rf",
-                     upsample = FALSE){
+                     upsample = FALSE,
+                     combat = FALSE,
+                     data_file_path = NA){
   
   best_features <- read.csv(best_features_file_path)  
   best_features_sub <- best_features %>%
@@ -44,7 +48,14 @@ combined_pipeline <- function(comparison, classes,
   
   biomarkers <- strsplit(best_features_sub$biomarkers, split = "|", fixed = TRUE)[[1]]  
   
-  data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+  if(is.na(data_file_path)){
+    if(!combat){
+      data_file_path = "data/formatted/umi_counts.csv"  
+    } else{
+      data_file_path = "data/formatted/umi_counts_combat_seq.csv"
+    }    
+  }
+  data <- read.table(data_file_path, header=TRUE, sep=",", row.names=1, skip=0,
                      nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
   phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")
   
@@ -135,10 +146,39 @@ combined_pipeline <- function(comparison, classes,
     dplyr::select(Sample, Label)
   
   #currently train.tra_data, test.tra_data format : (transcripts x samples)
+  train.tra_data <- as.data.frame(t(as.matrix(train.tra_data)))
+  test.tra_data <- as.data.frame(t(as.matrix(test.tra_data)))  
+  #now train.tra_data, test.tra_data format : (samples x transcripts)
+  
+  #get best biomarkers only
+  features_with_slash <- colnames(train.tra_data)[grepl("/", colnames(train.tra_data), fixed = TRUE)] 
+  for(f in features_with_slash){
+    f_replaced <- gsub("/|-", ".", f) 
+    if(f_replaced %in% biomarkers){
+      biomarkers[biomarkers == f_replaced] = f
+    }
+  }
+  biomarkers <- gsub(".", "-", biomarkers, fixed = TRUE)
+  
+  train.tra_data <- train.tra_data[, biomarkers]
+  test.tra_data <- test.tra_data[, biomarkers]
+  
+  train.tra_data <- as.data.frame(t(as.matrix(train.tra_data)))
+  test.tra_data <- as.data.frame(t(as.matrix(test.tra_data)))  
+  
+  #currently train.tra_data, test.tra_data format : (transcripts x samples)
   if(perform_filter){
-    keep <- edgeR::filterByExpr(train.tra_data, group = train.output_labels$Label)
-    train.tra_data <- train.tra_data[keep, ]
-    test.tra_data <- test.tra_data[keep, ]  
+    if(combined_filter){
+      data <- cbind(train.tra_data, test.tra_data)
+      keep <- edgeR::filterByExpr(data, group = c(train.output_labels$Label, test.output_labels$Label))
+      data <- data[keep, ]
+      train.tra_data <- data[, train.output_labels$Sample]
+      test.tra_data <- data[, test.output_labels$Sample]
+    }else{
+      keep <- edgeR::filterByExpr(train.tra_data, group = train.output_labels$Label)
+      train.tra_data <- train.tra_data[keep, ]
+      test.tra_data <- test.tra_data[keep, ]      
+    }
   }
   
   if(norm == "norm_log_tmm"){
@@ -194,20 +234,7 @@ combined_pipeline <- function(comparison, classes,
     test.tra_data <- as.data.frame(t(as.matrix(test.tra_data)))  
   }
   
-  #now train.tra_data, test.tra_data format : (samples x transcripts)
-  
-  #get best biomarkers only
-  features_with_slash <- colnames(train.tra_data)[grepl("/", colnames(train.tra_data), fixed = TRUE)] 
-  for(f in features_with_slash){
-    f_replaced <- gsub("/|-", ".", f) 
-    if(f_replaced %in% biomarkers){
-      biomarkers[biomarkers == f_replaced] = f
-    }
-  }
-  biomarkers <- gsub(".", "-", biomarkers, fixed = TRUE)
-  
-  train.tra_data <- train.tra_data[, biomarkers]
-  test.tra_data <- test.tra_data[, biomarkers]
+
   
   if(use_phenotype_info){
     #normalize train.pheno_data, test.pheno_data
@@ -239,11 +266,10 @@ combined_pipeline <- function(comparison, classes,
   } else if(model == "l1_log_reg"){
     result_df <- log_reg_model(train.data, train.output_labels, test.data, test.output_labels,
                                classes, regularize = "l1")
+  } else if(model == "log_reg"){
+    result_df <- log_reg_model(train.data, train.output_labels, test.data, test.output_labels,
+                               classes)
   }
-  
-  # 
-
-
   
   if(!dir.exists(result_file_dir)){
     dir.create(result_file_dir, recursive = TRUE)
@@ -1477,4 +1503,284 @@ show_metrics(comparison = "IGTVsNGT",
              classes = c("NGT", "IGT"),
              result_file_path = "data/prediction_result_adult_AU_adult_log_with_pheno/IGTVsNGT.csv",
              metric_output_file_path = "data/prediction_result_adult_AU_adult_log_with_pheno/metrics.csv")
+
+#######################
+
+combined_pipeline(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logcpm_",
+                  result_file_dir = "data/prediction_result_adult_AU_adult_combat_logcpm/",
+                  result_file_name = "CFRDVsIGT.csv",
+                  perform_filter = TRUE,
+                  norm = "log_cpm",
+                  model = "sigmoid_svm",
+                  upsample = FALSE,
+                  combat = TRUE)
+combined_pipeline(comparison = "CFRDVsNGT", classes = c("NGT", "CFRD"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logcpm_",
+                  result_file_dir = "data/prediction_result_adult_AU_adult_combat_logcpm/",
+                  result_file_name = "CFRDVsNGT.csv",
+                  perform_filter = TRUE,
+                  norm = "log_cpm",
+                  model = "sigmoid_svm",
+                  upsample = FALSE,
+                  combat = TRUE)
+combined_pipeline(comparison = "IGTVsNGT", classes = c("NGT", "IGT"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logcpm_",
+                  result_file_dir = "data/prediction_result_adult_AU_adult_combat_logcpm/",
+                  result_file_name = "IGTVsNGT.csv",
+                  perform_filter = TRUE,
+                  norm = "log_cpm",
+                  model = "log_reg",
+                  upsample = FALSE,
+                  combat = TRUE)
+
+show_metrics(comparison = "CFRDVsIGT",
+             classes = c("IGT", "CFRD"),
+             result_file_path = "data/prediction_result_adult_AU_adult_combat_logcpm/CFRDVsIGT.csv",
+             metric_output_file_path = "data/prediction_result_adult_AU_adult_combat_logcpm/metrics.csv")
+show_metrics(comparison = "CFRDVsNGT",
+             classes = c("NGT", "CFRD"),
+             result_file_path = "data/prediction_result_adult_AU_adult_combat_logcpm/CFRDVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_adult_AU_adult_combat_logcpm/metrics.csv")
+show_metrics(comparison = "IGTVsNGT",
+             classes = c("NGT", "IGT"),
+             result_file_path = "data/prediction_result_adult_AU_adult_combat_logcpm/IGTVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_adult_AU_adult_combat_logcpm/metrics.csv")
+
+#######################
+
+combined_pipeline(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logtmm_",
+                  result_file_dir = "data/prediction_result_adult_AU_adult_combat_logtmm/",
+                  result_file_name = "CFRDVsIGT.csv",
+                  perform_filter = TRUE,
+                  norm = "log_tmm",
+                  model = "rf",
+                  upsample = FALSE,
+                  combat = TRUE)
+combined_pipeline(comparison = "CFRDVsNGT", classes = c("NGT", "CFRD"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logtmm_",
+                  result_file_dir = "data/prediction_result_adult_AU_adult_combat_logtmm/",
+                  result_file_name = "CFRDVsNGT.csv",
+                  perform_filter = TRUE,
+                  norm = "log_tmm",
+                  model = "l2_log_reg",
+                  upsample = FALSE,
+                  combat = TRUE)
+combined_pipeline(comparison = "IGTVsNGT", classes = c("NGT", "IGT"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logtmm_",
+                  result_file_dir = "data/prediction_result_adult_AU_adult_combat_logtmm/",
+                  result_file_name = "IGTVsNGT.csv",
+                  perform_filter = TRUE,
+                  norm = "log_tmm",
+                  model = "radial_svm",
+                  upsample = FALSE,
+                  combat = TRUE)
+
+show_metrics(comparison = "CFRDVsIGT",
+             classes = c("IGT", "CFRD"),
+             result_file_path = "data/prediction_result_adult_AU_adult_combat_logtmm/CFRDVsIGT.csv",
+             metric_output_file_path = "data/prediction_result_adult_AU_adult_combat_logtmm/metrics.csv")
+show_metrics(comparison = "CFRDVsNGT",
+             classes = c("NGT", "CFRD"),
+             result_file_path = "data/prediction_result_adult_AU_adult_combat_logtmm/CFRDVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_adult_AU_adult_combat_logtmm/metrics.csv")
+show_metrics(comparison = "IGTVsNGT",
+             classes = c("NGT", "IGT"),
+             result_file_path = "data/prediction_result_adult_AU_adult_combat_logtmm/IGTVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_adult_AU_adult_combat_logtmm/metrics.csv")
+
+#######################
+
+combined_pipeline(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logtmm_",
+                  result_file_dir = "data/prediction_result_adult_AU_adult_combat_logtmm_onefilter/",
+                  result_file_name = "CFRDVsIGT.csv",
+                  perform_filter = TRUE,
+                  combined_filter = TRUE,
+                  norm = "log_tmm",
+                  model = "rf",
+                  upsample = FALSE,
+                  combat = TRUE)
+combined_pipeline(comparison = "CFRDVsNGT", classes = c("NGT", "CFRD"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logtmm_",
+                  result_file_dir = "data/prediction_result_adult_AU_adult_combat_logtmm_onefilter/",
+                  result_file_name = "CFRDVsNGT.csv",
+                  perform_filter = TRUE,
+                  combined_filter = TRUE,
+                  norm = "log_tmm",
+                  model = "l2_log_reg",
+                  upsample = FALSE,
+                  combat = TRUE)
+combined_pipeline(comparison = "IGTVsNGT", classes = c("NGT", "IGT"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logtmm_",
+                  result_file_dir = "data/prediction_result_adult_AU_adult_combat_logtmm_onefilter/",
+                  result_file_name = "IGTVsNGT.csv",
+                  perform_filter = TRUE,
+                  combined_filter = TRUE,
+                  norm = "log_tmm",
+                  model = "radial_svm",
+                  upsample = FALSE,
+                  combat = TRUE)
+
+show_metrics(comparison = "CFRDVsIGT",
+             classes = c("IGT", "CFRD"),
+             result_file_path = "data/prediction_result_adult_AU_adult_combat_logtmm_onefilter/CFRDVsIGT.csv",
+             metric_output_file_path = "data/prediction_result_adult_AU_adult_combat_logtmm_onefilter/metrics.csv")
+show_metrics(comparison = "CFRDVsNGT",
+             classes = c("NGT", "CFRD"),
+             result_file_path = "data/prediction_result_adult_AU_adult_combat_logtmm_onefilter/CFRDVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_adult_AU_adult_combat_logtmm_onefilter/metrics.csv")
+show_metrics(comparison = "IGTVsNGT",
+             classes = c("NGT", "IGT"),
+             result_file_path = "data/prediction_result_adult_AU_adult_combat_logtmm_onefilter/IGTVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_adult_AU_adult_combat_logtmm_onefilter/metrics.csv")
+
+
+#######################
+
+combined_pipeline(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_prefiltered_adult_combat_logtmm_",
+                  result_file_dir = "data/prediction_result_AU_prefiltered_adult_combat_logtmm/",
+                  result_file_name = "CFRDVsIGT.csv",
+                  perform_filter = FALSE,
+                  norm = "log_tmm",
+                  model = "rf",
+                  upsample = FALSE,
+                  data_file_path = "data/formatted/CFRDVsIGT_umi_counts_combat_seq.csv")
+combined_pipeline(comparison = "CFRDVsNGT", classes = c("NGT", "CFRD"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logtmm_",
+                  result_file_dir = "data/prediction_result_AU_prefiltered_adult_combat_logtmm/",
+                  result_file_name = "CFRDVsNGT.csv",
+                  perform_filter = FALSE,
+                  norm = "log_tmm",
+                  model = "l2_log_reg",
+                  upsample = FALSE,
+                  data_file_path = "data/formatted/CFRDVsNGT_umi_counts_combat_seq.csv")
+combined_pipeline(comparison = "IGTVsNGT", classes = c("NGT", "IGT"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logtmm_",
+                  result_file_dir = "data/prediction_result_AU_prefiltered_adult_combat_logtmm/",
+                  result_file_name = "IGTVsNGT.csv",
+                  perform_filter = FALSE,
+                  norm = "log_tmm",
+                  model = "radial_svm",
+                  upsample = FALSE,
+                  data_file_path = "data/formatted/IGTVsNGT_umi_counts_combat_seq.csv")
+
+show_metrics(comparison = "CFRDVsIGT",
+             classes = c("IGT", "CFRD"),
+             result_file_path = "data/prediction_result_AU_prefiltered_adult_combat_logtmm/CFRDVsIGT.csv",
+             metric_output_file_path = "data/prediction_result_AU_prefiltered_adult_combat_logtmm/metrics.csv")
+show_metrics(comparison = "CFRDVsNGT",
+             classes = c("NGT", "CFRD"),
+             result_file_path = "data/prediction_result_AU_prefiltered_adult_combat_logtmm/CFRDVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_AU_prefiltered_adult_combat_logtmm/metrics.csv")
+show_metrics(comparison = "IGTVsNGT",
+             classes = c("NGT", "IGT"),
+             result_file_path = "data/prediction_result_AU_prefiltered_adult_combat_logtmm/IGTVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_AU_prefiltered_adult_combat_logtmm/metrics.csv")
+
+
+#######################
+
+combined_pipeline(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_prefiltered_adult_combat_logcpm_",
+                  result_file_dir = "data/prediction_result_AU_prefiltered_adult_combat_logcpm/",
+                  result_file_name = "CFRDVsIGT.csv",
+                  perform_filter = FALSE,
+                  norm = "log_cpm",
+                  model = "rf",
+                  upsample = FALSE,
+                  data_file_path = "data/formatted/CFRDVsIGT_umi_counts_combat_seq.csv")
+combined_pipeline(comparison = "CFRDVsNGT", classes = c("NGT", "CFRD"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logcpm_",
+                  result_file_dir = "data/prediction_result_AU_prefiltered_adult_combat_logcpm/",
+                  result_file_name = "CFRDVsNGT.csv",
+                  perform_filter = FALSE,
+                  norm = "log_cpm",
+                  model = "rf",
+                  upsample = FALSE,
+                  data_file_path = "data/formatted/CFRDVsNGT_umi_counts_combat_seq.csv")
+combined_pipeline(comparison = "IGTVsNGT", classes = c("NGT", "IGT"), 
+                  best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                  only_adults = TRUE,
+                  train_cohort_country = "AU",
+                  use_phenotype_info = FALSE,
+                  dataset_replace_str = "CF_EV_AU_adult_combat_logcpm_",
+                  result_file_dir = "data/prediction_result_AU_prefiltered_adult_combat_logcpm/",
+                  result_file_name = "IGTVsNGT.csv",
+                  perform_filter = FALSE,
+                  norm = "log_cpm",
+                  model = "sigmoid_svm",
+                  upsample = FALSE,
+                  data_file_path = "data/formatted/IGTVsNGT_umi_counts_combat_seq.csv")
+
+show_metrics(comparison = "CFRDVsIGT",
+             classes = c("IGT", "CFRD"),
+             result_file_path = "data/prediction_result_AU_prefiltered_adult_combat_logcpm/CFRDVsIGT.csv",
+             metric_output_file_path = "data/prediction_result_AU_prefiltered_adult_combat_logcpm/metrics.csv")
+show_metrics(comparison = "CFRDVsNGT",
+             classes = c("NGT", "CFRD"),
+             result_file_path = "data/prediction_result_AU_prefiltered_adult_combat_logcpm/CFRDVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_AU_prefiltered_adult_combat_logcpm/metrics.csv")
+show_metrics(comparison = "IGTVsNGT",
+             classes = c("NGT", "IGT"),
+             result_file_path = "data/prediction_result_AU_prefiltered_adult_combat_logcpm/IGTVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_AU_prefiltered_adult_combat_logcpm/metrics.csv")
 
