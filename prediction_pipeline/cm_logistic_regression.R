@@ -1,6 +1,12 @@
 # label.train <- output_labels.train
 # label.test <- output_labels.test
 # regularize <- "l2"
+# 
+# data.train <- train.data
+# label.train <- train.output_labels
+# data.test <- test.data
+# label.test <- test.output_labels
+# regularize <- NA
 
 log_reg_model <- function(data.train, label.train, data.test, label.test, 
                           classes, regularize = NA, ...){
@@ -13,11 +19,12 @@ log_reg_model <- function(data.train, label.train, data.test, label.test,
   } else {
     model_name <- paste("L2 Regularized", model_name)
   }
+  print(model_name)
   
   try({
     label.train$Label <- ifelse(label.train$Label == classes[1], 0, 1)
     label.test$Label <- ifelse(label.test$Label == classes[1], 0, 1)
-    
+    set.seed(1000)
     if (!is.na(regularize)) {
       #alpha = 1 => l1 regularization (lasso)
       #alpha = 0 => l2 regularization (ridge)
@@ -27,7 +34,6 @@ log_reg_model <- function(data.train, label.train, data.test, label.test,
       else {
         alpha <- 0
       }
-      set.seed(1000)
       model <- glmnet::cv.glmnet(as.matrix(data.train), label.train$Label, alpha = alpha, family = 'binomial', type.measure = 'mse')
       # plot(model)
       
@@ -54,22 +60,45 @@ log_reg_model <- function(data.train, label.train, data.test, label.test,
       pred_prob <- predict(model, newx = as.matrix(data.test), s = lambda_1se, type = 'response')
       pred <- ifelse(pred_prob > best_cut_off, 1, 0)
       mean(pred == label.test$Label)
-    }
-    else {
+      
+      pred_prob.train <- pred_prob.train[,1]
+      pred.train <- pred.train[,1]
+      pred_prob <- pred_prob[,1]
+      pred <- pred[,1]
+    } else {
       model <- glm(label.train$Label ~., data = data.train, family = binomial)
+      
+      best_acc <- -1
+      best_cut_off <- 0.5
+      for(cut_off in c(0.5, seq(0.2, 0.8, 0.01))){
+        print(cut_off)
+        pred_prob.train <- predict(model, newdata = data.train, type = 'response')
+        pred.train <- ifelse(pred_prob.train > cut_off, 1, 0)
+        acc <- mean(pred.train == label.train$Label)
+        if(acc > best_acc){
+          best_acc <- acc
+          best_cut_off <- cut_off
+        }
+      }
+      
+      pred_prob.train <- predict(model, newdata = data.train, type = 'response')
+      pred.train <- ifelse(pred_prob.train > best_cut_off, 1, 0)
+      mean(pred.train == label.train$Label)
+      
       pred_prob <- predict(model, newdata = data.test, type = 'response')
-      pred <- ifelse(pred_prob > 0.5, 1, 0)
+      pred <- ifelse(pred_prob > best_cut_off, 1, 0)
+      mean(pred == label.test$Label)
     }
-
+    
     result_df.train <- data.frame("TrueLabel" = ifelse(label.train$Label == 0, classes[1], classes[2]),
-                            "Pred_prob" = pred_prob.train[,1],
-                            "PredictedLabel" = pred.train[,1],
+                            "Pred_prob" = pred_prob.train,
+                            "PredictedLabel" = pred.train,
                             "Type" = "train",
                             "cutoff" = best_cut_off)
 
     result_df.test <- data.frame("TrueLabel" = ifelse(label.test$Label == 0, classes[1], classes[2]),
-                             "Pred_prob" = pred_prob[,1],
-                             "PredictedLabel" = pred[,1],
+                             "Pred_prob" = pred_prob,
+                             "PredictedLabel" = pred,
                              "Type" = "test",
                              "cutoff" = best_cut_off)
     
