@@ -816,3 +816,142 @@ create_dim_red_plots(comparison = "IGTVsNGT",
                      dim_red = "UMAP",
                      norm = "log_cpm",
                      combat_seq = TRUE, combat_seq_specify_group = FALSE, shownames = FALSE)
+
+
+
+
+
+#logtmm without combat
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     combat_seq = FALSE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logtmm/")
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     combat_seq = FALSE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logtmm/")
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     combat_seq = FALSE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logtmm/")
+
+#logtmm with combat
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     combat_seq = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logtmm/")
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     combat_seq = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logtmm/")
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     combat_seq = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logtmm/")
+
+#logtmm with combat and best biomarkers
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     combat_seq = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logtmm/",
+                     best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                     dataset_replace_str = "CF_EV_AU_prefiltered_adult_combat_logtmm_")
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     combat_seq = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logtmm/",
+                     best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                     dataset_replace_str = "CF_EV_AU_prefiltered_adult_combat_logtmm_")
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_tmm",
+                     combat_seq = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logtmm/",
+                     best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                     dataset_replace_str = "CF_EV_AU_prefiltered_adult_combat_logtmm_")
+
+
+
+
+#logcpm without combat
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = FALSE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logcpm/")
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = FALSE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logcpm/")
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = FALSE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logcpm/")
+
+#logcpm with combat
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logcpm/")
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logcpm/")
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logcpm/")
+
+#logcpm with combat and best biomarkers
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logcpm/",
+                     best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                     dataset_replace_str = "CF_EV_AU_prefiltered_adult_combat_logcpm_")
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logcpm/",
+                     best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                     dataset_replace_str = "CF_EV_AU_prefiltered_adult_combat_logcpm_")
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combat_seq = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logcpm/",
+                     best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
+                     dataset_replace_str = "CF_EV_AU_prefiltered_adult_combat_logcpm_")
