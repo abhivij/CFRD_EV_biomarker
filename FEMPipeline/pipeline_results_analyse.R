@@ -678,3 +678,66 @@ plot_common_feature_heatmap(c(233, 234),
                             heatmap_file_name = "AU_logcpm_IGTVsNGT.png",
                             plot_dir_path = "../plots/fem_pipeline_results_AU_prefiltered_adult_combat_logcpm/subset/"
 )
+
+##########
+
+#adult log
+
+plot_heatmap(
+  dparg_vec = c(235, 239, 243),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_adult_log",
+  dir_path = "../plots/fem_pipeline_results_adult_log/",
+  dataset_replace_string = "CF_EV_"
+)
+
+
+##########
+
+#adult log_cpm
+
+plot_heatmap(
+  dparg_vec = c(247, 251, 255),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_adult_log_cpm",
+  dir_path = "../plots/fem_pipeline_results_adult_log_cpm/",
+  dataset_replace_string = "CF_EV_"
+)
+
+
+##########
+
+#adult log_tmm
+
+plot_heatmap(
+  dparg_vec = c(259, 263, 267),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_adult_log_tmm",
+  dir_path = "../plots/fem_pipeline_results_adult_log_tmm/",
+  dataset_replace_string = "CF_EV_"
+)
+
+
+##########
+
+#adult combat+log_cpm
+
+plot_heatmap(
+  dparg_vec = c(271, 275, 279),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_adult_combat_log_cpm",
+  dir_path = "../plots/fem_pipeline_results_adult_combat_log_cpm/",
+  dataset_replace_string = "CF_EV_"
+)
+
+##########
+
+#adult combat+log_tmm
+
+plot_heatmap(
+  dparg_vec = c(283, 287, 291),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_adult_combat_log_tmm",
+  dir_path = "../plots/fem_pipeline_results_adult_combat_log_tmm/",
+  dataset_replace_string = "CF_EV_"
+)
