@@ -832,3 +832,28 @@ plot_common_feature_heatmap(c(343, 344, 345, 346),
                             heatmap_file_name = "combat_log_tmm_IGTVsNGT.png",
                             plot_dir_path = "../plots/fem_pipeline_results_adult_combat_log_tmm/subset/"
 )
+
+##########
+
+#adult plsda
+
+plot_heatmap(
+  dparg_vec = c(347, 348, 349),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_adult_log_cpm_plsda",
+  dir_path = "../plots/fem_pipeline_results_adult_log_cpm_plsda/",
+  dataset_replace_string = "CF_EV_"
+)
+
+
+##########
+
+#adult F508del__F508del 
+
+plot_heatmap(
+  dparg_vec = c(350, 354, 358),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_adult_log_cpm_F508del___F508del",
+  dir_path = "../plots/fem_pipeline_results_adult_log_cpm_F508del___F508del/",
+  dataset_replace_string = "CF_EV_"
+)
