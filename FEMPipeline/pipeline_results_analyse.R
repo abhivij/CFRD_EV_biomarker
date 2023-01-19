@@ -857,3 +857,61 @@ plot_heatmap(
   dir_path = "../plots/fem_pipeline_results_adult_log_cpm_F508del___F508del/",
   dataset_replace_string = "CF_EV_"
 )
+
+plot_common_feature_heatmap(c(362, 363, 364, 365),
+                            results_dir = "../fem_pipeline_results_adult_log_cpm_F508del___F508del_subset",
+                            dataset_replace_string = "CF_EV_",
+                            heatmap_file_name = "log_cpm_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_adult_log_cpm_F508del___F508del/subset/"
+)
+plot_common_feature_heatmap(c(366, 367),
+                            results_dir = "../fem_pipeline_results_adult_log_cpm_F508del___F508del_subset",
+                            dataset_replace_string = "CF_EV_",
+                            heatmap_file_name = "log_cpm_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_adult_log_cpm_F508del___F508del/subset/"
+)
+plot_common_feature_heatmap(c(368, 369, 370, 371),
+                            results_dir = "../fem_pipeline_results_adult_log_cpm_F508del___F508del_subset",
+                            dataset_replace_string = "CF_EV_",
+                            heatmap_file_name = "log_cpm_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_adult_log_cpm_F508del___F508del/subset/"
+)
+
+
+##########
+
+#adult seurat normalize and find varible features logtmm
+#pipeline execution not successful
+
+plot_heatmap(
+  dparg_vec = c(372, 376, 380),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+  dir_path = "../plots/fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm/",
+  dataset_replace_string = "CF_EV_"
+)
+
+##########
+
+#adult seurat normalize and find varible features no other norm
+
+plot_heatmap(
+  dparg_vec = c(384, 388, 392),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_adult_seurat3_norm_find_var_none",
+  dir_path = "../plots/fem_pipeline_results_adult_seurat3_norm_find_var_none/",
+  dataset_replace_string = "CF_EV_"
+)
+
+##########
+
+#adult seurat without normalize and find varible features + logtmm
+#pipeline execution not successful
+
+plot_heatmap(
+  dparg_vec = c(396, 400, 404),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_adult_seurat3_log_tmm",
+  dir_path = "../plots/fem_pipeline_results_adult_seurat3_log_tmm/",
+  dataset_replace_string = "CF_EV_"
+)

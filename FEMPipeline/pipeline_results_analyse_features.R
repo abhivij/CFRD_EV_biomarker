@@ -1318,3 +1318,55 @@ create_data_subsets(dparg_id = 358,
                     subset_creation_criteria <- list("i"= c("mrmr75")),
                     subset_file_name_substr = "mrmr75",
                     create_all_common = FALSE, combat = FALSE)
+
+
+
+###########
+###########
+
+#adult seurat normalize and find varible features no other norm
+
+explore_common_features(dparg_id = 384,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("ga_rf", "wilcoxontest", "ranger_pos_impu_cor",
+                                         "t-test", "RF_RFE",
+                                         "mrmr_perc50", "mrmr75"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_adult_seurat3_norm_find_var_none",
+                        dir_path = "../plots/fem_pipeline_results_adult_seurat3_norm_find_var_none/common_features_upset")
+explore_common_features(dparg_id = 388,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("wilcoxontest", "RF_RFE", "t-test", "ga_rf",
+                                         "ranger_pos_impu_cor", "mrmr100"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_adult_seurat3_norm_find_var_none",
+                        dir_path = "../plots/fem_pipeline_results_adult_seurat3_norm_find_var_none/common_features_upset")
+explore_common_features(dparg_id = 392,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("ga_rf", "ranger_pos_impu_cor", "RF_RFE", 
+                                         "t-test", "wilcoxontest", "mrmr75"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_adult_seurat3_norm_find_var_none",
+                        dir_path = "../plots/fem_pipeline_results_adult_seurat3_norm_find_var_none/common_features_upset")
+
+create_data_subsets(dparg_id = 384,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("wilcoxontest")),
+                    subset_file_name_substr = "wilcoxontest",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/umi_counts_seurat3_with_norm_and_find_var_feat.csv")
+create_data_subsets(dparg_id = 388,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("wilcoxontest")),
+                    subset_file_name_substr = "wilcoxontest",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/CFRDVsNGT_umi_counts_combat_seq.csv")
+create_data_subsets(dparg_id = 392,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("ranger_pos_impu_cor")),
+                    subset_file_name_substr = "ranger_pos_impu_cor",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/IGTVsNGT_umi_counts_combat_seq.csv")
