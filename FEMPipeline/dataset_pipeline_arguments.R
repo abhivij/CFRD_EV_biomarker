@@ -5821,5 +5821,627 @@ list(phenotype_file_name = "data/formatted/phenotype.txt",
      filter_expression = expression(age_group == 'adult' & mutation == 'F508del___F508del'),
      norm = "log_cpm",
      fems_to_run = c("all"),
-     random_seed = 2000)
+     random_seed = 2000),
+
+
+#AU+DK seurat3_with_norm_and_find_var_feat + log_tmm norm 
+
+#1
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_log_tmm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_log_tmm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_log_tmm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_log_tmm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("ga_rf")),  
+
+
+#1
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_log_tmm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_log_tmm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_log_tmm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_log_tmm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("ga_rf")),    
+
+
+
+#1
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_log_tmm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_log_tmm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_log_tmm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_log_tmm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("ga_rf")),
+
+
+#AU+DK seurat3_with_norm_and_find_var_feat + none norm 
+
+#1
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_none",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_none",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_none",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_none",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_none",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_none",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_none",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_none",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     fems_to_run = c("ga_rf")),  
+
+
+#1
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_none",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_none",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_none",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_none",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_none",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_none",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_none",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_none",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     fems_to_run = c("ga_rf")),    
+
+
+
+#1
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_none",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_none",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_none",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_none",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_none",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_none",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_with_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_norm_find_var_none",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_norm_find_var_none",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     fems_to_run = c("ga_rf")),
+
+
+#AU+DK seurat3_without_norm_and_find_var_feat + log_tmm norm 
+
+#1
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_without_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_log_tmm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_without_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_log_tmm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_without_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_log_tmm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsIGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_without_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_log_tmm",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("ga_rf")),  
+
+
+#1
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_without_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_log_tmm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_without_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_log_tmm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_without_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_log_tmm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#CFRDVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_without_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_log_tmm",
+     classification_criteria = "CFRDVsNGT",
+     classes = c("NGT", "CFRD"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("ga_rf")),    
+
+
+
+#1
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_without_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_log_tmm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("all", 
+                     "t-test", "wilcoxontest",
+                     "ranger_pos_impu_cor",
+                     "mrmr10", "mrmr75", "mrmr100")),
+
+#2
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_without_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_log_tmm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("mrmr_perc50")),
+
+#3
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_without_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_log_tmm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("RF_RFE")),
+
+#4
+#IGTVsNGT
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted",
+     read_count_file_name = "umi_counts_seurat3_without_norm_and_find_var_feat.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_seurat3_log_tmm",
+     classification_criteria = "IGTVsNGT",
+     classes = c("NGT", "IGT"),
+     cores = 16,
+     perform_filter = TRUE,
+     results_dir_path = "fem_pipeline_results_adult_seurat3_log_tmm",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "log_tmm",
+     fems_to_run = c("ga_rf"))
+
 )  
