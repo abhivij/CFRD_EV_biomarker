@@ -134,7 +134,7 @@ create_combined_filter_with_combat_seq_files(comparison = "IGTVsNGT",
                                              classes = c("IGT", "NGT"))
 
 
-
+##########################################################################
 #create one combined seurat3 output for CFRD, IGT, NGT adult samples
 # since 1 file for each comparison causes issues in IGTVsNGT
 
@@ -206,4 +206,149 @@ all.equal(colnames(data.int_not_full), rownames(phenotype))
 colnames(data.int_not_full) <- phenotype$Sample
 write.csv(data.int_not_full, 
           "data/formatted/umi_counts_seurat3_without_norm_and_find_var_feat.csv")
+##########################################################################
+
+#batch effect removal in DK using AU
+
+# comparison = "CFRDVsIGT"
+# classes = c("IGT", "CFRD")
+
+#filtering only 2 conditions of interest and performing batch correction with seurat seems to not work
+#throws some error
+#therefore, use samples from all 3 conditions
+#create 1st file with filter
+
+data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                   nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")  
+
+output_labels <- phenotype %>%
+  filter(!is.na(CFRDVsIGT) | !is.na(CFRDVsNGT) | !is.na(IGTVsNGT)) %>%
+  mutate(updated_sample_name = paste(condition, Sample, sep = "_")) %>%
+  column_to_rownames("updated_sample_name")
+
+data <- data[, output_labels$Sample]
+colnames(data) <- rownames(output_labels)
+
+output_labels.au <- output_labels %>%
+  filter(country == "AU")
+output_labels.dk <- output_labels %>%
+  filter(country == "DK")
+
+data.au <- data[, rownames(output_labels.au)]
+data.dk <- data[, rownames(output_labels.dk)]
+
+keep <- edgeR::filterByExpr(data.au, group = output_labels.au$condition)
+data.au <- data.au[keep, ]
+data.dk <- data.dk[keep, ]
+
+data.au.seurat <- CreateSeuratObject(counts = data.au, meta.data = output_labels.au)
+str(data.au.seurat)
+data.dk.seurat <- CreateSeuratObject(counts = data.dk, meta.data = output_labels.dk)
+str(data.dk.seurat)
+
+#ref : https://satijalab.org/seurat/reference/transferdata
+
+# perform standard preprocessing on each object
+data.au.seurat <- NormalizeData(data.au.seurat)
+data.au.seurat <- FindVariableFeatures(data.au.seurat)
+data.au.seurat <- ScaleData(data.au.seurat)
+data.au.seurat.assay_orig <- as.data.frame(GetAssayData(data.au.seurat[['RNA']]))
+
+data.dk.seurat <- NormalizeData(data.dk.seurat)
+data.dk.seurat <- FindVariableFeatures(data.dk.seurat)
+data.dk.seurat <- ScaleData(data.dk.seurat)
+data.dk.seurat.assay_orig <- as.data.frame(GetAssayData(data.dk.seurat[['RNA']]))
+
+# find anchors
+anchors <- FindTransferAnchors(reference = data.au.seurat, query = data.dk.seurat, 
+                               k.filter = 20)
+
+# transfer labels
+assay_modified <- TransferData(
+  anchorset = anchors,
+  refdata = GetAssayData(data.au.seurat[['RNA']]),
+  k.weight = 20
+)
+
+data.dk <- as.data.frame(GetAssayData(assay_modified))
+data.au <- as.data.frame(GetAssayData(data.au.seurat[['RNA']]))
+
+all.equal(data.au, data.au.seurat.assay_orig)
+all.equal(data.dk, data.dk.seurat.assay_orig)
+
+data.combined <- cbind(data.au, data.dk)
+output_labels.combined <- rbind(output_labels.au, output_labels.dk)
+all.equal(rownames(output_labels.combined), colnames(data.combined))
+#TRUE
+colnames(data.combined) <- output_labels.combined$Sample
+write.csv(data.combined, "data/formatted/umi_counts_filtered_seurat3_au_ref.csv")
+
+
+#############################
+#2nd file same process without filter
+data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                   nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")  
+
+output_labels <- phenotype %>%
+  filter(!is.na(CFRDVsIGT) | !is.na(CFRDVsNGT) | !is.na(IGTVsNGT)) %>%
+  mutate(updated_sample_name = paste(condition, Sample, sep = "_")) %>%
+  column_to_rownames("updated_sample_name")
+
+data <- data[, output_labels$Sample]
+colnames(data) <- rownames(output_labels)
+
+output_labels.au <- output_labels %>%
+  filter(country == "AU")
+output_labels.dk <- output_labels %>%
+  filter(country == "DK")
+
+data.au <- data[, rownames(output_labels.au)]
+data.dk <- data[, rownames(output_labels.dk)]
+
+data.au.seurat <- CreateSeuratObject(counts = data.au, meta.data = output_labels.au)
+str(data.au.seurat)
+data.dk.seurat <- CreateSeuratObject(counts = data.dk, meta.data = output_labels.dk)
+str(data.dk.seurat)
+
+#ref : https://satijalab.org/seurat/reference/transferdata
+
+# perform standard preprocessing on each object
+data.au.seurat <- NormalizeData(data.au.seurat)
+data.au.seurat <- FindVariableFeatures(data.au.seurat)
+data.au.seurat <- ScaleData(data.au.seurat)
+data.au.seurat.assay_orig <- as.data.frame(GetAssayData(data.au.seurat[['RNA']]))
+
+data.dk.seurat <- NormalizeData(data.dk.seurat)
+data.dk.seurat <- FindVariableFeatures(data.dk.seurat)
+data.dk.seurat <- ScaleData(data.dk.seurat)
+data.dk.seurat.assay_orig <- as.data.frame(GetAssayData(data.dk.seurat[['RNA']]))
+
+# find anchors
+anchors <- FindTransferAnchors(reference = data.au.seurat, query = data.dk.seurat, 
+                               k.filter = 20)
+
+# transfer labels
+assay_modified <- TransferData(
+  anchorset = anchors,
+  refdata = GetAssayData(data.au.seurat[['RNA']]),
+  k.weight = 20
+)
+
+data.dk <- as.data.frame(GetAssayData(assay_modified))
+data.au <- as.data.frame(GetAssayData(data.au.seurat[['RNA']]))
+
+all.equal(data.au, data.au.seurat.assay_orig)
+all.equal(data.dk, data.dk.seurat.assay_orig)
+
+data.combined <- cbind(data.au, data.dk)
+output_labels.combined <- rbind(output_labels.au, output_labels.dk)
+all.equal(rownames(output_labels.combined), colnames(data.combined))
+#TRUE
+colnames(data.combined) <- output_labels.combined$Sample
+write.csv(data.combined, "data/formatted/umi_counts_no_filter_seurat3_au_ref.csv")
+
+
+
 
