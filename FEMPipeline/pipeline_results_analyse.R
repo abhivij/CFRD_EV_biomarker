@@ -948,6 +948,25 @@ plot_heatmap(
   dataset_replace_string = "CF_EV_"
 )
 
+plot_common_feature_heatmap(c(437, 438),
+                            results_dir = "../fem_pipeline_results_AU_adult_filt_seurat3norm_none_subset",
+                            dataset_replace_string = "CF_EV_AU_adult_filt_seurat3norm_none_",
+                            heatmap_file_name = "filt_seurat3norm_none_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_filt_seurat3norm_none/subset/"
+)
+plot_common_feature_heatmap(c(439, 440),
+                            results_dir = "../fem_pipeline_results_AU_adult_filt_seurat3norm_none_subset",
+                            dataset_replace_string = "CF_EV_AU_adult_filt_seurat3norm_none_",
+                            heatmap_file_name = "filt_seurat3norm_none_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_filt_seurat3norm_none/subset/"
+)
+plot_common_feature_heatmap(c(441, 442),
+                            results_dir = "../fem_pipeline_results_AU_adult_filt_seurat3norm_none_subset",
+                            dataset_replace_string = "CF_EV_AU_adult_filt_seurat3norm_none_",
+                            heatmap_file_name = "filt_seurat3norm_none_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_filt_seurat3norm_none/subset/"
+)
+
 ##########
 
 #AU seurat3 norm + batchcorrectedDK + none norm 
@@ -958,4 +977,23 @@ plot_heatmap(
   results_dir = "../fem_pipeline_results_AU_adult_nofilt_seurat3norm_none",
   dir_path = "../plots/fem_pipeline_results_AU_adult_nofilt_seurat3norm_none/",
   dataset_replace_string = "CF_EV_"
+)
+
+plot_common_feature_heatmap(c(443, 444),
+                            results_dir = "../fem_pipeline_results_AU_adult_nofilt_seurat3norm_none_subset",
+                            dataset_replace_string = "CF_EV_AU_adult_nofilt_seurat3norm_none_",
+                            heatmap_file_name = "nofilt_seurat3norm_none_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_nofilt_seurat3norm_none/subset/"
+)
+plot_common_feature_heatmap(c(445, 446),
+                            results_dir = "../fem_pipeline_results_AU_adult_nofilt_seurat3norm_none_subset",
+                            dataset_replace_string = "CF_EV_AU_adult_nofilt_seurat3norm_none_",
+                            heatmap_file_name = "nofilt_seurat3norm_none_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_nofilt_seurat3norm_none/subset/"
+)
+plot_common_feature_heatmap(c(447, 448),
+                            results_dir = "../fem_pipeline_results_AU_adult_nofilt_seurat3norm_none_subset",
+                            dataset_replace_string = "CF_EV_AU_adult_nofilt_seurat3norm_none_",
+                            heatmap_file_name = "nofilt_seurat3norm_none_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_AU_adult_nofilt_seurat3norm_none/subset/"
 )
