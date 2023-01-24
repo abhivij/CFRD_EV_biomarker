@@ -1370,3 +1370,100 @@ create_data_subsets(dparg_id = 392,
                     subset_file_name_substr = "ranger_pos_impu_cor",
                     create_all_common = FALSE,
                     data_file_path = "../data/formatted/umi_counts_seurat3_with_norm_and_find_var_feat.csv")
+
+###########
+###########
+
+#AU filter + seurat3 norm + batchcorrectedDK + none norm 
+
+explore_common_features(dparg_id = 413,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("t-test", "mrmr75", "mrmr100", "ga_rf"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_AU_adult_filt_seurat3norm_none",
+                        dir_path = "../plots/fem_pipeline_results_AU_adult_filt_seurat3norm_none/common_features_upset")
+explore_common_features(dparg_id = 417,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("mrmr100", "mrmr75", "t-test", "wilcoxontest"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_AU_adult_filt_seurat3norm_none",
+                        dir_path = "../plots/fem_pipeline_results_AU_adult_filt_seurat3norm_none/common_features_upset")
+explore_common_features(dparg_id = 421,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("wilcoxontest", "mrmr10", "mrmr75", "mrmr100", "RF_RFE"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_AU_adult_filt_seurat3norm_none",
+                        dir_path = "../plots/fem_pipeline_results_AU_adult_filt_seurat3norm_none/common_features_upset")
+
+
+create_data_subsets(dparg_id = 413,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/umi_counts_filtered_seurat3_au_ref.csv")
+create_data_subsets(dparg_id = 417,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/umi_counts_filtered_seurat3_au_ref.csv")
+create_data_subsets(dparg_id = 421,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/umi_counts_filtered_seurat3_au_ref.csv")
+
+###########
+###########
+
+#AU seurat3 norm + batchcorrectedDK + none norm 
+
+explore_common_features(dparg_id = 425,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("t-test", "ga_rf", "ranger_pos_impu_cor",
+                                         "RF_RFE", "wilcoxontest", "mrmr_perc50",
+                                         "mrmr100"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_AU_adult_nofilt_seurat3norm_none",
+                        dir_path = "../plots/fem_pipeline_results_AU_adult_nofilt_seurat3norm_none/common_features_upset")
+explore_common_features(dparg_id = 429,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("ranger_pos_impu_cor", "t-test", "wilcoxontest",
+                                         "ga_rf", "RF_RFE", "mrmr_perc50", "mrmr100"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_AU_adult_nofilt_seurat3norm_none",
+                        dir_path = "../plots/fem_pipeline_results_AU_adult_nofilt_seurat3norm_none/common_features_upset")
+explore_common_features(dparg_id = 433,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("wilcoxontest", "RF_RFE", "ranger_pos_impu_cor",
+                                         "ga_rf", "t-test", "mrmr_perc50", "mrmr100"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_AU_adult_nofilt_seurat3norm_none",
+                        dir_path = "../plots/fem_pipeline_results_AU_adult_nofilt_seurat3norm_none/common_features_upset")
+
+create_data_subsets(dparg_id = 425,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("ranger_pos_impu_cor")),
+                    subset_file_name_substr = "ranger_pos_impu_cor",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/umi_counts_no_filter_seurat3_au_ref.csv")
+create_data_subsets(dparg_id = 429,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("ranger_pos_impu_cor")),
+                    subset_file_name_substr = "ranger_pos_impu_cor",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/umi_counts_no_filter_seurat3_au_ref.csv")
+create_data_subsets(dparg_id = 433,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("ranger_pos_impu_cor")),
+                    subset_file_name_substr = "ranger_pos_impu_cor",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/umi_counts_no_filter_seurat3_au_ref.csv")

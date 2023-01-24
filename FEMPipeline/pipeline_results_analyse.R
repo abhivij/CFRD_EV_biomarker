@@ -934,3 +934,28 @@ plot_heatmap(
   dir_path = "../plots/fem_pipeline_results_adult_seurat3_log_tmm/",
   dataset_replace_string = "CF_EV_"
 )
+
+
+##########
+
+#AU filter + seurat3 norm + batchcorrectedDK + none norm 
+
+plot_heatmap(
+  dparg_vec = c(413, 417, 421),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_AU_adult_filt_seurat3norm_none",
+  dir_path = "../plots/fem_pipeline_results_AU_adult_filt_seurat3norm_none/",
+  dataset_replace_string = "CF_EV_"
+)
+
+##########
+
+#AU seurat3 norm + batchcorrectedDK + none norm 
+
+plot_heatmap(
+  dparg_vec = c(425, 429, 433),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_AU_adult_nofilt_seurat3norm_none",
+  dir_path = "../plots/fem_pipeline_results_AU_adult_nofilt_seurat3norm_none/",
+  dataset_replace_string = "CF_EV_"
+)
