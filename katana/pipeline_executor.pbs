@@ -4,7 +4,6 @@ cd /srv/scratch/vafaeelab/AbhishekVijayan/CFRD_EV_biomarker
 
 source ~/.venvs/forR/bin/activate
 
-module load gcc/7.5.0
-module load R/4.2.0-gcc7-clean
+module load r/4.2.2
 
 Rscript FEMPipeline/pipeline_executor.R --args ${PBS_ARRAY_INDEX} 
