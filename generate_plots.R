@@ -11,12 +11,16 @@ setwd(base_dir)
 
 # heatmap of samples vs normalized gene expression
 # Fig 1 J
+num_variable_features = 100
+variable_features_only = FALSE
 perform_filter = TRUE
 plot_file_dir = "plots/expression_heatmap"
-plot_file_name = "fil_seurat.png"
+plot_file_name = "var100_fil_seurat.png"
 norm = "seurat_norm"
 
 generate_expression_heatmap <- function(plot_file_name, norm, perform_filter = TRUE,
+                                        variable_features_only = FALSE,
+                                        num_variable_features = 100,
                                         plot_file_dir = "plots/expression_heatmap"){
   data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
                      nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
@@ -28,10 +32,28 @@ generate_expression_heatmap <- function(plot_file_name, norm, perform_filter = T
            .after = "condition"
     )
   data <- data[, phenotype$Sample]
+  rownames(data) <- gsub(pattern = '_', replacement = '-', rownames(data))
                                   
   if(perform_filter){
     keep <- edgeR::filterByExpr(data, group = phenotype$condition2)
     data <- data[keep, ]    
+  }
+
+  if(variable_features_only){
+    group_info <- phenotype %>% select(Sample, condition2)
+    data_joined <- group_info %>%
+      inner_join(as.data.frame(t(data)) %>% 
+                   rownames_to_column('Sample'))
+    data_joined.mean <- data_joined %>%
+      group_by(condition2) %>%
+      summarise(across(where(is.numeric), mean))
+    data_joined.var <- data_joined.mean %>%
+      summarise(across(where(is.numeric), var))
+    data_joined.var <- as.data.frame(t(data_joined.var))
+    colnames(data_joined.var) <- 'val'
+    data_joined.var <- data_joined.var %>%
+      arrange(desc(val))
+    transcripts_of_interest <- rownames(data_joined.var)[1:num_variable_features]    
   }
 
   if(norm == "logCPM"){
@@ -52,6 +74,9 @@ generate_expression_heatmap <- function(plot_file_name, norm, perform_filter = T
     data <- data.seurat.norm
   }
   
+  if(variable_features_only){
+    data <- data[transcripts_of_interest, ]
+  }
   data <- data.matrix(data)
   
   if(!dir.exists(plot_file_dir)){
@@ -94,6 +119,11 @@ generate_expression_heatmap(plot_file_name = "fil_seurat.png", norm = "seurat_no
 generate_expression_heatmap(plot_file_name = "nofil_seurat.png", norm = "seurat_norm", perform_filter = FALSE)
 generate_expression_heatmap(plot_file_name = "fil_logcpm.png", norm = "logCPM")
 generate_expression_heatmap(plot_file_name = "nofil_logcpm.png", norm = "logCPM", perform_filter = FALSE)
+generate_expression_heatmap(plot_file_name = "fil_seurat_var100.png", norm = "seurat_norm", 
+                            variable_features_only = TRUE)
+generate_expression_heatmap(plot_file_name = "fil_logcpm_var100.png", norm = "logCPM",
+                            variable_features_only = TRUE)
+
 
 # pheno_sub <- phenotype %>%
 #   filter(condition %in% c("CFRD", "IGT", "NGT")) %>%
