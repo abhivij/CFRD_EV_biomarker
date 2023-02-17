@@ -6,6 +6,7 @@ library(ggrepel)
 library(umap)
 library(ggvenn)
 library(sva)
+library(harmony)
 
 
 base_dir <- "~/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
@@ -637,14 +638,32 @@ plot_best_biomarker_venn("IGTVsNGT")
 ###############
 #create box plots of best biomarker sets and all transcripts
 
-comparison = "CFRDVsNGT"
-classes = c("NGT", "CFRD")
 use_best_features = TRUE
-norm = "log_tmm"
+train_cohort_country = "AU"
+norm = "none"
 best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
 perform_filter = TRUE
-train_cohort_country = "AU"
+combat_seq = FALSE
+filter_type = "regular"
+dataset_replace_str = ""
 plot_width_cm = 20
+dir_path = "prediction_pipeline/plots/box_plots"
+data_file_path = NA
+combined_plot = FALSE
+plot_title_input = NA
+
+data_file_path = "data/formatted/umi_counts_filtered_seurat3_with_norm_and_find_var_feat.csv"
+comparison = "IGTVsNGT"
+classes  = c("NGT", "IGT")
+use_best_features = TRUE
+norm = "none"
+best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
+perform_filter = FALSE
+combined_plot = TRUE
+dataset_replace_str = "CF_EV_adult_filtered_seurat3_norm_find_var_none_"
+plot_width_cm = 25
+dir_path = "prediction_pipeline/plots/box_plots/filtered_then_seurat3_norm_and_find_var_feat_custom"
+plot_title_input = "filter and then seurat3 best biomarkers IGT Vs NGT"
 
 #filter_type - possible values : combined - apply filter taking AU+DK together
 #                                regular  - filter on train, apply on test
@@ -659,15 +678,23 @@ create_transcript_box_plots <- function(comparison,
                                         filter_type = "regular",
                                         dataset_replace_str = "",
                                         plot_width_cm = 20,
-                                        dir_path = "prediction_pipeline/plots/box_plots"){
+                                        dir_path = "prediction_pipeline/plots/box_plots",
+                                        data_file_path = NA,
+                                        combined_plot = FALSE,
+                                        plot_title_input = NA){
   
-  if(combat_seq){
-    data <- read.table("data/formatted/umi_counts_combat_seq.csv", header=TRUE, sep=",", row.names=1, skip=0,
-                       nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+  if(is.na(data_file_path)){
+    if(combat_seq){
+      data <- read.table("data/formatted/umi_counts_combat_seq.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                         nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+    } else{
+      data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                         nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+    }  
   } else{
-    data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+    data <- read.table(data_file_path, header=TRUE, sep=",", row.names=1, skip=0,
                        nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
-  }  
+  }
   
   phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")
   phenotype <- phenotype %>% filter(age_group == "adult")
@@ -777,10 +804,14 @@ create_transcript_box_plots <- function(comparison,
     cbind(test.tra_data,
           "label" = test.output_labels$Label,
           "country" = test_cohort_country)
-  ) %>%
-    mutate(label = paste(country, label, sep = "_")) %>%
+  )
+  if(!combined_plot){
+    data_to_plot <- data_to_plot %>%
+      mutate(label = paste(country, label, sep = "_"))
+  }
+  data_to_plot <- data_to_plot %>%
     select(-c(country)) %>%
-    rownames_to_column("sample_name")
+    rownames_to_column("sample_name")  
   
   group_counts <- data_to_plot %>%
     select(c(sample_name, label)) %>%
@@ -804,7 +835,7 @@ create_transcript_box_plots <- function(comparison,
     plot_title <- "Log CPM expression of "    
   } else{
     y_lab <- "Expression level across samples"
-    plot_title <- "Non-normalized expression of "
+    plot_title <- "Expression of "
   }
   
   if(use_best_features){
@@ -815,12 +846,16 @@ create_transcript_box_plots <- function(comparison,
   plot_title <- paste0(plot_title, " in classes ", paste0(rev(classes), collapse = ","))
   plot_title <- paste0(plot_title, " filter_type ", filter_type)
 
+  if(!is.na(plot_title_input)){
+    plot_title = plot_title_input
+  }
+  
   plot <- ggplot(data_to_plot, aes(x = transcripts, y = value)) +
     geom_boxplot(aes(fill = label)) +
     xlab(paste0("Transcripts (", num_transcripts, ")")) +
     ylab(y_lab) +
     ggtitle(plot_title) +
-    labs(fill = "") 
+    labs(fill = "")
   if(use_best_features){
     plot <- plot + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
   } else {
@@ -850,36 +885,42 @@ create_transcript_box_plots <- function(comparison,
 # shownames = FALSE
 # norm = "log_tmm"
 
+fill_column = NA
+combat_seq = FALSE
+combat_seq_specify_group = FALSE
+combatref = FALSE
+shownames = FALSE
+perform_filter = TRUE
+best_features_file_path = NA
+dataset_replace_str = NA
+dir_path = NA
+data_file_path = "data/formatted/umi_counts.csv"
+filter_out_child = FALSE
+
 comparison = "CFRDVsIGT"
 classes = c("CFRD", "IGT")
 class_colours = c("red", "orange")
 dim_red = "UMAP"
-norm = "log"
-shownames = FALSE
-fill_column = "mutation"
-fill_column = NA
-
-combat_seq = FALSE
-combat_seq_specify_group = FALSE
-
-# comparison = "PreModulatorVsPostModulator"
-# classes = c("PreModulator", "PostModulator")
-# class_colours = c("brown", "skyblue")
-# dim_red = "UMAP"
-# norm = "log_tmm"
-# shownames = FALSE
+norm = "none"
+data_file_path = "data/formatted/umi_counts_seurat3_with_norm_and_find_var_feat.csv"
+perform_filter = FALSE
+dir_path = "prediction_pipeline/plots/dimred_seurat3_with_norm_and_find_var_feat/"
+filter_out_child = TRUE
 
 create_dim_red_plots <- function(comparison, classes,
                                  class_colours,
                                  dim_red, norm,
                                  fill_column = NA,
                                  combat_seq = FALSE, combat_seq_specify_group = FALSE,
+                                 combatref = FALSE,
                                  shownames = FALSE,
                                  perform_filter = TRUE,
                                  best_features_file_path = NA, 
                                  dataset_replace_str = NA,
-                                 dir_path = NA){
-  data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                                 dir_path = NA,
+                                 data_file_path = "data/formatted/umi_counts.csv",
+                                 filter_out_child = FALSE){
+  data <- read.table(data_file_path, header=TRUE, sep=",", row.names=1, skip=0,
                      nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
   phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")
   
@@ -908,6 +949,11 @@ create_dim_red_plots <- function(comparison, classes,
                   quant_batch = factor(quant_batch),
                   patient_recruitment_year = factor(patient_recruitment_year)) %>%
     arrange(Label, Sample)
+  
+  if(filter_out_child){
+    output_labels <- output_labels %>%
+      filter(age_group != "child")
+  }
   
   if(!is.na(fill_column)){
     output_labels <- output_labels %>%
@@ -988,6 +1034,45 @@ create_dim_red_plots <- function(comparison, classes,
     data <- edgeR::cpm(data, log = TRUE)
   }
   data <- as.data.frame(t(as.matrix(data)))
+  
+  
+  # if(harmony){
+  #   harmony_embeddings <- HarmonyMatrix(
+  #     data_mat  = data,
+  #     meta_data = output_labels,
+  #     vars_use  = "country"
+  #   )
+  # }
+  
+  #perform batch correction on test data using train data as reference
+  if(combatref){
+    ref_batch = 'AU'
+    data_of_interest <- as.data.frame(t(as.matrix(data)))
+
+    all.equal(colnames(data_of_interest), output_labels$Sample)
+    
+    data_of_interest.combat = ComBat(dat=data_of_interest, 
+                                     batch=output_labels$country, 
+                                     ref.batch = ref_batch)
+    data_of_interest.combat <- as.data.frame(t(as.matrix(data_of_interest.combat)))
+    
+    output_labels.au <- output_labels %>% filter(country == 'AU')
+    data.au <- data[output_labels.au$Sample, ]
+    output_labels.dk <- output_labels %>% filter(country == 'DK')
+    data.dk <- data[output_labels.dk$Sample, ]
+    
+    data_of_interest.combat.au <- data_of_interest.combat[output_labels.au$Sample, ]
+    data_of_interest.combat.dk <- data_of_interest.combat[output_labels.dk$Sample, ]
+    
+    #all.equal(data.au, data_of_interest.combat.au)
+    #TRUE
+    #all.equal(data.dk, data_of_interest.combat.dk)
+    #FALSE
+    data <- data_of_interest.combat
+    
+    title <- paste(title, '+ combat with ref as', ref_batch)
+  }
+  
   
   if(shownames){
     text <- rownames(data)
