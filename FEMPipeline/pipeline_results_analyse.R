@@ -1011,7 +1011,7 @@ plot_heatmap(
 )
 
 
-plot_common_feature_heatmap(c(461:466),
+plot_common_feature_heatmap(c(461:466, 476,477),
                             results_dir = "../fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none_subset",
                             dataset_replace_string = "CF_EV_adult_filtered_seurat3_norm_find_var_none_",
                             heatmap_file_name = "seurat3_norm_find_var_none_CFRDVsIGT.png",
