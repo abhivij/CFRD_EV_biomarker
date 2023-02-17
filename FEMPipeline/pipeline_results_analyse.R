@@ -997,3 +997,38 @@ plot_common_feature_heatmap(c(447, 448),
                             heatmap_file_name = "nofilt_seurat3norm_none_IGTVsNGT.png",
                             plot_dir_path = "../plots/fem_pipeline_results_AU_adult_nofilt_seurat3norm_none/subset/"
 )
+
+##########
+
+#adult filtered + seurat normalize and find varible features no other norm
+
+plot_heatmap(
+  dparg_vec = c(449, 453, 457),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none",
+  dir_path = "../plots/fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none/",
+  dataset_replace_string = "CF_EV_"
+)
+
+plot_common_feature_heatmap(c(408, 409),
+                            results_dir = "../fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none_subset",
+                            dataset_replace_string = "CF_EV_adult_filtered__seurat3_norm_find_var_none_",
+                            heatmap_file_name = "seurat3_norm_find_var_none_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none/subset/"
+)
+plot_common_feature_heatmap(c(410, 411),
+                            results_dir = "../fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none_subset",
+                            dataset_replace_string = "CF_EV_adult_filtered__seurat3_norm_find_var_none_",
+                            heatmap_file_name = "seurat3_norm_find_var_none_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none/subset/"
+)
+plot_common_feature_heatmap(c(412),
+                            results_dir = "../fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none_subset",
+                            dataset_replace_string = "CF_EV_adult_filtered__seurat3_norm_find_var_none_",
+                            heatmap_file_name = "seurat3_norm_find_var_none_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none/subset/"
+)
+
+
+
+##########
