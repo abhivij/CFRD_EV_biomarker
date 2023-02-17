@@ -7560,6 +7560,38 @@ list(phenotype_file_name = "data/formatted/phenotype.txt",
      norm = "none",
      perform_filter = FALSE,
      fems_to_run = c("all"),
+     random_seed = 2000),
+
+
+#running 27 iter common features since 28 iter ones didn't give good performance
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted/subset",
+     read_count_file_name = "CF_EV_adult_filtered_seurat3_norm_find_var_none_CFRDVsIGT_ranger_pos_impu_cor_27.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_filtered_seurat3_norm_find_var_none_CFRDVsIGT_ranger_pos_impu_cor_27",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 4,
+     results_dir_path = "fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none_subset",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     perform_filter = FALSE,
+     fems_to_run = c("all"),
+     random_seed = 2000),
+
+list(phenotype_file_name = "data/formatted/phenotype.txt",
+     read_count_dir_path = "data/formatted/subset",
+     read_count_file_name = "CF_EV_adult_filtered_seurat3_norm_find_var_none_CFRDVsIGT_ranger_pos_impu_cor_nopir_27.csv",
+     sep = ",",
+     dataset_id = "CF_EV_adult_filtered_seurat3_norm_find_var_none_CFRDVsIGT_ranger_pos_impu_cor_nopir_27",
+     classification_criteria = "CFRDVsIGT",
+     classes = c("IGT", "CFRD"),
+     cores = 4,
+     results_dir_path = "fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none_subset",
+     filter_expression = expression(age_group == 'adult'),
+     norm = "none",
+     perform_filter = FALSE,
+     fems_to_run = c("all"),
      random_seed = 2000)
 
 

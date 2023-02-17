@@ -1010,21 +1010,22 @@ plot_heatmap(
   dataset_replace_string = "CF_EV_"
 )
 
-plot_common_feature_heatmap(c(408, 409),
+
+plot_common_feature_heatmap(c(461:466),
                             results_dir = "../fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none_subset",
-                            dataset_replace_string = "CF_EV_adult_filtered__seurat3_norm_find_var_none_",
+                            dataset_replace_string = "CF_EV_adult_filtered_seurat3_norm_find_var_none_",
                             heatmap_file_name = "seurat3_norm_find_var_none_CFRDVsIGT.png",
                             plot_dir_path = "../plots/fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none/subset/"
 )
-plot_common_feature_heatmap(c(410, 411),
+plot_common_feature_heatmap(c(467:470),
                             results_dir = "../fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none_subset",
-                            dataset_replace_string = "CF_EV_adult_filtered__seurat3_norm_find_var_none_",
+                            dataset_replace_string = "CF_EV_adult_filtered_seurat3_norm_find_var_none_",
                             heatmap_file_name = "seurat3_norm_find_var_none_CFRDVsNGT.png",
                             plot_dir_path = "../plots/fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none/subset/"
 )
-plot_common_feature_heatmap(c(412),
+plot_common_feature_heatmap(c(471:475),
                             results_dir = "../fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none_subset",
-                            dataset_replace_string = "CF_EV_adult_filtered__seurat3_norm_find_var_none_",
+                            dataset_replace_string = "CF_EV_adult_filtered_seurat3_norm_find_var_none_",
                             heatmap_file_name = "seurat3_norm_find_var_none_IGTVsNGT.png",
                             plot_dir_path = "../plots/fem_pipeline_results_adult_filtered_then_seurat3_norm_find_var_none/subset/"
 )
