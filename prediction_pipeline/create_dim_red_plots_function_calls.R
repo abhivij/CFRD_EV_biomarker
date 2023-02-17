@@ -955,3 +955,94 @@ create_dim_red_plots(comparison = "IGTVsNGT",
                      dir_path = "prediction_pipeline/plots/dim_red_logcpm/",
                      best_features_file_path  = "data/selected_features/best_features_with_is_best.csv",
                      dataset_replace_str = "CF_EV_AU_prefiltered_adult_combat_logcpm_")
+
+
+
+#logcpm with combatref
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combatref = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logcpm_combatrefAU/")
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combatref = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logcpm_combatrefAU/")
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "log_cpm",
+                     combatref = TRUE, 
+                     dir_path = "prediction_pipeline/plots/dim_red_logcpm_combatrefAU/")
+
+
+
+#filt + seurat3norm + BEC on DK with AU as ref
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "none",
+                     data_file_path = "data/formatted/umi_counts_filtered_seurat3_au_ref.csv", perform_filter = FALSE,
+                     dir_path = "prediction_pipeline/plots/dimred_fil_seurat3_bec/")
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "none",
+                     data_file_path = "data/formatted/umi_counts_filtered_seurat3_au_ref.csv", perform_filter = FALSE, 
+                     dir_path = "prediction_pipeline/plots/dimred_fil_seurat3_bec/")
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "none",
+                     data_file_path = "data/formatted/umi_counts_filtered_seurat3_au_ref.csv", perform_filter = FALSE, 
+                     dir_path = "prediction_pipeline/plots/dimred_fil_seurat3_bec/")
+
+
+#seurat3norm + BEC on DK with AU as ref
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "none",
+                     data_file_path = "data/formatted/umi_counts_no_filter_seurat3_au_ref.csv", perform_filter = FALSE,
+                     dir_path = "prediction_pipeline/plots/dimred_nofil_seurat3_bec/")
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "none",
+                     data_file_path = "data/formatted/umi_counts_no_filter_seurat3_au_ref.csv", perform_filter = FALSE, 
+                     dir_path = "prediction_pipeline/plots/dimred_nofil_seurat3_bec/")
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "none",
+                     data_file_path = "data/formatted/umi_counts_no_filter_seurat3_au_ref.csv", perform_filter = FALSE, 
+                     dir_path = "prediction_pipeline/plots/dimred_nofil_seurat3_bec/")
+
+
+
+
+#AU+DK seurat3_with_norm_and_find_var_feat + none norm 
+create_dim_red_plots(comparison = "CFRDVsIGT",
+                     classes = c("CFRD", "IGT"), class_colours = c("red", "orange"),
+                     dim_red = "UMAP",
+                     norm = "none",
+                     data_file_path = "data/formatted/umi_counts_seurat3_with_norm_and_find_var_feat.csv", perform_filter = FALSE,
+                     dir_path = "prediction_pipeline/plots/dimred_seurat3_with_norm_and_find_var_feat/", 
+                     filter_out_child = TRUE)
+create_dim_red_plots(comparison = "CFRDVsNGT",
+                     classes = c("CFRD", "NGT"), class_colours = c("red", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "none",
+                     data_file_path = "data/formatted/umi_counts_seurat3_with_norm_and_find_var_feat.csv", perform_filter = FALSE, 
+                     dir_path = "prediction_pipeline/plots/dimred_seurat3_with_norm_and_find_var_feat/", 
+                     filter_out_child = TRUE)
+create_dim_red_plots(comparison = "IGTVsNGT",
+                     classes = c("IGT", "NGT"), class_colours = c("orange", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "none",
+                     data_file_path = "data/formatted/umi_counts_seurat3_with_norm_and_find_var_feat.csv", perform_filter = FALSE, 
+                     dir_path = "prediction_pipeline/plots/dimred_seurat3_with_norm_and_find_var_feat/", 
+                     filter_out_child = TRUE)
