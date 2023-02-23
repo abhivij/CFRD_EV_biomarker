@@ -457,7 +457,11 @@ create_transcript_box_plots(data_file_path = "data/formatted/umi_counts_filtered
                             dataset_replace_str = "CF_EV_adult_filtered_seurat3_norm_find_var_none_",
                             plot_width_cm = 25,
                             dir_path = "prediction_pipeline/plots/box_plots/filtered_then_seurat3_norm_and_find_var_feat_custom",
-                            plot_title_input = "filter and then seurat3 best biomarkers CFRD Vs NGT")
+                            plot_title_input = "filter and then seurat3 best biomarkers CFRD Vs NGT",
+                            biomarkers_specific = c("hsa-miR-122-5p", "hsa-miR-342-3p", 
+                                                    "hsa-miR-486-3p", "hsa-miR-182-5p",
+                                                    "hsa-piR-020497", "hsa-miR-17-5p", 
+                                                    "hsa-piR-016926"))
 create_transcript_box_plots(data_file_path = "data/formatted/umi_counts_filtered_seurat3_with_norm_and_find_var_feat.csv",
                             comparison = "IGTVsNGT",
                             classes  = c("NGT", "IGT"),

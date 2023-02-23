@@ -8,7 +8,6 @@ library(ggvenn)
 library(sva)
 library(harmony)
 
-
 base_dir <- "~/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
 setwd(base_dir)
 
@@ -653,8 +652,8 @@ combined_plot = FALSE
 plot_title_input = NA
 
 data_file_path = "data/formatted/umi_counts_filtered_seurat3_with_norm_and_find_var_feat.csv"
-comparison = "IGTVsNGT"
-classes  = c("NGT", "IGT")
+comparison = "CFRDVsNGT"
+classes  = c("NGT", "CFRD")
 use_best_features = TRUE
 norm = "none"
 best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
@@ -663,7 +662,8 @@ combined_plot = TRUE
 dataset_replace_str = "CF_EV_adult_filtered_seurat3_norm_find_var_none_"
 plot_width_cm = 25
 dir_path = "prediction_pipeline/plots/box_plots/filtered_then_seurat3_norm_and_find_var_feat_custom"
-plot_title_input = "filter and then seurat3 best biomarkers IGT Vs NGT"
+plot_title_input = "filter and then seurat3 best biomarkers CFRD Vs NGT"
+y_lim = NA
 
 #filter_type - possible values : combined - apply filter taking AU+DK together
 #                                regular  - filter on train, apply on test
@@ -681,7 +681,9 @@ create_transcript_box_plots <- function(comparison,
                                         dir_path = "prediction_pipeline/plots/box_plots",
                                         data_file_path = NA,
                                         combined_plot = FALSE,
-                                        plot_title_input = NA){
+                                        plot_title_input = NA,
+                                        y_lim = c(),
+                                        biomarkers_specific = c()){
   
   if(is.na(data_file_path)){
     if(combat_seq){
@@ -742,8 +744,6 @@ create_transcript_box_plots <- function(comparison,
     filter_type <- "none"
   }
 
-  
-  
   if(norm == "log_tmm"){
     dge <- edgeR::DGEList(counts = train.tra_data, group = train.output_labels$Label)
     dge <- edgeR::calcNormFactors(dge, method = "TMM")
@@ -850,12 +850,37 @@ create_transcript_box_plots <- function(comparison,
     plot_title = plot_title_input
   }
   
-  plot <- ggplot(data_to_plot, aes(x = transcripts, y = value)) +
-    geom_boxplot(aes(fill = label)) +
+  # biomarkers_specific <- c("hsa-miR-122-5p", "hsa-miR-342-3p", "hsa-miR-486-3p", "hsa-miR-182-5p",
+  #                          "hsa-piR-020497", "hsa-miR-17-5p", "hsa-piR-016926")
+  data_to_plot_sub <- data_to_plot %>%
+    filter(!transcripts %in% biomarkers_specific) %>%
+    group_by(transcripts) %>%
+    summarize(median = median(value), mean = mean(value)) %>%
+    arrange(desc(median), desc(mean))
+  biomarkers_rem <- data_to_plot_sub$transcripts
+  
+  biomarkers_ordered <- c(biomarkers_specific, biomarkers_rem)
+
+  data_to_plot <- data_to_plot %>%
+    mutate(transcripts = factor(transcripts, levels = biomarkers_ordered)) %>%
+    mutate(plot_num = ifelse(transcripts %in% biomarkers_specific,
+                               1, 2))
+  plot <- ggplot() +
+    aes(x = transcripts, y = value, fill = label) +
+    geom_boxplot(data = (data_to_plot %>% filter(plot_num == 1))) +
+    geom_boxplot(data = (data_to_plot %>% filter(plot_num == 2))) +
     xlab(paste0("Transcripts (", num_transcripts, ")")) +
     ylab(y_lab) +
     ggtitle(plot_title) +
-    labs(fill = "")
+    labs(fill = "") +
+    facet_wrap(~plot_num, scales = "free") + 
+    theme(
+      strip.text.x = element_blank()
+    )
+
+  if(length(y_lim) != 0){
+    plot <- plot + ylim(y_lim)
+  }
   if(use_best_features){
     plot <- plot + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
   } else {
