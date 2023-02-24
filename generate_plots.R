@@ -3,6 +3,8 @@ library(Seurat)
 library(ComplexHeatmap)
 library(viridis)
 library(ggplot2)
+library(readxl)
+library(ggvenn)
 
 
 base_dir <- "~/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
@@ -133,3 +135,63 @@ generate_expression_heatmap(plot_file_name = "fil_logcpm_var100.png", norm = "lo
 # phenotype %>%
 #   filter(condition == "HC") %>%
 #   select(Sample, country, age_group, condition, pre_post_modulator)
+
+
+#######################
+#create venn diagram - overlap of our study miRNAs with Zhao et al study
+# https://www.nature.com/articles/s41598-020-61098-9#MOESM1
+
+data.zhaoetal <- read_xlsx("data/Zhao_etal_Supp4_41598_2020_61098_MOESM4_ESM.xlsx",
+                           skip = 2)
+colnames(data.zhaoetal)[1:3] <- c("mirna", "ev", "dep_ev")
+data.zhaoetal.ev <- data.zhaoetal %>%
+  select(c(mirna, ev)) %>%
+  filter(ev != 0)
+data.zhaoetal.dep_ev <- data.zhaoetal %>%
+  select(c(mirna, dep_ev)) %>%
+  filter(dep_ev != 0)
+
+# data.zhaoetal <- data.zhaoetal %>%
+#   filter(ev != 0 | dep_ev != 0)
+#this above value has 536 entries - probably what Alex used
+
+#but we need only ev mirnas
+
+#some of these entries contain '>'
+#eg : hsa-miR-548aa>hsa-miR-548t-3p
+#https://rnacentral.org/rna/URS000012930C/9606
+
+data.zhaoetal.ev <- data.zhaoetal.ev %>%
+  separate(mirna, into = c("mir1", "mir2"), sep = ">")
+
+mir1_vec <- data.zhaoetal.ev %>% filter(!is.na(mir1)) %>% select(mir1)
+mir2_vec <- data.zhaoetal.ev %>% filter(!is.na(mir2)) %>% select(mir2)
+
+arrow_data <- data.zhaoetal.ev %>%
+  filter(!is.na(mir2))
+write.csv(arrow_data, "data/formatted/zhao_et_al_arrow_data.csv", row.names = FALSE)
+
+data <- read.csv("data/formatted/umi_counts.csv") %>%
+  mutate(mean_expr = rowMeans(across(!transcript)), .after = 'transcript') %>%
+  filter(mean_expr != 0)
+
+ggvenn(list("Our study" = data$transcript,
+            "Zhao et al. (2020)" = c(mir1_vec$mir1)),
+       stroke_size = 0.1, fill_color = c("orange3", "skyblue3"),
+       set_name_size = 4,
+       text_size = 3, stroke_linetype = "blank")
+ggsave("plots/venn/overlap_part1.png")
+
+ggvenn(list("Our study" = data$transcript,
+            "Zhao et al. (2020)" = c(mir2_vec$mir2)),
+       stroke_size = 0.1, fill_color = c("orange3", "skyblue3"),
+       set_name_size = 4,
+       text_size = 3, stroke_linetype = "blank")
+ggsave("plots/venn/overlap_part2.png")
+
+ggvenn(list("Our study" = data$transcript,
+            "Zhao et al. (2020)" = c(mir1_vec$mir1, mir2_vec$mir2)),
+       stroke_size = 0.1, fill_color = c("orange3", "skyblue3"),
+       set_name_size = 4,
+       text_size = 3, stroke_linetype = "blank")
+ggsave("plots/venn/overlap_all.png")
