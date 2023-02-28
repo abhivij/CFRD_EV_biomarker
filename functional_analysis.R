@@ -3,6 +3,8 @@ library(clusterProfiler)
 library(enrichplot)
 library(org.Hs.eg.db)
 library(multiMiR)
+library("xlsx")
+library(ggvenn)
 
 # geneList.uniprot <- unique(gsub("-[0-9]+", "", names(geneList_)))
 # map <- select(org.Hs.eg.db, geneList.uniprot, "ENTREZID", "UNIPROT")
@@ -37,6 +39,11 @@ go_BP(input_file_path = "de_results/DE_IGTVsNGT.csv",
       output_file_name = "igtvsngt_go_bp", plot_title = "IGT Vs NGT")
 
 
+mirna_vec = cond1higher
+plot_title = "GO processes related to targets of miRNAs higher in CFRD among CFRD Vs IGT biomarkers"
+output_dir = "prediction_pipeline/functional_analysis"
+output_plot_name = "CFRDVsIGT_CFRD.png"
+output_result_file_name = "CFRDVsIGT_CFRD.csv"
 
 obtain_mirna_go_bp <- function(mirna_vec,
                                plot_title,
@@ -51,9 +58,20 @@ obtain_mirna_go_bp <- function(mirna_vec,
     summary = TRUE
   )  
   
-  mir.targets.data <- mir.targets@data[, c(2, 3, 5)] %>%
+  mir.targets.data <- mir.targets@data %>%
+    arrange(target_entrez, target_ensembl)
+  
+  mir.targets.data.group_count <- mir.targets.data %>%
+    group_by(target_entrez) %>%
+    summarize(count = n()) %>%
+    arrange(desc(count))
+  
+  [, c(2, 3, 5)] %>%
     unique() %>%
     filter(target_entrez != "")
+  
+  write.csv(mir.targets.data, paste0(output_dir, "/", "mir_targets",
+                                  output_result_file_name), row.names = FALSE)  
   
   mir.targets.data.grouped <- mir.targets.data %>%
     group_by(target_entrez) %>%
@@ -72,11 +90,13 @@ obtain_mirna_go_bp <- function(mirna_vec,
   
   options(scipen = 2, digits = 3)
   
+  if(!dir.exists(output_dir)){
+    dir.create(output_dir, recursive = TRUE)
+  }
   barplot(ego.bp, x = "Count", showCategory = 15,
           title = plot_title)
-  ggsave(paste0(output_dir, "/", output_plot_name), width = 20)
+  ggsave(paste0(output_dir, "/", output_plot_name), width = 15, height = 10)
   # heatplot(ego.bp, showCategory = 10)
-  
   write.csv(ego.bp.result, paste0(output_dir, "/", output_result_file_name), row.names = FALSE)  
 }
 
@@ -87,8 +107,13 @@ go_BP <- function(input_file_path, output_dir, output_file_name, plot_title){
   
   de.mir <- de %>%
     filter(grepl("miR", Molecule) | grepl("hsa-let", Molecule))
+  print("de mir")
+  print(dim(de.mir))
+  
   de.pir <- de %>%
     filter(grepl("piR", Molecule))
+  print("de pir")
+  print(dim(de.pir))
   
   assertthat::are_equal(
     dim(
@@ -97,16 +122,40 @@ go_BP <- function(input_file_path, output_dir, output_file_name, plot_title){
         filter(!Molecule %in% de.pir$Molecule)
     )[1], 
     0)
+
   
   de.mir.up <- de.mir %>%
-    filter(logFC > 0)
+    filter(logFC > 0) %>%
+    arrange(desc(logFC))
   print("up reg FDR < 0.05")
   print(dim(de.mir.up))
+  
   de.mir.down <- de.mir %>%
-    filter(logFC < 0)
+    filter(logFC < 0) %>%
+    arrange(desc(-logFC))
   print("down reg FDR < 0.05")
   print(dim(de.mir.down))
+  
+  
+  #write fdr < 0.05 de mirnas to xlsx file
+  dir_path <- strsplit(input_file_path, split = "/")[[1]][1]
+  de_file_name <- strsplit(input_file_path, split = "/")[[1]][2] 
+  
+  dir_path <- paste(dir_path, "sig", sep = "_")
+  if(!dir.exists(dir_path)){
+    dir.create(dir_path, recursive = TRUE)
+  }
+  de_file_name <- sub(".csv", ".xlsx", de_file_name)
+  
+  write.xlsx(de.mir.up, paste(dir_path, de_file_name, sep = "/"), 
+             sheetName = "mir_upreg",
+             col.names = TRUE, row.names = FALSE, append = TRUE)
+  write.xlsx(de.mir.down, paste(dir_path, de_file_name, sep = "/"), 
+             sheetName = "mir_downreg",
+             col.names = TRUE, row.names = FALSE, append = TRUE)
 
+  
+  
   obtain_mirna_go_bp(mirna_vec = de.mir.up$Molecule,
                      plot_title = paste("Biological Process : upregulated miRNAs", plot_title),
                      output_dir = output_dir,
@@ -241,3 +290,112 @@ ek.result <- ek@result
 
 barplot(ek, x = "Count", showCategory = 15)
 ggsave("functional_analysis/cfvshc_down_kegg.png")
+
+
+
+
+#############
+#functional analsysis of identified biomarkers
+
+#CFRDVsIGT
+cond1higher <- c('hsa-miR-192-5p')
+cond2higher <- c('hsa-miR-181d-5p')
+
+obtain_mirna_go_bp(mirna_vec = cond1higher, 
+                   plot_title = "GO processes related to targets of miRNAs higher in CFRD among CFRD Vs IGT biomarkers",
+                   output_dir = "prediction_pipeline/functional_analysis",
+                   output_plot_name = "CFRDVsIGT_CFRD.png",
+                   output_result_file_name = "CFRDVsIGT_CFRD.csv")
+
+obtain_mirna_go_bp(mirna_vec = cond2higher, 
+                   plot_title = "GO processes related to targets of miRNAs higher in IGT among CFRD Vs IGT biomarkers",
+                   output_dir = "prediction_pipeline/functional_analysis",
+                   output_plot_name = "CFRDVsIGT_IGT.png",
+                   output_result_file_name = "CFRDVsIGT_IGT.csv")
+
+#CFRDVsNGT
+cond1higher <- c("hsa-miR-122-5p", "hsa-miR-342-3p", 
+                 "hsa-miR-486-3p", "hsa-miR-182-5p",
+                 "hsa-miR-17-5p", "hsa-miR-4443" 
+                 )
+cond2higher <- c("hsa-miR-181c-3p", "hsa-miR-181d-5p",
+                 "hsa-miR-27b-5p", "hsa-miR-3617-5p",
+                 "hsa-miR-4286", "hsa-miR-4497",
+                 "hsa-miR-501-5p", "hsa-miR-519d-5p",
+                 "hsa-miR-92b-5p")
+
+obtain_mirna_go_bp(mirna_vec = cond1higher, 
+                   plot_title = "GO processes related to targets of miRNAs higher in CFRD among CFRD Vs NGT biomarkers",
+                   output_dir = "prediction_pipeline/functional_analysis",
+                   output_plot_name = "CFRDVsNGT_CFRD.png",
+                   output_result_file_name = "CFRDVsNGT_CFRD.csv")
+
+obtain_mirna_go_bp(mirna_vec = cond2higher, 
+                   plot_title = "GO processes related to targets of miRNAs higher in NGT among CFRD Vs NGT biomarkers",
+                   output_dir = "prediction_pipeline/functional_analysis",
+                   output_plot_name = "CFRDVsNGT_NGT.png",
+                   output_result_file_name = "CFRDVsNGT_NGT.csv")
+
+#IGTVsNGT
+cond1higher <- c("hsa-miR-17-5p")
+cond2higher <- c("hsa-miR-3617-5p", "hsa-miR-326")
+
+obtain_mirna_go_bp(mirna_vec = cond1higher, 
+                   plot_title = "GO processes related to targets of miRNAs higher in IGT among IGT Vs NGT biomarkers",
+                   output_dir = "prediction_pipeline/functional_analysis",
+                   output_plot_name = "IGTVsNGT_IGT.png",
+                   output_result_file_name = "IGTVsNGT_IGT.csv")
+
+obtain_mirna_go_bp(mirna_vec = cond2higher, 
+                   plot_title = "GO processes related to targets of miRNAs higher in NGT among IGT Vs NGT biomarkers",
+                   output_dir = "prediction_pipeline/functional_analysis",
+                   output_plot_name = "IGTVsNGT_NGT.png",
+                   output_result_file_name = "IGTVsNGT_NGT.csv")
+
+
+mir.targets1 <- get_multimir(
+  org     = "hsa",
+  mirna  = c("hsa-miR-17-5p"),
+  table   = "validated",
+  summary = TRUE
+)  
+mir.targets1.data <- mir.targets1@data[, c(2, 3, 5)] %>%
+  unique() %>%
+  filter(target_entrez != "")
+
+mir.targets2 <- get_multimir(
+  org     = "hsa",
+  mirna  = c("hsa-miR-17-3p"),
+  table   = "validated",
+  summary = TRUE
+)  
+mir.targets2.data <- mir.targets2@data[, c(2, 3, 5)] %>%
+  unique() %>%
+  filter(target_entrez != "")
+
+
+mir.targets3 <- get_multimir(
+  org     = "hsa",
+  mirna  = c("hsa-miR-17"),
+  table   = "validated",
+  summary = TRUE
+)  
+mir.targets3.data <- mir.targets3@data[, c(2, 3, 5)] %>%
+  unique() %>%
+  filter(target_entrez != "")
+
+
+
+##############
+#compare pancreas-specific
+pancreas_all <- read_tsv("data/pancreas_all.tsv")
+pancreas_enriched <- read_tsv("data/pancreas_enriched.tsv")
+pancreas_specific <- read_tsv("data/pancreas_specific.tsv")
+
+ggvenn(list("Pancreas all" = pancreas_all$Gene,
+            "Pancreas enriched" = pancreas_enriched$Gene,
+            "Pancreas specific" = pancreas_specific$Gene),
+       stroke_size = 0.1, fill_color = c("skyblue3", "orange3", "yellow3"),
+       set_name_size = 4,
+       text_size = 3, stroke_linetype = "blank")
+ggsave("plots/venn/pancreas_ref_data.png")
