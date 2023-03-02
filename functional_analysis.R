@@ -3,7 +3,7 @@ library(clusterProfiler)
 library(enrichplot)
 library(org.Hs.eg.db)
 library(multiMiR)
-library("xlsx")
+library(xlsx)
 library(ggvenn)
 
 # geneList.uniprot <- unique(gsub("-[0-9]+", "", names(geneList_)))
@@ -390,9 +390,7 @@ ggvenn(list("Pancreas all" = pancreas_all$Gene,
 ggsave("plots/venn/pancreas_ref_data.png")
 
 
-
 #################
-
 
 
 mirna_vec = cond1higher
@@ -401,11 +399,14 @@ output_dir = "prediction_pipeline/functional_analysis"
 output_plot_name = "CFRDVsIGT_CFRD.png"
 output_result_file_name = "CFRDVsIGT_CFRD.csv"
 
+comparison <- "CFRDVsIGT"
+output_dir_path = "prediction_pipeline/mirna_targets"
+
+
+#mirna_vec : a single element vector
 get_mirna_targets <- function(mirna_vec,
-                               plot_title,
-                               output_dir,
-                               output_plot_name,
-                               output_result_file_name){
+                              comparison,
+                              output_dir_path = "prediction_pipeline/mirna_targets"){
   
   mir.targets <- get_multimir(
     org     = "hsa",
@@ -462,15 +463,6 @@ get_mirna_targets <- function(mirna_vec,
   #   filter(target_ensembl == 'ENSG00000139687')
   # #6 entries
   
-  unique_targets <- mir.targets.data %>%
-    filter(target_ensembl != "") %>%
-    distinct(target_ensembl)
-  
-  
-  doi <- mir.targets.data %>%
-    filter(target_ensembl != "") %>%
-    inner_join(pancreas_enriched, by = c("target_ensembl" = "Ensembl"))
-  
   #the below is zero for targets from "hsa-miR-192-5p"
   #assuming this for others and using only those with target_ensembl id present.
   
@@ -478,32 +470,109 @@ get_mirna_targets <- function(mirna_vec,
   #   filter(target_ensembl == "") %>%
   #   inner_join(pancreas_enriched, by = c("target_symbol" = "Gene"))
   
-  write.csv(mir.targets.data, paste0(output_dir, "/", "mir_targets",
-                                     output_result_file_name), row.names = FALSE)  
+  unique_targets <- mir.targets.data %>%
+    filter(target_ensembl != "") %>%
+    distinct(target_ensembl)
   
-  mir.targets.data.grouped <- mir.targets.data %>%
-    group_by(target_entrez) %>%
-    summarise(n = n()) %>%
-    arrange(desc(n))
+  #read targets of interest from reference
+  pancreas_all <- read_tsv("data/pancreas_all.tsv")
+  pancreas_enriched <- read_tsv("data/pancreas_enriched.tsv")
+  pancreas_specific <- read_tsv("data/pancreas_specific.tsv")
+  ###################
+  targets_of_interest.all <- pancreas_all %>%
+    dplyr::filter(Ensembl %in% unique_targets$target_ensembl) %>%
+    dplyr::select(c(1:11, 16:19))
+    
+  targets_of_interest.enriched <- pancreas_enriched %>%
+    dplyr::filter(Ensembl %in% unique_targets$target_ensembl) %>%
+    dplyr::select(c(1:11, 16:19))
   
-  gene_list <- unique(mir.targets.data$target_entrez)
+  targets_of_interest.specific <- pancreas_specific %>%
+    dplyr::filter(Ensembl %in% unique_targets$target_ensembl) %>%
+    dplyr::select(c(1:11, 16:19))
   
-  ego.bp <- enrichGO(
-    gene          = gene_list,
-    OrgDb         = org.Hs.eg.db,
-    ont           = "BP",
-    pvalueCutoff  = 0.05
-  )
-  ego.bp.result <- ego.bp@result
-  
-  options(scipen = 2, digits = 3)
-  
-  if(!dir.exists(output_dir)){
-    dir.create(output_dir, recursive = TRUE)
+  if(!exists(output_dir_path)){
+    dir.create(output_dir_path, recursive = TRUE)
   }
-  barplot(ego.bp, x = "Count", showCategory = 15,
-          title = plot_title)
-  ggsave(paste0(output_dir, "/", output_plot_name), width = 15, height = 10)
-  # heatplot(ego.bp, showCategory = 10)
-  write.csv(ego.bp.result, paste0(output_dir, "/", output_result_file_name), row.names = FALSE)  
+  
+  #assuming mirna_vec has only 1 element and extracting first
+  write.xlsx(as.data.frame(targets_of_interest.all), 
+             paste0(output_dir_path, "/", comparison, "_", mirna_vec[1], ".xlsx"),
+             sheetName = "pancreas all", showNA = FALSE,
+             col.names = TRUE, row.names = FALSE)
+  write.xlsx(as.data.frame(targets_of_interest.enriched), 
+             paste0(output_dir_path, "/", comparison, "_", mirna_vec[1], ".xlsx"),
+             sheetName = "pancreas enriched", showNA = FALSE,
+             col.names = TRUE, row.names = FALSE, append = TRUE)
+  write.xlsx(as.data.frame(targets_of_interest.specific), 
+             paste0(output_dir_path, "/", comparison, "_", mirna_vec[1], ".xlsx"),
+             sheetName = "pancreas specifc", showNA = FALSE,
+             col.names = TRUE, row.names = FALSE, append = TRUE)
+  
+  summary_row <- data.frame("mirna" = mirna_vec[1],
+                            "comparison" = comparison,
+                            "pancreas specific targets" = nrow(targets_of_interest.specific),
+                            "pancreas enriched targets" = nrow(targets_of_interest.enriched),
+                            "pancreas expressed targets" = nrow(targets_of_interest.all))
+  write.table(summary_row,
+              paste0(output_dir_path, "/pancreatic_targets_summary.csv"),
+              row.names = FALSE, append = TRUE, sep = ",",
+              col.names = !file.exists(paste0(output_dir_path, "/pancreatic_targets_summary.csv")))
 }
+
+
+get_mirna_targets(mirna_vec = c("hsa-miR-181d-5p"),
+                  comparison = "CFRDVsIGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-192-5p"),
+                  comparison = "CFRDVsIGT")
+
+get_mirna_targets(mirna_vec = c("hsa-miR-122-5p"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-342-3p"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-486-3p"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-182-5p"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-17-5p"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-181d-5p"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-27b-5p"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-181c-3p"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-4443"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-92b-5p"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-3617-5p"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-501-5p"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-4286"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-4497"),
+                  comparison = "CFRDVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-519d-5p"),
+                  comparison = "CFRDVsNGT")
+
+
+get_mirna_targets(mirna_vec = c("hsa-miR-17-5p"),
+                  comparison = "IGTVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-3617-5p"),
+                  comparison = "IGTVsNGT")
+get_mirna_targets(mirna_vec = c("hsa-miR-326"),
+                  comparison = "IGTVsNGT")
+
+
+#sort summary
+
+summary <- read.csv("prediction_pipeline/mirna_targets/pancreatic_targets_summary.csv")
+summary_sorted <- summary %>%
+  arrange(comparison, 
+          desc(pancreas.specific.targets),
+          desc(pancreas.enriched.targets),
+          desc(pancreas.expressed.targets))
+write.csv(summary_sorted, "prediction_pipeline/mirna_targets/pancreatic_targets_summary_sorted.csv",
+          row.names = FALSE)
