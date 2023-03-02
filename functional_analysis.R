@@ -58,20 +58,9 @@ obtain_mirna_go_bp <- function(mirna_vec,
     summary = TRUE
   )  
   
-  mir.targets.data <- mir.targets@data %>%
-    arrange(target_entrez, target_ensembl)
-  
-  mir.targets.data.group_count <- mir.targets.data %>%
-    group_by(target_entrez) %>%
-    summarize(count = n()) %>%
-    arrange(desc(count))
-  
-  [, c(2, 3, 5)] %>%
+  mir.targets.data <- mir.targets@data[, c(2, 3, 5)] %>%
     unique() %>%
     filter(target_entrez != "")
-  
-  write.csv(mir.targets.data, paste0(output_dir, "/", "mir_targets",
-                                  output_result_file_name), row.names = FALSE)  
   
   mir.targets.data.grouped <- mir.targets.data %>%
     group_by(target_entrez) %>%
@@ -399,3 +388,122 @@ ggvenn(list("Pancreas all" = pancreas_all$Gene,
        set_name_size = 4,
        text_size = 3, stroke_linetype = "blank")
 ggsave("plots/venn/pancreas_ref_data.png")
+
+
+
+#################
+
+
+
+mirna_vec = cond1higher
+plot_title = "GO processes related to targets of miRNAs higher in CFRD among CFRD Vs IGT biomarkers"
+output_dir = "prediction_pipeline/functional_analysis"
+output_plot_name = "CFRDVsIGT_CFRD.png"
+output_result_file_name = "CFRDVsIGT_CFRD.csv"
+
+get_mirna_targets <- function(mirna_vec,
+                               plot_title,
+                               output_dir,
+                               output_plot_name,
+                               output_result_file_name){
+  
+  mir.targets <- get_multimir(
+    org     = "hsa",
+    mirna  = mirna_vec,
+    table   = "validated",
+    summary = TRUE
+  )  
+  
+  mir.targets.data <- mir.targets@data %>%
+    arrange(target_entrez, target_ensembl)
+  
+  ############
+  #using only ones with ensemblid 
+  #merging based on target_symbol and gene, merges haplotypic ones
+  
+  # dim(mir.targets.data %>%
+  #   filter(target_ensembl == ""))
+  # #164
+  # dim(mir.targets.data %>%
+  #       filter(target_entrez == ""))
+  # #191
+  # 
+  # therefore use ensembl
+  
+  # doi <- mir.targets.data %>%
+  #   filter(target_entrez != "") %>%
+  #   inner_join(pancreas_enriched, by = c("target_ensembl" = "Ensembl"))
+  # doi.other <- mir.targets.data %>%
+  #   # filter(target_entrez == "") %>%
+  #   inner_join(pancreas_enriched, by = c("target_symbol" = "Gene"))  %>%
+  #   filter(target_ensembl != Ensembl)
+  # 
+  # doi %>%
+  #   filter(target_ensembl %in% doi.other$Ensembl)
+  # 
+  # mir.targets.data.group_count <- mir.targets.data %>%
+  #   group_by(target_entrez) %>%
+  #   summarize(count = n()) %>%
+  #   arrange(desc(count))
+  
+  ############
+  
+  # #as seen below in commented code, some targets are present in multiple dbs, 
+  # #and sometimes in each db multiple times, for different experiments
+  # #so just use unique target_ensembl
+  # 
+  # mir.targets.data.processed <- mir.targets.data %>%
+  #   filter(target_ensembl != "")
+  # multiple <- mir.targets.data.processed %>%
+  #   group_by(target_ensembl) %>%
+  #   summarize(count = n()) %>%
+  #   arrange(desc(count))
+  # doi <- mir.targets.data.processed %>%
+  #   filter(target_ensembl == 'ENSG00000139687')
+  # #6 entries
+  
+  unique_targets <- mir.targets.data %>%
+    filter(target_ensembl != "") %>%
+    distinct(target_ensembl)
+  
+  
+  doi <- mir.targets.data %>%
+    filter(target_ensembl != "") %>%
+    inner_join(pancreas_enriched, by = c("target_ensembl" = "Ensembl"))
+  
+  #the below is zero for targets from "hsa-miR-192-5p"
+  #assuming this for others and using only those with target_ensembl id present.
+  
+  # doi.other <- mir.targets.data %>%
+  #   filter(target_ensembl == "") %>%
+  #   inner_join(pancreas_enriched, by = c("target_symbol" = "Gene"))
+  
+  write.csv(mir.targets.data, paste0(output_dir, "/", "mir_targets",
+                                     output_result_file_name), row.names = FALSE)  
+  
+  mir.targets.data.grouped <- mir.targets.data %>%
+    group_by(target_entrez) %>%
+    summarise(n = n()) %>%
+    arrange(desc(n))
+  
+  gene_list <- unique(mir.targets.data$target_entrez)
+  
+  ego.bp <- enrichGO(
+    gene          = gene_list,
+    OrgDb         = org.Hs.eg.db,
+    ont           = "BP",
+    pvalueCutoff  = 0.05
+  )
+  ego.bp.result <- ego.bp@result
+  
+  options(scipen = 2, digits = 3)
+  
+  if(!dir.exists(output_dir)){
+    dir.create(output_dir, recursive = TRUE)
+  }
+  barplot(ego.bp, x = "Count", showCategory = 15,
+          title = plot_title)
+  ggsave(paste0(output_dir, "/", output_plot_name), width = 15, height = 10)
+  # heatplot(ego.bp, showCategory = 10)
+  write.csv(ego.bp.result, paste0(output_dir, "/", output_result_file_name), row.names = FALSE)  
+}
