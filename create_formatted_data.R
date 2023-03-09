@@ -6,6 +6,8 @@ library(readxl)
 library(sva)
 library(Seurat)
 
+library(ggvenn)
+
 
 base_dir <- "/home/abhivij/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
 setwd(base_dir)
@@ -400,3 +402,92 @@ all.equal(colnames(data.int), rownames(phenotype))
 colnames(data.int) <- phenotype$Sample
 write.csv(data.int, "data/formatted/umi_counts_filtered_seurat3_with_norm_and_find_var_feat.csv")
 
+####################################################################
+
+#seurat after filterByExpr on pre-postmodulator child samples
+#objective is to obtain prediction from model with adult samples on CFRDVsIGT, CFRDVsNGT, IGTVsNGT
+#so same transcripts should be used
+
+data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                   nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t") %>%
+  filter(age_group == "adult") %>%
+  filter(!is.na(CFRDVsIGT) | !is.na(CFRDVsNGT) | !is.na(IGTVsNGT)) %>%
+  mutate(updated_sample_name = paste(condition, Sample, sep = "_"))
+
+data.train <- data[, phenotype$Sample]
+colnames(data.train) <- phenotype$updated_sample_name
+
+phenotype <- phenotype %>%
+  column_to_rownames("updated_sample_name")
+
+keep.train <- edgeR::filterByExpr(data.train, group = phenotype$condition)
+data.train <- data.train[keep.train, ] 
+
+
+phenotype.prepost <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t") %>%
+  filter(age_group == "child" & condition == "CF_pre_post_modulator") %>%
+  mutate(updated_sample_name = paste("prepost", Sample, sep = "_"))
+summary(factor(phenotype.prepost$country))
+
+data.prepost <- data[, phenotype.prepost$Sample]
+colnames(data.prepost) <- phenotype.prepost$updated_sample_name
+
+phenotype.prepost <- phenotype.prepost %>%
+  column_to_rownames("updated_sample_name")
+
+keep.prepost <- edgeR::filterByExpr(data.prepost, group = phenotype.prepost$condition)
+data.prepost <- data.prepost[keep.prepost, ]   
+
+
+ggvenn(list("PrePost filtered" = rownames(data.prepost),
+            "Adult CFRD/IGT/NGT filtered" = rownames(data.train)),
+       stroke_size = 0.1, fill_color = c("skyblue3", "yellow3"),
+       set_name_size = 4,
+       text_size = 3, stroke_linetype = "blank")
+ggsave("prediction_pipeline/plots/venn/filtered_overlap.png")
+
+
+
+# prepost data with transcripts from filtered data.train
+data.prepost <- data[, phenotype.prepost$Sample]
+colnames(data.prepost) <- rownames(phenotype.prepost)
+data.prepost <- data.prepost[keep.train, ]
+
+
+
+rnaseq <- CreateSeuratObject(counts = data.prepost, meta.data = phenotype.prepost)
+str(rnaseq)
+
+rnaseq <- NormalizeData(rnaseq, verbose = FALSE)
+rnaseq <- FindVariableFeatures(rnaseq, selection.method = "vst", nfeatures = 2000, verbose = FALSE)
+rnaseq <- ScaleData(rnaseq, verbose = FALSE)
+
+rnaseq <- RunPCA(rnaseq, npcs = 30, verbose = FALSE)
+rnaseq <- RunUMAP(rnaseq, reduction = "pca", dims = 1:30)
+
+p1 <- DimPlot(rnaseq, reduction = "umap", group.by = "pre_post_modulator")
+p1
+
+# data.prepost.pp <- as.data.frame(rnaseq$RNA@scale.data)
+
+# all.equal(colnames(data.prepost.pp), rownames(phenotype.prepost))
+# colnames(data.prepost.pp) <- phenotype.prepost$Sample
+# write.csv(data.prepost.pp, 
+#           "data/formatted/umi_counts_prepost_filtered_seurat3.csv")
+
+
+data.train <- read.csv("data/formatted/umi_counts_filtered_seurat3_with_norm_and_find_var_feat.csv",
+                       row.names = 1)
+rowSums(data.train)
+#not almost 0
+#so save rnaseq$RNA@data for prepost
+
+data.prepost.pp <- as.data.frame(rnaseq$RNA@data)
+all.equal(colnames(data.prepost.pp), rownames(phenotype.prepost))
+colnames(data.prepost.pp) <- phenotype.prepost$Sample
+
+rowSums(data.prepost.pp)
+
+write.csv(data.prepost.pp,
+          "data/formatted/umi_counts_prepost_filtered_seurat3.csv")
