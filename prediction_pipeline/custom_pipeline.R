@@ -213,25 +213,30 @@ create_dim_red_plot_adult_and_child_data <- function(train.data, test.data,
 }
 
 
+# comparison = "CFRDVsIGT"
+# classes = c("IGT", "CFRD")
+# result_file_path = "data/prediction_result_pre_post/CFRDVsIGT.csv"
+# metric_output_file_path = "data/prediction_result_pre_post/metrics.csv"
+
 show_metrics <- function(comparison, classes, result_file_path,
                          metric_output_file_path = "data/prediction_result/metrics.csv"){
   print(comparison)
   result_df <- read.csv(result_file_path)  
   
   results.train <- result_df %>%
-    filter(Type == "train")
-  results.test <- result_df %>%
-    filter(Type == "test")
+    filter(Type == "train") %>%
+    select(c(1:4))
   
   acc.train <- mean(results.train$TrueLabel == results.train$PredictedLabel)
-  acc.test <- mean(results.test$TrueLabel == results.test$PredictedLabel)
   
   pr <- ROCR::prediction(results.train$Pred_prob, results.train$TrueLabel, label.ordering = classes)
   auc.train <- ROCR::performance(pr, measure = "auc")@y.values[[1]]
   
-  pr <- ROCR::prediction(results.test$Pred_prob, results.test$TrueLabel, label.ordering = classes)
-  auc.test <- ROCR::performance(pr, measure = "auc")@y.values[[1]]
-  
+  tpr <- caret::sensitivity(factor(results.train$PredictedLabel), 
+                            factor(results.train$TrueLabel), positive = classes[2])
+  tnr <- caret::specificity(factor(results.train$PredictedLabel), 
+                            factor(results.train$TrueLabel), negative = classes[1])
+
   #classes[2] assigned to class1 deliberately
   #classes are provided as c(neg_class, pos_class)
   class1 <- classes[2]
@@ -239,16 +244,12 @@ show_metrics <- function(comparison, classes, result_file_path,
   class1_count <- results.train %>% dplyr::filter(TrueLabel == class1) %>% nrow()
   class2_count <- results.train %>% dplyr::filter(TrueLabel == class2) %>% nrow() 
   train_count <- paste0(class1, "=", class1_count, " | ", class2, "=", class2_count)
-  class1_count <- results.test %>% dplyr::filter(TrueLabel == class1) %>% nrow()
-  class2_count <- results.test %>% dplyr::filter(TrueLabel == class2) %>% nrow() 
-  test_count <- paste0(class1, "=", class1_count, " | ", class2, "=", class2_count)
   metrics <- data.frame(Comparison = comparison,
                         TrainCount = train_count,
-                        TestCount = test_count,
                         TrainAccuracy = acc.train,
                         TrainAUC = auc.train,
-                        TestAccuracy = acc.test,
-                        TestAUC = auc.test)
+                        TrainTPR = tpr,
+                        TrainTNR = tnr)
   
   write.table(x = metrics, file = metric_output_file_path, append = TRUE, 
               col.names = !file.exists(metric_output_file_path), sep = ",",
@@ -288,3 +289,97 @@ custom_pipeline(
   model = "sigmoid_svm"
 )
 
+show_metrics(comparison = "CFRDVsIGT", classes = c("IGT", "CFRD"), 
+             result_file_path = "data/prediction_result_pre_post/CFRDVsIGT.csv",
+             metric_output_file_path = "data/prediction_result_pre_post/metrics.csv")
+show_metrics(comparison = "CFRDVsNGT", classes = c("NGT", "CFRD"), 
+             result_file_path = "data/prediction_result_pre_post/CFRDVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_pre_post/metrics.csv")
+show_metrics(comparison = "IGTVsNGT", classes = c("NGT", "IGT"), 
+             result_file_path = "data/prediction_result_pre_post/IGTVsNGT.csv",
+             metric_output_file_path = "data/prediction_result_pre_post/metrics.csv")
+
+
+comparison = "CFRDVsIGT"
+classes = c("IGT", "CFRD")
+result_file_path = "data/prediction_result_pre_post/CFRDVsIGT.csv"
+
+write_pre_post_sample_results <- function(){
+  
+  phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t") %>%
+    select(c(Sample, individual_id))
+
+  # result_df <- read.csv("data/prediction_result_pre_post/CFRDVsIGT.csv")  
+  # results.test <- phenotype %>%
+  #   inner_join(result_df %>%
+  #                filter(Type == "test") %>%
+  #                select(c(1, 3, 4, 8)),
+  #              by = c("Sample" = "sample"))
+  # pre_mod_samples <- results.test %>%
+  #   filter(pre_post_modulator == 0)
+  # post_mod_samples <- results.test %>%
+  #   filter(pre_post_modulator == 1)
+  # 
+  # length(unique(pre_mod_samples$individual_id))
+  # length(unique(post_mod_samples$individual_id))
+  # 
+  # all.equal(unique(pre_mod_samples$individual_id),
+  #           unique(post_mod_samples$individual_id))
+  # #TRUE
+  
+  result_df <- read.csv("data/prediction_result_pre_post/CFRDVsIGT.csv") 
+  if(!"cutoff" %in% colnames(result_df)){
+    selection_vector <- c(1, 3, 4, 7)
+  } else{
+    selection_vector <- c(1, 3, 4, 8)
+  }
+  results.CFRDVsIGT <- phenotype %>%
+    inner_join(result_df %>%
+                 filter(Type == "test") %>%
+                 select(all_of(selection_vector)),
+               by = c("Sample" = "sample")) %>%
+    relocate(individual_id, .before = Sample) %>%
+    relocate(pre_post_modulator, .after = Sample) %>%
+    arrange(individual_id, pre_post_modulator)
+  colnames(results.CFRDVsIGT)[4:5] <- c("CFRDVsIGT_prob", "CFRDVSIGT")
+  
+  result_df <- read.csv("data/prediction_result_pre_post/CFRDVsNGT.csv") 
+  if(!"cutoff" %in% colnames(result_df)){
+    selection_vector <- c(1, 3, 4, 7)
+  } else{
+    selection_vector <- c(1, 3, 4, 8)
+  }
+  results.CFRDVsNGT <- phenotype %>%
+    inner_join(result_df %>%
+                 filter(Type == "test") %>%
+                 select(all_of(selection_vector)),
+               by = c("Sample" = "sample")) %>%
+    relocate(individual_id, .before = Sample) %>%
+    relocate(pre_post_modulator, .after = Sample) %>%
+    arrange(individual_id, pre_post_modulator)
+  colnames(results.CFRDVsNGT)[4:5] <- c("CFRDVsNGT_prob", "CFRDVSNGT")
+
+  result_df <- read.csv("data/prediction_result_pre_post/IGTVsNGT.csv") 
+  if(!"cutoff" %in% colnames(result_df)){
+    selection_vector <- c(1, 3, 4, 7)
+  } else{
+    selection_vector <- c(1, 3, 4, 8)
+  }
+  results.IGTVsNGT <- phenotype %>%
+    inner_join(result_df %>%
+                 filter(Type == "test") %>%
+                 select(all_of(selection_vector)),
+               by = c("Sample" = "sample")) %>%
+    relocate(individual_id, .before = Sample) %>%
+    relocate(pre_post_modulator, .after = Sample) %>%
+    arrange(individual_id, pre_post_modulator)
+  colnames(results.IGTVsNGT)[4:5] <- c("IGTVsNGT_prob", "IGTVSNGT")
+  
+  results_all <- results.CFRDVsIGT %>%
+    inner_join(results.CFRDVsNGT, by = c("individual_id", "Sample", "pre_post_modulator")) %>%
+    inner_join(results.IGTVsNGT, by = c("individual_id", "Sample", "pre_post_modulator"))
+  
+  write.csv(results_all, "data/prediction_result_pre_post/results_all.csv", row.names = FALSE)
+}
+
+write_pre_post_sample_results()
