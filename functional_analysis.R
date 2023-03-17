@@ -5,6 +5,8 @@ library(org.Hs.eg.db)
 library(multiMiR)
 library(xlsx)
 library(ggvenn)
+library(ComplexHeatmap)
+library(readxl)
 
 # geneList.uniprot <- unique(gsub("-[0-9]+", "", names(geneList_)))
 # map <- select(org.Hs.eg.db, geneList.uniprot, "ENTREZID", "UNIPROT")
@@ -576,3 +578,289 @@ summary_sorted <- summary %>%
           desc(pancreas.expressed.targets))
 write.csv(summary_sorted, "prediction_pipeline/mirna_targets/pancreatic_targets_summary_sorted.csv",
           row.names = FALSE)
+
+
+
+#get TSI for each miRNA in above summary data
+#TSI data from https://academic.oup.com/nar/article/44/8/3865/2467026?login=false
+# database https://ccb-web.cs.uni-saarland.de/tissueatlas/
+
+mirna_target_summary <- read.csv("prediction_pipeline/mirna_targets/pancreatic_targets_summary_sorted.csv")
+
+tsi_data <- read.table("data/mirna_tissue_specificity/miRNA_Tissue_Atlas/tsi_values.csv", header = TRUE,
+                       sep = "\t")
+tsi_data <- tsi_data %>%
+  filter(miRNA %in% mirna_target_summary$mirna) %>%
+  dplyr::select(-c(8:10))
+
+tsi_mirs_of_interest <- mirna_target_summary %>%
+  left_join(tsi_data, by = c("mirna" = "miRNA"))
+
+tsi_mirs_of_interest %>%
+  group_by(mirna) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count))
+
+write.csv(tsi_mirs_of_interest, 
+          "prediction_pipeline/tissue_specificity/tsi_mirs_of_interest.csv",
+          row.names = FALSE)
+
+
+#get actual tissue specific information from the same resource as above
+tissue_data_matrix <- read.table("data/mirna_tissue_specificity/miRNA_Tissue_Atlas/expression_data/data_matrix_raw.txt",
+                                 sep = "\t", header = TRUE)
+tissue_data_matrix.1 <- data.frame(matrix(nrow = nrow(tissue_data_matrix), 
+                                          ncol = ncol(tissue_data_matrix),
+                                          dimnames = list(rownames(tissue_data_matrix),
+                                                          colnames(tissue_data_matrix))))
+tissue_data_matrix.2 <- data.frame(matrix(nrow = nrow(tissue_data_matrix), 
+                                          ncol = ncol(tissue_data_matrix),
+                                          dimnames = list(rownames(tissue_data_matrix),
+                                                          colnames(tissue_data_matrix))))
+mean_tissue_expr <- data.frame(matrix(nrow = nrow(tissue_data_matrix), 
+                                      ncol = ncol(tissue_data_matrix),
+                                      dimnames = list(rownames(tissue_data_matrix),
+                                                      colnames(tissue_data_matrix))))
+for(i in c(1:nrow(tissue_data_matrix))){
+  for(j in c(1:ncol(tissue_data_matrix))){
+    value <- tissue_data_matrix[i, j]
+    split_val <- strsplit(value, ',')[[1]]
+    a <- as.numeric(ifelse(split_val[1] == "", NA, split_val[1]))
+    b <- as.numeric(ifelse(split_val[2] == "", NA, split_val[2]))
+    tissue_data_matrix.1[i, j] <- a
+    tissue_data_matrix.2[i, j] <- b
+    mean_tissue_expr[i, j] <- mean(c(a, b), na.rm = TRUE)
+  }
+}
+sum(is.na(tissue_data_matrix.1))
+sum(is.na(tissue_data_matrix.2))
+
+mir_specific <- as.data.frame(t(mean_tissue_expr["hsa-miR-192-5p", ]))
+colnames(mir_specific) <- c('mirna')
+mir_specific <- mir_specific %>%
+  arrange(desc(mirna))
+
+
+mir_specific <- as.data.frame(t(tissue_data_matrix.1["hsa-miR-192-5p", ]))
+colnames(mir_specific) <- c('mirna')
+mir_specific <- mir_specific %>%
+  arrange(desc(mirna))
+
+
+mir_specific <- as.data.frame(t(tissue_data_matrix.2["hsa-miR-192-5p", ]))
+colnames(mir_specific) <- c('mirna')
+mir_specific <- mir_specific %>%
+  arrange(desc(mirna))
+
+
+#using the below, since it matches with the tissue specific graph obtained from database website
+mir_specific <- as.data.frame(t(tissue_data_matrix.1["hsa-miR-192-5p", ]))
+colnames(mir_specific) <- c('mirna')
+mir_specific <- mir_specific %>%
+  arrange(desc(mirna))
+
+
+#now the actual mirnas
+
+mirna_tissue_data <- as.data.frame(t(tissue_data_matrix.1[unique(mirna_target_summary$mirna), ])) %>%
+  dplyr::select(c(-15)) %>% #remove 15 since its all NA
+  rownames_to_column("tissue") %>%
+  mutate(tissue = gsub("..", ".", tissue, fixed = TRUE)) %>%
+  mutate(tissue = gsub(".{3}$", "", tissue)) 
+
+mirna_tissue_data <- mirna_tissue_data %>%
+  group_by(tissue) %>%
+  summarise_all(mean)
+
+write.csv(mirna_tissue_data, "prediction_pipeline/tissue_specificity/mirna_tissue_data.csv",
+          row.names = FALSE)
+
+mirna_tissue_data <- mirna_tissue_data %>%
+  column_to_rownames("tissue")
+
+mirna_tissue_data <- as.matrix(mirna_tissue_data)
+
+max(mirna_tissue_data)
+min(mirna_tissue_data)
+#-18.5
+
+mirna_tissue_data <- mirna_tissue_data + 20
+mirna_tissue_data <- log10(mirna_tissue_data)
+
+max(mirna_tissue_data)
+min(mirna_tissue_data)
+
+png("prediction_pipeline/tissue_specificity/heatmap.png", 
+    units = "cm", width = 20, height = 25, res = 1200)
+ht <- Heatmap(as.matrix(mirna_tissue_data), 
+        name = "Log10 raw expr", 
+        rect_gp = gpar(col = "white", lwd = 1))
+draw(ht)
+dev.off()
+
+
+
+#check simply diving by colSums
+# 1.389166 / 82.71799
+# 0.01679400
+# 
+# 1.579784 / 86.97906
+# 0.01816281
+# 
+# #the incorrect one
+# #row2 column1 uses colSum of column2 !
+# 1.380211 / 86.97906
+# 0.01586832
+
+
+mirna_tissue_data.scaled <- t(t(mirna_tissue_data)/colSums(mirna_tissue_data))
+colSums(mirna_tissue_data.scaled)
+
+
+
+
+png("prediction_pipeline/tissue_specificity/heatmap_scaled.png", 
+    units = "cm", width = 20, height = 25, res = 1200)
+ht <- Heatmap(as.matrix(mirna_tissue_data.scaled), 
+              name = "Scaled log10 expr", 
+              rect_gp = gpar(col = "white", lwd = 1))
+draw(ht)
+dev.off()
+
+
+
+##################
+
+comparison = "IGTVsNGT"
+
+create_data_and_plots_from_tissue_data <- function(comparison){
+  biomarkers <- read_excel("data/formatted/identified_biomarkers.xlsx", sheet = comparison)
+  
+  biomarkers.mir <- biomarkers %>%
+    filter(grepl("miR", transcripts))
+  biomarkers.pir <- biomarkers %>%
+    filter(grepl("piR", transcripts))
+  
+  tissue_of_interest <- read_tsv("data/mirna_tissue_specificity/miTED/tissues_of_interest.tsv")
+  biomarkers.mir$transcripts %in% colnames(tissue_of_interest)
+  
+  tissue_data_subset <- tissue_of_interest %>%
+    dplyr::select("Sample_ID", "Project_ID", "Tissue_or_organ_of_origin",
+                  "Tissue_subregion", "Cell_Line", "Disease", "Organism",
+                  "Gender", "Health_state", "Tissue_definition",
+                  biomarkers.mir$transcripts)
+  write.csv(tissue_data_subset, 
+            paste0("data/mirna_tissue_specificity/miTED/formatted_subset_tissues_of_interest_",
+                   comparison,
+                   ".csv"),
+            row.names = FALSE)
+  
+  tissue_data_subset <- tissue_data_subset %>%
+    dplyr::select("Tissue_or_organ_of_origin", "Health_state", biomarkers.mir$transcripts) %>%
+    filter(!is.na(Health_state)) %>%
+    mutate(tissue_health = paste(Health_state, Tissue_or_organ_of_origin, sep = "___")) %>%
+    dplyr::select(-c("Tissue_or_organ_of_origin", "Health_state")) %>%
+    group_by(tissue_health) %>%
+    summarise_if(is.numeric, mean, na.rm = TRUE) %>%
+    column_to_rownames("tissue_health")
+  
+  tissue_data_subset.scaled <- t(t(tissue_data_subset)/colSums(tissue_data_subset))
+  colSums(tissue_data_subset.scaled)  
+  
+  write.csv(tissue_data_subset.scaled, 
+            paste0("data/mirna_tissue_specificity/miTED/formatted_scaled_data_tissues_of_interest_",
+                   comparison,
+                   ".csv"))
+  
+  png(paste0("prediction_pipeline/tissue_specificity/", 
+             "tissue_",
+             comparison, ".png"), 
+      units = "cm", width = 20, height = 25, res = 1200)
+  ht <- Heatmap(as.matrix(tissue_data_subset.scaled), 
+                name = "Scaled mean RPM", 
+                rect_gp = gpar(col = "white", lwd = 1))
+  draw(ht)
+  dev.off()
+  
+  
+  pancreas <- tissue_data_subset[c("disease___Pancreas", "healthy___Pancreas"), ] %>% 
+    filter(if_any(everything(), ~ !is.na(.)))
+  pancreas <- sort(colMeans(pancreas), decreasing = TRUE)
+  
+  biomarkers.ordered <- data.frame(transcripts = names(pancreas), panc_expr = pancreas,
+                                         row.names = c())
+  if(dim(biomarkers.pir)[1] > 0){
+    biomarkers.ordered <- rbind(biomarkers.ordered,
+                                data.frame(transcripts = biomarkers.pir$transcripts, 
+                                           panc_expr = NA))
+  }
+  
+  write.xlsx(biomarkers.ordered,
+             "data/formatted/biomarkers_pancreatic_expression_order.xlsx",
+             sheetName = comparison,
+             col.names = TRUE, row.names = FALSE, append = TRUE)
+  
+}
+
+create_data_and_plots_from_tissue_data("CFRDVsIGT")
+create_data_and_plots_from_tissue_data("CFRDVsNGT")
+create_data_and_plots_from_tissue_data("IGTVsNGT")
+
+
+
+comparison = "CFRDVsNGT"
+
+create_data_and_plots_from_cell_line_data <- function(comparison){
+  biomarkers <- read_excel("data/formatted/identified_biomarkers.xlsx", sheet = comparison)
+  
+  biomarkers.mir <- biomarkers %>%
+    filter(grepl("miR", transcripts))
+  biomarkers.pir <- biomarkers %>%
+    filter(grepl("piR", transcripts))
+  
+  cell_line_of_interest <- read_tsv("data/mirna_tissue_specificity/miTED/celllines_of_interest.tsv")
+  biomarkers.mir$transcripts %in% colnames(cell_line_of_interest)
+  
+  cell_line_data_subset <- cell_line_of_interest %>%
+    dplyr::select("Sample_ID", "Project_ID", "Tissue_or_organ_of_origin",
+                  "Tissue_subregion", "Cell_Line", "Disease", "Organism",
+                  "Gender", "Health_state", "Tissue_definition",
+                  biomarkers.mir$transcripts)
+  write.csv(cell_line_data_subset, 
+            paste0("data/mirna_tissue_specificity/miTED/formatted_subset_cell_lines_of_interest_",
+                   comparison,
+                   ".csv"),
+            row.names = FALSE)
+  
+  cell_line_data_subset <- cell_line_data_subset %>%
+    dplyr::select("Cell_Line", "Disease", biomarkers.mir$transcripts) %>%
+    mutate(cell_line_disease = paste(Disease, Cell_Line, sep = "___")) %>%
+    dplyr::select(-c("Cell_Line", "Disease")) %>%
+    group_by(cell_line_disease) %>%
+    summarise_if(is.numeric, mean, na.rm = TRUE) %>%
+    column_to_rownames("cell_line_disease")
+  
+  cell_line_data_subset.scaled <- t(t(cell_line_data_subset)/colSums(cell_line_data_subset))
+  colSums(cell_line_data_subset.scaled)  
+  #assume that nans come due to zero division
+  cell_line_data_subset.scaled[is.nan(cell_line_data_subset.scaled)] <- 0
+  
+  write.csv(cell_line_data_subset.scaled, 
+            paste0("data/mirna_tissue_specificity/miTED/formatted_scaled_data_cell_lines_of_interest_",
+                   comparison,
+                   ".csv"))
+  
+  png(paste0("prediction_pipeline/tissue_specificity/", 
+             "cell_line_",
+             comparison, ".png"), 
+      units = "cm", width = 20, height = 25, res = 1200)
+  ht <- Heatmap(as.matrix(cell_line_data_subset.scaled), 
+                name = "Scaled mean RPM", 
+                rect_gp = gpar(col = "white", lwd = 1))
+  draw(ht)
+  dev.off()
+}
+
+create_data_and_plots_from_cell_line_data("CFRDVsIGT")
+create_data_and_plots_from_cell_line_data("CFRDVsNGT")
+create_data_and_plots_from_cell_line_data("IGTVsNGT")
