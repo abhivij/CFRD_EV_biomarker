@@ -864,3 +864,40 @@ create_data_and_plots_from_cell_line_data <- function(comparison){
 create_data_and_plots_from_cell_line_data("CFRDVsIGT")
 create_data_and_plots_from_cell_line_data("CFRDVsNGT")
 create_data_and_plots_from_cell_line_data("IGTVsNGT")
+
+
+####################
+comparison1 <- "CFRDVsNGT"
+#created ordered list of biomarkers based on number of pancreatic targets
+create_ordered_list_based_on_pancreatic_targets <- function(comparison){
+  biomarkers <- read_excel("data/formatted/identified_biomarkers.xlsx", sheet = comparison)
+  
+  biomarkers.mir <- biomarkers %>%
+    filter(grepl("miR", transcripts))
+  biomarkers.pir <- biomarkers %>%
+    filter(grepl("piR", transcripts))
+ 
+  pancreatic_target_summary <- read.csv("prediction_pipeline/mirna_targets/pancreatic_targets_summary_sorted.csv") %>%
+    dplyr::select(-c(comparison)) %>%
+    distinct() %>%
+    filter(mirna %in% biomarkers.mir$transcripts) %>%
+    arrange(desc(pancreas.specific.targets), desc(pancreas.enriched.targets),
+            desc(pancreas.expressed.targets))
+  colnames(pancreatic_target_summary)[1] <- 'transcripts'
+  
+  if(dim(biomarkers.pir)[1] > 0){
+    pancreatic_target_summary <- rbind(pancreatic_target_summary,
+                                       biomarkers.pir %>%
+                                         mutate(pancreas.specific.targets = NA,
+                                                pancreas.enriched.targets = NA,
+                                                pancreas.expressed.targets = NA))
+  }
+  write.xlsx(pancreatic_target_summary,
+             "data/formatted/biomarkers_pancreatic_target_count_order.xlsx",
+             sheetName = comparison,
+             col.names = TRUE, row.names = FALSE, append = TRUE)
+}
+
+create_ordered_list_based_on_pancreatic_targets("CFRDVsIGT")
+create_ordered_list_based_on_pancreatic_targets("CFRDVsNGT")
+create_ordered_list_based_on_pancreatic_targets("IGTVsNGT")
