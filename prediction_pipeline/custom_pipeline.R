@@ -379,7 +379,94 @@ write_pre_post_sample_results <- function(){
     inner_join(results.CFRDVsNGT, by = c("individual_id", "Sample", "pre_post_modulator")) %>%
     inner_join(results.IGTVsNGT, by = c("individual_id", "Sample", "pre_post_modulator"))
   
+  results_all <- results_all %>%
+    mutate(prob1_CFRD = CFRDVsIGT_prob,
+           prob2_CFRD = CFRDVsNGT_prob,
+           prob3_IGT = 1-CFRDVsIGT_prob,
+           prob4_IGT = IGTVsNGT_prob,
+           prob5_NGT = 1-CFRDVsNGT_prob,
+           prob6_NGT = 1-IGTVsNGT_prob)
+
+  results_all <- results_all %>%
+    mutate(prediction_max_column = max.col(results_all[, c(10:15)], ties.method = "first")) %>%
+    mutate(prediction_max_val = pmax(results_all$prob1_CFRD, results_all$prob2_CFRD,
+                                     results_all$prob3_IGT, results_all$prob4_IGT,
+                                     results_all$prob5_NGT, results_all$prob6_NGT)) %>%
+    mutate(prediction_max = case_when(prediction_max_column %in% c(1, 2) ~ 'CFRD',
+                                      prediction_max_column %in% c(3, 4) ~ 'IGT',
+                                      prediction_max_column %in% c(5, 6) ~ 'NGT'))
+
   write.csv(results_all, "data/prediction_result_pre_post/results_all.csv", row.names = FALSE)
 }
 
 write_pre_post_sample_results()
+
+
+
+write_pre_post_sample_results_train <- function(){
+  
+  phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t") %>%
+    select(c(Sample, individual_id, condition))
+  selection_vector <- c(1, 3, 4, 6)
+  
+  result_df <- read.csv("data/prediction_result_pre_post/CFRDVsIGT.csv") 
+  results.CFRDVsIGT <- phenotype %>%
+    inner_join(result_df %>%
+                 filter(Type == "train") %>%
+                 select(all_of(selection_vector)),
+               by = c("Sample" = "sample")) %>%
+    relocate(individual_id, .before = Sample) %>%
+    arrange(individual_id, Sample)
+  colnames(results.CFRDVsIGT)[4:5] <- c("CFRDVsIGT_prob", "CFRDVSIGT_pred")
+  
+  result_df <- read.csv("data/prediction_result_pre_post/CFRDVsNGT.csv") 
+  results.CFRDVsNGT <- phenotype %>%
+    inner_join(result_df %>%
+                 filter(Type == "train") %>%
+                 select(all_of(selection_vector)),
+               by = c("Sample" = "sample")) %>%
+    relocate(individual_id, .before = Sample) %>%
+    arrange(individual_id, Sample)
+  colnames(results.CFRDVsNGT)[4:5] <- c("CFRDVsNGT_prob", "CFRDVSNGT_pred")
+  
+  result_df <- read.csv("data/prediction_result_pre_post/IGTVsNGT.csv") 
+  results.IGTVsNGT <- phenotype %>%
+    inner_join(result_df %>%
+                 filter(Type == "train") %>%
+                 select(all_of(selection_vector)),
+               by = c("Sample" = "sample")) %>%
+    relocate(individual_id, .before = Sample) %>%
+    arrange(individual_id, Sample) %>%
+    select(-c(Label))
+  colnames(results.IGTVsNGT)[4:5] <- c("IGTVsNGT_prob", "IGTVSNGT_pred")
+  
+  results_all <- results.CFRDVsIGT %>%
+    full_join(results.CFRDVsNGT, by = c("individual_id", "Sample", "condition")) %>%
+    full_join(results.IGTVsNGT, by = c("individual_id", "Sample", "condition"))
+  
+  results_all <- results_all %>%
+    mutate(prob1_CFRD = CFRDVsIGT_prob,
+           prob2_CFRD = CFRDVsNGT_prob,
+           prob3_IGT = 1-CFRDVsIGT_prob,
+           prob4_IGT = IGTVsNGT_prob,
+           prob5_NGT = 1-CFRDVsNGT_prob,
+           prob6_NGT = 1-IGTVsNGT_prob)
+  
+  results_all[, c(12:17)][is.na(results_all[, c(12:17)])] <- 0
+  
+  results_all <- results_all %>%
+    mutate(prediction_max_column = max.col(results_all[, c(12:17)], ties.method = "first")) %>%
+    mutate(prediction_max = case_when(prediction_max_column %in% c(1, 2) ~ 'CFRD',
+                                      prediction_max_column %in% c(3, 4) ~ 'IGT',
+                                      prediction_max_column %in% c(5, 6) ~ 'NGT')) %>%
+    mutate(condition_copy = condition)
+
+  mean(results_all$condition == results_all$prediction_max)
+  sum(results_all$condition != results_all$prediction_max)
+  
+  which(results_all$condition != results_all$prediction_max)
+  
+  write.csv(results_all, "data/prediction_result_pre_post/results_train_all.csv", row.names = FALSE)
+}
+
+write_pre_post_sample_results_train()
