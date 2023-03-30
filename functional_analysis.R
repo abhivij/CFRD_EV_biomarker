@@ -901,3 +901,25 @@ create_ordered_list_based_on_pancreatic_targets <- function(comparison){
 create_ordered_list_based_on_pancreatic_targets("CFRDVsIGT")
 create_ordered_list_based_on_pancreatic_targets("CFRDVsNGT")
 create_ordered_list_based_on_pancreatic_targets("IGTVsNGT")
+
+combined_biomarker_order <- function(comparison){
+  biomarkers <- read_excel("data/formatted/identified_biomarkers.xlsx", sheet = comparison) %>%
+    mutate("our_study_expr_rank" = rownames(.))
+  biomarkers_panc_expr <- read_excel("data/formatted/biomarkers_pancreatic_expression_order.xlsx", sheet = comparison)
+  biomarkers_target_summary <- read_excel("data/formatted/biomarkers_pancreatic_target_count_order.xlsx", sheet = comparison)
+
+  biomarkers_agg <- biomarkers %>%
+    inner_join(biomarkers_panc_expr) %>%
+    inner_join(biomarkers_target_summary) %>%
+    arrange(desc(panc_expr), desc(pancreas.specific.targets), 
+            desc(pancreas.enriched.targets), desc(pancreas.expressed.targets),
+            desc(our_study_expr_rank))
+  
+  write.xlsx(as.data.frame(biomarkers_agg),
+             "data/formatted/biomarkers_combined_order.xlsx",
+             sheetName = comparison,
+             col.names = TRUE, row.names = FALSE, append = TRUE)
+}
+combined_biomarker_order("CFRDVsIGT")
+combined_biomarker_order("CFRDVsNGT")
+combined_biomarker_order("IGTVsNGT")
