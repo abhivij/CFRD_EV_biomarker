@@ -923,3 +923,89 @@ combined_biomarker_order <- function(comparison){
 combined_biomarker_order("CFRDVsIGT")
 combined_biomarker_order("CFRDVsNGT")
 combined_biomarker_order("IGTVsNGT")
+
+
+
+#adding combined scores to the modified downloaded sheet
+data <- read_excel("data/selected_features/biomarkers_combined_order.xlsx", 
+                   sheet = "combined", na = c("", "#N/A"), skip = 2)
+data <- data[-c(1), ]
+
+#1st mirna has 
+# has 2 extra rows with just PMID info
+# out of the 3 total rows, 2 are related to diabetes
+# so add to PMID column in 1st row and remove 2nd and 3rd rows
+data[1,9] <- data[1,9] + data[2,9] + data[3,9] 
+data <- data[-c(2,3), ]
+
+#create a copy all columns to later copy the PMID related columns to the final result
+data.all_columns <- data
+data <- data[, -c(8, 10, 11)]
+
+data <- data %>% mutate_at(c(2:6, 8), as.numeric)
+data[is.na(data)] <- 0
+
+data <- data %>%
+  inner_join(data %>% group_by(comparison) %>% summarize(biomarker_count = n()))
+data <- data %>%
+  mutate(our_study_expr_rank_inv = biomarker_count - our_study_expr_rank + 1)
+colnames(data)[8] <- "diabetes_related_PMID_count"
+
+#now obtain score for each biomarker after adding 0.1 to pancreas.specific.targets and normalizing all
+#using min-max normalization to get all columns in [0,1] range
+#weight : 
+# pancreas.specific.targets : 5
+# pancreas.enriched.targets : 4
+# panc_expr                 : 3
+# our_study_expr_rank_inv   : 2
+# diabetes_related_PMID_count : 1
+columns_of_interest <- c("pancreas.specific.targets", "pancreas.enriched.targets",
+                         "panc_expr", "our_study_expr_rank_inv",
+                         "diabetes_related_PMID_count")
+
+data.norm <- data.frame(matrix(nrow = 0, ncol = ncol(data)))
+colnames(data.norm) <- colnames(data)
+for(comp in unique(data$comparison)){
+  print(comp)
+  data.sub <- data %>%
+    filter(comparison == comp)
+  data.sub[, columns_of_interest] <- lapply(data.sub[, columns_of_interest],
+                                        function(y) (y - min(y)) / (max(y) - min(y))^as.logical(max(y) - min(y)))
+  
+  data.norm <- rbind(data.norm, data.sub)
+}
+
+data.norm <- data.norm %>%
+  mutate(combined_score = 5*pancreas.specific.targets + 4*pancreas.enriched.targets +
+                         3*panc_expr + 2*our_study_expr_rank_inv) %>%
+  mutate(combined_score_with_PMID = combined_score + diabetes_related_PMID_count)
+
+
+all.equal(data.norm[, c("transcripts", "comparison")], 
+          data.all_columns[, c("transcripts", "comparison")])
+#TRUE
+
+data.norm.modified <- data.norm %>%
+  dplyr::select(all_of(c(columns_of_interest, "combined_score", "combined_score_with_PMID")))
+colnames(data.norm.modified)[c(1:5)] <- paste0("norm_", colnames(data.norm.modified)[c(1:5)]) 
+
+data.with_score <- cbind(data.all_columns, data.norm.modified) %>%
+  relocate(comparison, .before = transcripts)
+
+# data_to_write <- data.with_score %>%
+#   relocate(combined_score_with_PMID, .after = transcripts) %>%
+#   dplyr::select(-c(combined_score)) %>%
+#   arrange(comparison, desc(combined_score_with_PMID))
+# write.xlsx(data_to_write,
+#            "data/selected_features/biomarkers_combined_score.xlsx",
+#            sheetName = "combined_score_with_PMID",
+#            col.names = TRUE, row.names = FALSE, append = TRUE)
+
+data_to_write <- data.with_score %>%
+  relocate(combined_score, .after = transcripts) %>%
+  relocate(combined_score_with_PMID, .after = transcripts) %>%
+  arrange(comparison, desc(combined_score_with_PMID))
+write.xlsx(data_to_write,
+           "data/selected_features/biomarkers_combined_score.xlsx",
+           sheetName = "both scores",
+           col.names = TRUE, row.names = FALSE)
