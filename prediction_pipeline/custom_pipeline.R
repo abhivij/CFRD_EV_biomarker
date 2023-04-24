@@ -2,6 +2,7 @@
 
 library(tidyverse)
 library(umap)
+library(readxl)
 
 base_dir <- "~/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
 setwd(base_dir)
@@ -470,3 +471,16 @@ write_pre_post_sample_results_train <- function(){
 }
 
 write_pre_post_sample_results_train()
+
+
+#obtain metrics from actual labels for pre-post samples
+results <- read_excel("prediction_pipeline/sch_pred_with_clinical_results.xlsx")
+results_prediction <- results[-c(1), c(2, 8, 10)]
+colnames(results_prediction) <- c("Sample", "prediction", "actual")
+
+results_prediction <- results_prediction %>%
+  filter(!is.na(actual))
+
+accuracy <- mean(results_prediction$prediction == results_prediction$actual)
+table(results_prediction$actual, results_prediction$prediction)
+caret::confusionMatrix(factor(results_prediction$actual), factor(results_prediction$prediction))
