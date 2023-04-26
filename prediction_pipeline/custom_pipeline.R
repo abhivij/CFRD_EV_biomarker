@@ -475,12 +475,33 @@ write_pre_post_sample_results_train()
 
 #obtain metrics from actual labels for pre-post samples
 results <- read_excel("prediction_pipeline/sch_pred_with_clinical_results.xlsx")
-results_prediction <- results[-c(1), c(2, 8, 10)]
-colnames(results_prediction) <- c("Sample", "prediction", "actual")
+results_prediction <- results[-c(1), c(2, 8, 9, 10, 11)]
+colnames(results_prediction) <- c("Sample", "prediction", "matching_dates", "OGTT", "actual")
 
 results_prediction <- results_prediction %>%
   filter(!is.na(actual))
 
-accuracy <- mean(results_prediction$prediction == results_prediction$actual)
+mean(results_prediction$prediction == results_prediction$actual)
 table(results_prediction$actual, results_prediction$prediction)
 caret::confusionMatrix(factor(results_prediction$actual), factor(results_prediction$prediction))
+
+
+results_prediction_matching <- results_prediction %>%
+  filter(matching_dates == "P")
+mean(results_prediction_matching$prediction == results_prediction_matching$actual)
+table(results_prediction_matching$actual, results_prediction_matching$prediction)
+caret::confusionMatrix(factor(results_prediction_matching$actual), factor(results_prediction_matching$prediction))
+
+
+
+results_prediction_matching_incorrect <- results_prediction_matching %>%
+  filter((prediction == 'IGT' & actual == 'NGT')|(prediction == 'NGT' & actual == 'IGT')) %>%
+  arrange(Sample, actual)
+
+
+
+library(xlsx)
+write.xlsx(as.data.frame(results_prediction_matching_incorrect),
+           "prediction_pipeline/sch_pred_with_clinical_results.xlsx",
+           sheetName = "IGT_NGT_incorrect",
+           col.names = TRUE, row.names = FALSE, append = TRUE)
