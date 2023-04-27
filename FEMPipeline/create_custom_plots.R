@@ -55,13 +55,24 @@ plot_roc <- function(sample_wise_results, sample_type, current_comparison,
   }
   file_name <- paste0(current_comparison, "_", sample_type, ".png")
   png(paste0(dir_path, file_name))
+  
   plot(perf,
        lty = 3, lwd = 0.5,
        colorize = TRUE,
        main = title)
+  # plot(perf,
+  #      avg = 'horizontal', spread.estimate = 'stderr',
+  #      lwd = 2, col = 1, add = TRUE)
+  # plot(perf,
+  #      avg = 'vertical', spread.estimate = 'boxplot',
+  #      lwd = 2, col = 2, add = TRUE)
+  
+  pred_prob <- results[, "PredProb"]
+  true_label <- results[, "TrueLabel"]
+  pred <- prediction(pred_prob, true_label, label.ordering = classes)
+  perf <- performance(pred, "tpr", "fpr")
+  
   plot(perf,
-       colorize = TRUE,
-       avg = 'threshold',
        lwd = 2, add = TRUE)
   dev.off()
 }
