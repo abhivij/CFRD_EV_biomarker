@@ -78,3 +78,66 @@ filtered_samples_read_count <- data %>% dplyr::select(extracted_samples$Sample)
 #from the extracted_samples, select the 'Sample' column and classification_criteria column
 filtered_samples_output_labels <- extracted_samples[, c('Sample', classification_criteria)]
 colnames(filtered_samples_output_labels) <- c("Sample", "Label")
+
+
+
+
+
+###################### creating new phenotype file with updating CFRD/IGT/NGT status for some child samples
+
+results <- read_excel("prediction_pipeline/sch_pred_with_clinical_results.xlsx")
+results <- results[-c(1), c(2, 6, 8, 9, 10, 11)]
+colnames(results) <- c("Sample", "pre_post_mod", "prediction", "matching_dates", "OGTT", "actual")
+new_label_info <- results %>%
+  filter(matching_dates == "P") %>%
+  filter(!is.na(actual)) %>%
+  dplyr::select(c(Sample, actual, pre_post_mod)) %>%
+  mutate(Sample = paste0("X", Sample))
+
+phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t") %>%
+  left_join(new_label_info)
+phenotype_new <- phenotype %>%
+  mutate(condition = case_when(!is.na(actual) ~ actual,
+                               TRUE ~ condition))
+
+sum(phenotype_new$condition != phenotype$condition)
+sum(new_label_info$Sample %in% phenotype$Sample)
+new_label_info$Sample[!(new_label_info$Sample %in% phenotype$Sample)]
+
+
+phenotype_new <- phenotype_new %>%
+  dplyr::select(-c(actual, pre_post_mod))
+
+phenotype_new <- phenotype_new %>%
+  mutate("CFRDVsIGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                 condition == "CFRD" ~ "CFRD",
+                                 condition == "IGT" ~ "IGT",
+                                 TRUE ~ NA_character_))
+summary(factor(phenotype_new$CFRDVsIGT))
+phenotype_new <- phenotype_new %>%
+  mutate("CFRDVsNGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                 condition == "CFRD" ~ "CFRD",
+                                 condition == "NGT" ~ "NGT",
+                                 TRUE ~ NA_character_))
+summary(factor(phenotype_new$CFRDVsNGT))
+
+phenotype_new <- phenotype_new %>%
+  mutate("IGTVsNGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                condition == "IGT" ~ "IGT",
+                                condition == "NGT" ~ "NGT",
+                                TRUE ~ NA_character_))
+summary(factor(phenotype_new$IGTVsNGT))
+
+
+
+summary(factor(phenotype$CFRDVsIGT))
+summary(factor(phenotype$CFRDVsNGT))
+summary(factor(phenotype$IGTVsNGT))
+
+
+new_label_info_sub <- new_label_info %>%
+  filter(pre_post_mod == 0)
+
+
+write.table(phenotype_new, 
+            file = "data/formatted/phenotype_new.txt", sep="\t", row.names=FALSE)
