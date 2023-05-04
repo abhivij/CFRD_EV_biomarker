@@ -514,3 +514,53 @@ dk_used <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t") %>%
 summary(factor(dk_used$pre_post_modulator))
 # 0 NA's 
 # 42   59 
+
+
+############################################
+
+#seurat after filterByExpr based on new phenotype
+
+data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                   nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+phenotype <- read.table("data/formatted/phenotype_new.txt", header=TRUE, sep="\t") %>%
+  filter(!is.na(CFRDVsIGT) | !is.na(CFRDVsNGT) | !is.na(IGTVsNGT)) %>%
+  mutate(updated_sample_name = paste(condition, Sample, sep = "_"))
+
+data <- data[, phenotype$Sample]
+colnames(data) <- phenotype$updated_sample_name
+
+phenotype <- phenotype %>%
+  column_to_rownames("updated_sample_name")
+
+keep <- edgeR::filterByExpr(data, group = phenotype$condition)
+data <- data[keep, ] 
+
+rnaseq <- CreateSeuratObject(counts = data, meta.data = phenotype)
+str(rnaseq)
+
+rnaseq.list <- SplitObject(rnaseq, split.by = "country")
+
+for (i in 1:length(rnaseq.list)) {
+  rnaseq.list[[i]] <- NormalizeData(rnaseq.list[[i]], verbose = FALSE)
+  rnaseq.list[[i]] <- FindVariableFeatures(rnaseq.list[[i]], selection.method = "vst", 
+                                           nfeatures = 2000, verbose = FALSE)
+}
+rnaseq.anchors <- FindIntegrationAnchors(object.list = rnaseq.list)
+
+#k.weight default value is 100
+#choose a value less than smallest dataset size - here DK-60, AU-41
+rnaseq.integrated <- IntegrateData(anchorset = rnaseq.anchors, k.weight = 41)
+
+# Run the standard workflow for visualization and clustering
+rnaseq.integrated <- ScaleData(rnaseq.integrated, verbose = FALSE)
+rnaseq.integrated <- RunPCA(rnaseq.integrated, npcs = 30, verbose = FALSE)
+rnaseq.integrated <- RunUMAP(rnaseq.integrated, reduction = "pca", dims = 1:30)
+p1 <- DimPlot(rnaseq.integrated, reduction = "umap", group.by = "country")
+p2 <- DimPlot(rnaseq.integrated, reduction = "umap", group.by = "condition", label = TRUE, 
+              repel = TRUE) + NoLegend()
+p1 + p2
+
+data.int <- as.data.frame(rnaseq.integrated$integrated@data)
+all.equal(colnames(data.int), rownames(phenotype))
+colnames(data.int) <- phenotype$Sample
+write.csv(data.int, "data/formatted/umi_counts_filtered_seurat3_with_more_samples.csv")
