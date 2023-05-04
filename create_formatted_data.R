@@ -491,3 +491,26 @@ rowSums(data.prepost.pp)
 
 write.csv(data.prepost.pp,
           "data/formatted/umi_counts_prepost_filtered_seurat3.csv")
+
+
+
+##############################
+
+#check if dk cohort samples used are postmodulators
+
+dk <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t") %>%
+  filter(country == "DK")
+summary(factor(dk$pre_post_modulator))
+# 0    1 NA's 
+# 33   66   34 
+summary(factor(dk$age_group))  
+# adult 
+# 133 
+
+dk_used <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t") %>%
+  filter(age_group == "adult") %>%
+  filter(!is.na(CFRDVsIGT) | !is.na(CFRDVsNGT) | !is.na(IGTVsNGT)) %>%
+  mutate(updated_sample_name = paste(condition, Sample, sep = "_"))
+summary(factor(dk_used$pre_post_modulator))
+# 0 NA's 
+# 42   59 
