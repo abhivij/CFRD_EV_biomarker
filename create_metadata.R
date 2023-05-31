@@ -203,6 +203,9 @@ summary(factor(cph_info$sex))
 length(unique(cph_info$individual_id))
 #93
 
+cph_info <- cph_info %>%
+  mutate(sample_intake = year, .after = year)
+
 write.csv(cph_info, "data/formatted/sample_info_cph.csv", row.names = FALSE)
 
 
@@ -240,6 +243,7 @@ for(i in c(2:dim(mastersheet_info.rpa_sch_14e)[1])){
     mastersheet_info.rpa_sch_14e[i, "mutation2"] <- mastersheet_info.rpa_sch_14e[(i-1), "mutation2"]
   }
 }
+colnames(mastersheet_info.rpa_sch_14e)[6] <- "sample_intake"
 
 mastersheet_info.rpa <- mastersheet_info.rpa_sch_14e %>%
   filter(grepl("^17-", sample_name)) %>%
@@ -281,7 +285,7 @@ rpa_info <- sample_info.rpa %>%
 sum(is.na(rpa_info$diabetes_status))
 
 rpa_info <- rpa_info %>%
-  select(-c(10:12, 14, 19:21))
+  select(-c(10, 11, 14, 19:21))
 colnames(rpa_info)[9] <- "pre_post_modulator"
 
 rpa_info <- rpa_info %>%
@@ -332,7 +336,10 @@ mastersheet_info.sch <- mastersheet_info.sch %>%
 mastersheet_info.sch <- mastersheet_info.sch %>%
   select(c(1:3, 6, 7, 9, 10, 11))
 colnames(mastersheet_info.sch)[3] <- "pre_post_modulator"
-colnames(mastersheet_info.sch)[4] <- "sample_date"
+
+mastersheet_info.sch <- mastersheet_info.sch %>%
+  mutate(sample_date = sample_intake, .before = sample_intake)
+
 mastersheet_info.sch <- mastersheet_info.sch %>%
   mutate(modulator = NA, .before = "age")
 mastersheet_info.sch <- mastersheet_info.sch %>%
@@ -345,6 +352,9 @@ mastersheet_info.sch <- mastersheet_info.sch %>%
                              sep = "-")
   ) %>%
   select(-c(sd_date, sd_month, sd_year))
+
+mastersheet_info.sch <- mastersheet_info.sch %>%
+  relocate(sample_intake, .before = pre_post_modulator)
 
 mastersheet_info.sch2 <- read_xlsx("data/ExoCF mastersheet_RPA Copenhagen SCH.xlsx",
                                   sheet = 4)
@@ -391,6 +401,17 @@ mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
   mutate("FEV1" = NA, .after = "sex")
 colnames(mastersheet_info.sch)[1] <- "condition"
 colnames(mastersheet_info.sch2)[1] <- "condition"
+
+mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
+  separate(sample_name, into = c(NA, "sample_intake1"), sep = " ", remove = FALSE) %>%
+  separate(sample_name, into = c(NA, "sample_intake2"), sep = "_", remove = FALSE) %>%
+  mutate(sample_intake = ifelse(is.na(sample_intake1), sample_intake2, sample_intake1)) %>%
+  dplyr::select(-c(sample_intake1, sample_intake2)) %>%
+  relocate(sample_intake, .after = sample_name) %>%
+  mutate(sample_intake = sub("/20", "/", sample_intake, fixed = TRUE)) %>%
+  mutate(sample_intake = gsub("/", ".", sample_intake, fixed = TRUE)) %>%
+  mutate(sample_intake = as.Date(sample_intake, format = "%d.%m.%y"))
+
 
 mastersheet_info.sch <- rbind(mastersheet_info.sch, mastersheet_info.sch2)
 mastersheet_info.sch <- mastersheet_info.sch %>%
@@ -501,7 +522,7 @@ mastersheet_info.14e <- mastersheet_info.rpa_sch_14e %>%
   mutate(sample_name = gsub("-", "_", sample_name, fixed = TRUE)) %>%
   mutate(diabetes_status = "HC")
 mastersheet_info.14e <- mastersheet_info.14e %>%
-  select(c(1,2,3,7,10,11,12,13))
+  select(c(1,2,3,6,7,10,11,12,13))
 colnames(mastersheet_info.14e)[3] <- "pre_post_modulator"
 mastersheet_info.14e <- mastersheet_info.14e %>%
   mutate(modulator = "", .after = pre_post_modulator)
@@ -546,6 +567,13 @@ colnames(healthy_info)
 
 cph_info <- cph_info %>%
   relocate(age, .before = sex)
+rpa_info <- rpa_info %>%
+  relocate(sample_intake, .after = year)
+sch_info <- sch_info %>%
+  relocate(sample_intake, .after = year)
+healthy_info <- healthy_info %>%
+  relocate(sample_intake, .after = year)
+
 
 colnames(cph_info)
 colnames(rpa_info)
@@ -561,18 +589,25 @@ colnames(rpa_info)
 colnames(sch_info)
 colnames(healthy_info)
 
+meta_data_au <- rbind(rpa_info %>%
+                        mutate("cohort" = "RPA_NSW", .after = year) %>%
+                        mutate("country" = "AU", .after = cohort),
+                      sch_info %>%
+                        mutate("cohort" = "SCH_NSW", .after = year) %>%
+                        mutate("country" = "AU", .after = cohort), 
+                      healthy_info %>%
+                        mutate("cohort" = "UNSW", .after = year) %>%
+                        mutate("country" = "AU", .after = cohort)) %>%
+  rename(c("sample_intake_date" = "sample_intake")) %>%
+  mutate(sample_intake_year = format(sample_intake_date, format = "%Y"), .after = sample_intake_date)
+
 meta_data <- rbind(cph_info %>%
                      mutate("cohort" = "CPH", .after = year) %>%
-                     mutate("country" = "DK", .after = cohort), 
-                   rpa_info %>%
-                     mutate("cohort" = "RPA_NSW", .after = year) %>%
-                     mutate("country" = "AU", .after = cohort),
-                   sch_info %>%
-                     mutate("cohort" = "SCH_NSW", .after = year) %>%
-                     mutate("country" = "AU", .after = cohort), 
-                   healthy_info %>%
-                     mutate("cohort" = "UNSW", .after = year) %>%
-                     mutate("country" = "AU", .after = cohort))
+                     mutate("country" = "DK", .after = cohort) %>%
+                     rename(c("sample_intake_year" = "sample_intake")) %>%
+                     mutate(sample_intake_date = as.Date(""), .before = sample_intake_year),
+                   meta_data_au
+                   )
 
 meta_data <- meta_data %>%
   rename(c("patient_recruitment_year" = "year"))
@@ -710,3 +745,7 @@ missing1 <- umi_samples %>%
 missing2 <- meta_data_with_qual %>%
   anti_join(umi_samples)
 #0
+
+
+
+ 
