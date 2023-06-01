@@ -162,7 +162,8 @@ mastersheet_info.cph <- mastersheet_info.cph %>%
   mutate(individual_id = paste0("CPH", study_id), .after = study_id) %>%
   separate(intake, into = c("year", NA, NA), sep = " ", remove = FALSE)
 mastersheet_info.cph <- mastersheet_info.cph %>%
-  select(c(1:17), -c(is_sample_available, `EXOSOME ISOLATION`)) 
+  select(c(1:17, 19, 20), -c(is_sample_available, `EXOSOME ISOLATION`)) 
+colnames(mastersheet_info.cph)[16:17] <- c("OGTT_2020", "OGTT_2017")
 
 mastersheet_info.cph <- mastersheet_info.cph %>%
   mutate(sample_name = case_when(individual_id %in% c("CPH10", "CPH22") ~ individual_id,
@@ -205,6 +206,12 @@ length(unique(cph_info$individual_id))
 
 cph_info <- cph_info %>%
   mutate(sample_intake = year, .after = year)
+
+cph_info <- cph_info %>%
+  mutate(OGTT = case_when(year == "2017" ~ OGTT_2017,
+                          year == "2020" ~ OGTT_2020,
+                          TRUE ~ NA_real_)) %>%
+  dplyr::select(-c(OGTT_2017, OGTT_2020))
 
 write.csv(cph_info, "data/formatted/sample_info_cph.csv", row.names = FALSE)
 
@@ -393,7 +400,7 @@ mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
 
 colnames(mastersheet_info.sch2)[21] <- c("rna_extraction")
 mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
-  select(c(1:4, 21))
+  select(c(1:4, 21, 46))
 
 mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
   mutate("age" = NA, .after = "modulator") %>%
@@ -411,9 +418,9 @@ mastersheet_info.sch2 <- mastersheet_info.sch2 %>%
   mutate(sample_intake = sub("/20", "/", sample_intake, fixed = TRUE)) %>%
   mutate(sample_intake = gsub("/", ".", sample_intake, fixed = TRUE)) %>%
   mutate(sample_intake = as.Date(sample_intake, format = "%d.%m.%y"))
+colnames(mastersheet_info.sch2)[10] <- "OGTT"
 
-
-mastersheet_info.sch <- rbind(mastersheet_info.sch, mastersheet_info.sch2)
+mastersheet_info.sch <- rbind(mastersheet_info.sch %>% mutate(OGTT = NA), mastersheet_info.sch2)
 mastersheet_info.sch <- mastersheet_info.sch %>%
   mutate(sample_name = gsub("-", "_", sample_name, fixed = TRUE)) %>%
   mutate(sample_name = gsub(" ", "_", sample_name, fixed = TRUE)) %>%
@@ -566,7 +573,8 @@ colnames(sch_info)
 colnames(healthy_info)
 
 cph_info <- cph_info %>%
-  relocate(age, .before = sex)
+  relocate(age, .before = sex) %>%
+  relocate(OGTT, .after = FEV1)
 rpa_info <- rpa_info %>%
   relocate(sample_intake, .after = year)
 sch_info <- sch_info %>%
@@ -574,6 +582,10 @@ sch_info <- sch_info %>%
 healthy_info <- healthy_info %>%
   relocate(sample_intake, .after = year)
 
+rpa_info <- rpa_info %>%
+  mutate(OGTT = NA_real_, .after = FEV1)
+healthy_info <- healthy_info %>%
+  mutate(OGTT = NA_real_, .after = FEV1)
 
 colnames(cph_info)
 colnames(rpa_info)
@@ -747,5 +759,40 @@ missing2 <- meta_data_with_qual %>%
 #0
 
 
+###################### including CFRD/IGT/NGT status, OGTT for some child samples from info provided later by Bernadette
 
- 
+results <- read_excel("prediction_pipeline/sch_pred_with_clinical_results.xlsx")
+results <- results[-c(1), c(2, 6, 8, 9, 10, 11)]
+colnames(results) <- c("Sample", "pre_post_mod", "prediction", "matching_dates", "OGTT", "actual")
+new_label_info <- results %>%
+  filter(matching_dates == "P") %>%
+  filter(!is.na(actual)) %>%
+  dplyr::select(c(Sample, actual, pre_post_mod, OGTT)) %>%
+  rename(c("sample_long_name" = "Sample"))
+
+meta_data_with_qual <- meta_data_with_qual %>%
+  left_join(new_label_info, by = "sample_long_name")
+meta_data_with_qual <- meta_data_with_qual %>%
+  mutate(condition = case_when(!is.na(actual) ~ actual,
+                               TRUE ~ condition))
+
+meta_data_with_qual %>%
+  filter(!is.na(pre_post_mod) & !is.na(pre_post_modulator) & pre_post_mod != pre_post_modulator)
+#0 rows
+
+meta_data_with_qual %>%
+  filter(!is.na(OGTT.x) & !is.na(OGTT.y) & OGTT.x != OGTT.y)
+#0 rows
+
+meta_data_with_qual <- meta_data_with_qual %>%
+  mutate(OGTT = ifelse(!is.na(OGTT.x), OGTT.x, OGTT.y)) %>%
+  dplyr::select(-c(actual, pre_post_mod, OGTT.x, OGTT.y))
+
+#OGTT values that match with sample date from sheet shared by Laura 
+#only 116OC sample OGTT values are present in sheet shared by Laura thats not present in master sheet
+meta_data_with_qual[meta_data_with_qual$sample_name == "11_16_116OC_16_8_16", "OGTT"] <- 5.3
+meta_data_with_qual[meta_data_with_qual$sample_name == "11_16_116OC_30_4_13", "OGTT"] <- 5.3
+meta_data_with_qual[meta_data_with_qual$sample_name == "11_16_116OC_8_5_12", "OGTT"] <- 5.4
+meta_data_with_qual[meta_data_with_qual$sample_name == "11_16_116OC_19_9_17", "OGTT"] <- 4.1
+
+write.csv(format(meta_data_with_qual, digits = 3), "data/formatted/meta_data.csv", row.names = FALSE)
