@@ -171,3 +171,61 @@ summary(factor(non_modulator$country_condition_ag))
 summary(factor(modulator$country))
 summary(factor(modulator$country_condition_ag))
 
+#######################################################
+#######################################################
+#######################################################
+#updated phenotype
+library(tidyverse)
+
+base_dir <- "/home/abhivij/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
+setwd(base_dir)
+
+meta_data <- read.csv("data/formatted/meta_data_updated.csv") %>%
+  rename(c("condition" = "condition_updated"))
+
+phenotype <- meta_data %>%
+  rename("Sample" = "sample_long_name") %>%
+  mutate(Sample = paste0("X", Sample))
+
+phenotype <- phenotype %>%
+  mutate("CFRDVsIGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                 condition == "CFRD" ~ "CFRD",
+                                 condition == "IGT" ~ "IGT",
+                                 TRUE ~ NA_character_))
+summary(factor(phenotype$CFRDVsIGT))
+phenotype <- phenotype %>%
+  mutate("CFRDVsNGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                 condition == "CFRD" ~ "CFRD",
+                                 condition == "NGT" ~ "NGT",
+                                 TRUE ~ NA_character_))
+summary(factor(phenotype$CFRDVsNGT))
+
+phenotype <- phenotype %>%
+  mutate("IGTVsNGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                condition == "IGT" ~ "IGT",
+                                condition == "NGT" ~ "NGT",
+                                TRUE ~ NA_character_))
+summary(factor(phenotype$IGTVsNGT))
+
+phenotype <- phenotype %>%
+  mutate("CFVsHC" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                              condition == "HC" ~ "HC",
+                              TRUE ~ "CF"))
+summary(factor(phenotype$CFVsHC))
+
+phenotype <- phenotype %>%
+  mutate("PreModulatorVsPostModulator" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ "PostModulator",
+                                                   TRUE ~ "PreModulator"))
+
+#two samples are not prepended with X in the data file. Replicating that here
+phenotype <- phenotype %>%
+  mutate(Sample = sub("XCPH10_S271", "CPH10_S271", Sample)) %>%
+  mutate(Sample = sub("XCPH22_S272", "CPH22_S272", Sample))
+
+
+write.table(phenotype, 
+            file = "data/formatted/phenotype.txt", sep="\t", row.names=FALSE)
+
+p2 <- read.table("data/formatted/phenotype.txt", header = TRUE)
+
+all.equal(phenotype, p2)
