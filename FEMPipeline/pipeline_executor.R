@@ -1,5 +1,5 @@
 library(FEMPipeline)
-source("FEMPipeline/dataset_pipeline_arguments.R")
+source("FEMPipeline/dataset_pipeline_arguments_tra.R")
 
 args = commandArgs(trailingOnly = TRUE)
 if (length(args) > 1) {

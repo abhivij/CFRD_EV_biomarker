@@ -229,3 +229,52 @@ write.table(phenotype,
 p2 <- read.table("data/formatted/phenotype.txt", header = TRUE)
 
 all.equal(phenotype, p2)
+
+
+#######################################################
+#phenotype for proteomics
+
+meta_data <- read.csv("data/proteomics/prot_metadata_all.csv")
+
+phenotype <- meta_data %>%
+  rename("Sample" = "label") %>%
+  mutate(Sample = paste0("X", Sample))
+
+phenotype <- phenotype %>%
+  mutate("CFRDVsIGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                 condition == "CFRD" ~ "CFRD",
+                                 condition == "IGT" ~ "IGT",
+                                 TRUE ~ NA_character_))
+summary(factor(phenotype$CFRDVsIGT))
+phenotype <- phenotype %>%
+  mutate("CFRDVsNGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                 condition == "CFRD" ~ "CFRD",
+                                 condition == "NGT" ~ "NGT",
+                                 TRUE ~ NA_character_))
+summary(factor(phenotype$CFRDVsNGT))
+
+phenotype <- phenotype %>%
+  mutate("IGTVsNGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                condition == "IGT" ~ "IGT",
+                                condition == "NGT" ~ "NGT",
+                                TRUE ~ NA_character_))
+summary(factor(phenotype$IGTVsNGT))
+
+phenotype <- phenotype %>%
+  mutate("CFVsHC" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                              condition == "HC" ~ "HC",
+                              TRUE ~ "CF"))
+summary(factor(phenotype$CFVsHC))
+
+phenotype <- phenotype %>%
+  mutate("PreModulatorVsPostModulator" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ "PostModulator",
+                                                   TRUE ~ "PreModulator"))
+
+#two samples are not prepended with X in the data file. Replicating that here
+phenotype <- phenotype %>%
+  mutate(Sample = sub("XCPH10_S271", "CPH10_S271", Sample)) %>%
+  mutate(Sample = sub("XCPH22_S272", "CPH22_S272", Sample))
+
+
+write.table(phenotype, 
+            file = "data/formatted/phenotype.txt", sep="\t", row.names=FALSE)
