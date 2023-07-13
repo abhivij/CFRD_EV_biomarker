@@ -796,3 +796,255 @@ meta_data_with_qual[meta_data_with_qual$sample_name == "11_16_116OC_8_5_12", "OG
 meta_data_with_qual[meta_data_with_qual$sample_name == "11_16_116OC_19_9_17", "OGTT"] <- 4.1
 
 write.csv(format(meta_data_with_qual, digits = 3), "data/formatted/meta_data.csv", row.names = FALSE)
+
+
+###########
+
+#compare condition from OGTT and condition field already present
+meta_data_updated_condition <- meta_data_with_qual %>%
+  mutate(OGTT = as.numeric(OGTT),
+         condition_from_OGTT = case_when(is.na(OGTT) ~ NA_character_,
+                                         OGTT >= 11.1 ~ "CFRD",
+                                         OGTT < 7.8 ~ "NGT",
+                                         TRUE ~ "IGT"),
+         condition_updated = case_when(is.na(condition) ~ condition_from_OGTT,
+                                       condition != "IND" & condition != "CF_pre_post_modulator" & !is.na(condition_from_OGTT) ~ condition_from_OGTT,
+                                       TRUE ~ condition))
+write.csv(format(meta_data_updated_condition, digits = 3), "data/formatted/meta_data.csv", row.names = FALSE)
+
+mismatch_entries <- meta_data_updated_condition %>%
+  filter(!is.na(condition_from_OGTT) & condition_from_OGTT != condition)
+write.csv(format(mismatch_entries, digits = 3), "data/formatted/meta_data_condition_mismatch.csv", row.names = FALSE)
+
+
+############################################
+
+meta_data <- read.csv("data/formatted/meta_data_modified_2023June28.csv")
+ogtt_bernadatette <- read.csv("data/formatted/ogtt_au.csv")
+colnames(ogtt_bernadatette) <- c("sample", 
+                                 "pre_post_modulator_b", 
+                                 "are_dates_matching_b", 
+                                 "sample_intake_date_b",
+                                 "OGTT_date_b", "OGTT_2h_b",
+                                 "condition_b", "comment", "condition_other")
+meta_data_updated <- meta_data %>%
+  left_join(ogtt_bernadatette %>% dplyr::select(-c(condition_b)), by = c("sample_long_name" = "sample"))
+
+# subset <- meta_data_updated %>%
+#   filter(!is.na(sample_intake_date_b))
+# 
+# subset %>%
+#   filter(sample_intake_date != sample_intake_date_b)
+# subset %>%
+#   filter(pre_post_modulator != pre_post_modulator_b)
+# s <- subset %>%
+#   filter(OGTT_2h != OGTT_2h_b) %>%
+#   dplyr::select(c(sample_long_name, OGTT_2h, OGTT_2h_b)) %>%
+#   filter(OGTT_2h != "NA")
+# sum(is.na(s$OGTT_2h))
+
+
+meta_data_updated <- meta_data_updated %>%
+  dplyr::select(-c(note, sample_intake_date_b, pre_post_modulator_b, ogtt_date, are_dates_matching_b)) %>%
+  rename(c("OGTT_date" = "OGTT_date_b"))
+write.csv(meta_data_updated, "data/formatted/meta_data_with_info_from_bernadette.csv", row.names = FALSE)
+
+
+
+########################
+
+#create proteomics meta-data
+
+#copy meta-data from transcriptomics for samples available
+#others use proteomics meta-data
+tra_meta_data <- read.csv("data/formatted/meta_data_updated.csv") %>%
+  rename(c("condition" = "condition_updated")) %>%
+  rename("Sample" = "sample_long_name") %>%
+  mutate(Sample = paste0("X", Sample))
+
+prot_meta_data_from_Alex <- read.table("data/proteomics/AU_DK/proteomics_sinfo_modified.txt", 
+                                           sep = "\t", header = TRUE)
+prot_summary_others <- read.table("data/proteomics/AU_DK/DK_others/summary.txt", 
+                                  sep = "\t", header = TRUE)[, c(1:2)]
+colnames(prot_summary_others) <- c("rawfile", "label")
+
+prot_meta_data_to_be_used <- rbind(prot_meta_data_from_Alex %>%
+  dplyr::select(rawfile, label, technicalreplicate),
+  prot_summary_others %>%
+    filter(rawfile != "Total") %>%
+    mutate(technicalreplicate = NA))
+
+mapping <- read_excel("data/proteomics/pheno_combined_new_formatted.xlsx", sheet = "t_p_mapping")
+mapping.t_avlbl <- mapping %>%
+  filter(!is.na(sample_long_name_t) & !is.na(sample_long_name_p)) %>%
+  dplyr::select(c(sample_long_name_p, sample_long_name_t))
+mapping.t_not_avlbl <- mapping %>%
+  filter(is.na(sample_long_name_t) & !is.na(sample_long_name_p))
+
+length(unique(tra_meta_data$Sample))
+# [1] 272
+length(unique(mapping.t_avlbl$sample_long_name_t))
+# [1] 238
+length(unique(mapping.t_avlbl$sample_long_name_p))
+# [1] 249
+length(unique(mapping.t_not_avlbl$sample_long_name_p))
+# [1] 21
+length(unique(mapping$sample_long_name_p))
+# [1] 271
+# this is 249 + 21 + 1(NA)
+
+prot_meta_data1 <- tra_meta_data %>%
+  inner_join(mapping.t_avlbl, by = c("Sample" = "sample_long_name_t")) %>%
+  inner_join(prot_meta_data_to_be_used, by = c("sample_long_name_p" = "label"))
+#259
+length(unique(prot_meta_data1$Sample))
+# [1] 236
+write.csv(prot_meta_data1, 
+          "data/proteomics/prot_metadata1.csv", row.names = FALSE)
+#created a new file data/proteomics/prot_metadata1_modified.csv by 
+# manually entering values for missing technicalreplicate
+
+
+prot_meta_data_from_Alex_sub <- read.table("data/proteomics/AU_DK/proteomics_sinfo_modified.txt", 
+                                       sep = "\t", header = TRUE) %>%
+  inner_join(mapping.t_not_avlbl, by = c("label" = "sample_long_name_p"))
+write.csv(prot_meta_data_from_Alex_sub, "data/proteomics/prot_metadata_missing_in_tra.csv", row.names = FALSE)
+
+#manually modifying the above file and creating a new file
+# data/proteomics/prot_metadata_missing_in_tra_modified.csv
+
+
+
+#now just rely on 2 files for proteomics metadata
+#data/proteomics/prot_metadata1_modified.csv
+#data/proteomics/prot_metadata_missing_in_tra_modified.csv
+
+prot_meta_data1 <- read.csv("data/proteomics/prot_metadata1_modified.csv")
+prot_meta_data_missing_tra <- read.csv("data/proteomics/prot_metadata_missing_in_tra_modified.csv") %>%
+  dplyr::select(c(rawfile, label, individual_id, country, age_group, technicalreplicate,
+                  biotype, sample_intake_year, FEV1, cohort, age, sample_intake_date, 
+                  pre_post_modulator, modulator, sex, mutation1, mutation2,
+                  OGTT_1h, OGTT_2h, condition_updated)) %>%
+  mutate(mutation = case_when(is.na(mutation1) ~ NA_character_,
+                              mutation1 == "F508del" ~ paste0("F508del___", mutation2),
+                              mutation2 == "F508del" ~ paste0("F508del___", mutation1),
+                              mutation1 < mutation2 ~ paste(mutation1, mutation2, sep = "___"),
+                              TRUE ~ paste(mutation2, mutation1, sep = "___"))) %>%
+  dplyr::select(-c(mutation1, mutation2)) %>%
+  rename(c("condition" = "condition_updated"))
+
+prot_meta_data1 <- prot_meta_data1 %>%
+  rename(c("sample_long_name_t" = "Sample", "label" = "sample_long_name_p")) %>%
+  dplyr::select(c(label, rawfile, technicalreplicate, 
+                  sample_long_name_t, condition, individual_id, 
+                  sample_name, cohort, country, 
+                  sample_intake_date, sample_intake_year, 
+                  pre_post_modulator, modulator, 
+                  age, age_group, sex, FEV1, mutation, 
+                  illumina_sample_number, quant_batch, biotype, 
+                  patient_recruitment_year, 
+                  seq_plate, seq_miR_library_quality, 
+                  condition_from_OGTT, condition_initially_used, 
+                  OGTT_1h, OGTT_2h,
+                  OGTT_date, OGTT_2h_b, comment, condition_other))
+
+prot_meta_data_missing_tra <- prot_meta_data_missing_tra %>%
+  mutate(sample_long_name_t = NA,
+           sample_name = NA,
+           illumina_sample_number = NA,
+           quant_batch = NA, 
+           patient_recruitment_year = NA, 
+           seq_plate = NA, 
+           seq_miR_library_quality = NA, 
+           condition_from_OGTT = NA,
+           condition_initially_used = NA, 
+           OGTT_date = NA,
+           OGTT_2h_b = NA,
+           comment = NA,
+           condition_other = NA) %>%
+  dplyr::select(c(label, rawfile, technicalreplicate, 
+                  sample_long_name_t, condition, individual_id, 
+                  sample_name, cohort, country, 
+                  sample_intake_date, sample_intake_year, 
+                  pre_post_modulator, modulator, 
+                  age, age_group, sex, FEV1, mutation, 
+                  illumina_sample_number, quant_batch, biotype, 
+                  patient_recruitment_year, 
+                  seq_plate, seq_miR_library_quality, 
+                  condition_from_OGTT, condition_initially_used, 
+                  OGTT_1h, OGTT_2h,
+                  OGTT_date, OGTT_2h_b, comment, condition_other))
+
+all.equal(colnames(prot_meta_data1), colnames(prot_meta_data_missing_tra))
+
+prot_meta_data <- rbind(prot_meta_data1, prot_meta_data_missing_tra)
+
+sum(prot_meta_data$rawfile %in% prot_meta_data_from_Alex$rawfile)
+#262
+sum(prot_meta_data$rawfile %in% prot_summary_others$rawfile)
+#18
+
+length(prot_meta_data_from_Alex$rawfile)
+length(unique(prot_meta_data_from_Alex$rawfile))
+
+sum(!prot_meta_data_from_Alex$rawfile %in% prot_meta_data$rawfile)
+#16
+dim(prot_meta_data_from_Alex[! prot_meta_data_from_Alex$rawfile %in% prot_meta_data$rawfile, 
+               c('rawfile', 'label', 'condition')])
+#16 3
+missing_data <- prot_meta_data_from_Alex[! prot_meta_data_from_Alex$rawfile %in% prot_meta_data$rawfile, 
+                                         c('rawfile', 'label', 'condition')]
+#all glufib, QC
+#and
+# SW-exo-6-9-21-57-90min SW.exo.6.9.21.57.90min IGT
+# SW-exo-25-8-21-13-90min SW.exo.25.8.21.13.90min NGT
+#just these 2 were not prepended with 'X' in mapping file
+
+missing_ones_required <- mapping.t_avlbl %>%
+  filter(sample_long_name_p %in% c('SW.exo.6.9.21.57.90min', 'SW.exo.25.8.21.13.90min')) %>%
+  mutate(sample_long_name_t = paste0('X', sample_long_name_t)) %>%
+  inner_join(tra_meta_data, by = c("sample_long_name_t" = "Sample")) %>%
+  inner_join(prot_meta_data_to_be_used, by = c("sample_long_name_p" = "label")) %>%
+  rename(c("label" = "sample_long_name_p")) %>%
+  dplyr::select(c(label, rawfile, technicalreplicate, 
+                  sample_long_name_t, condition, individual_id, 
+                  sample_name, cohort, country, 
+                  sample_intake_date, sample_intake_year, 
+                  pre_post_modulator, modulator, 
+                  age, age_group, sex, FEV1, mutation, 
+                  illumina_sample_number, quant_batch, biotype, 
+                  patient_recruitment_year, 
+                  seq_plate, seq_miR_library_quality, 
+                  condition_from_OGTT, condition_initially_used, 
+                  OGTT_1h, OGTT_2h,
+                  OGTT_date, OGTT_2h_b, comment, condition_other))
+all.equal(colnames(prot_meta_data), colnames(missing_ones_required))
+prot_meta_data <- rbind(prot_meta_data, missing_ones_required)
+
+sum(prot_meta_data$rawfile %in% prot_meta_data_from_Alex$rawfile)
+#264
+sum(prot_meta_data$rawfile %in% prot_summary_others$rawfile)
+#18
+
+length(prot_meta_data_from_Alex$rawfile)
+length(unique(prot_meta_data_from_Alex$rawfile))
+
+sum(!prot_meta_data_from_Alex$rawfile %in% prot_meta_data$rawfile)
+#14
+dim(prot_meta_data_from_Alex[! prot_meta_data_from_Alex$rawfile %in% prot_meta_data$rawfile, 
+                             c('rawfile', 'label', 'condition')])
+#14 3
+missing_data <- prot_meta_data_from_Alex[! prot_meta_data_from_Alex$rawfile %in% prot_meta_data$rawfile, 
+                                         c('rawfile', 'label', 'condition')]
+
+
+dim(prot_meta_data[prot_meta_data$rawfile %in% prot_summary_others$rawfile, c('rawfile', 'label', 'condition')])
+prot_meta_data[prot_meta_data$rawfile %in% prot_summary_others$rawfile, c('rawfile', 'label', 'condition')]
+
+prot_meta_data <- prot_meta_data %>%
+  mutate(mq_batch = case_when(prot_meta_data$rawfile %in% prot_summary_others$rawfile ~ 'other',
+                              TRUE ~ 'main'))
+summary(factor(prot_meta_data$mq_batch))
+
+write.csv(prot_meta_data, 
+          "data/proteomics/prot_metadata_all.csv", row.names = FALSE)
