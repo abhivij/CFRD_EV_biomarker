@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd /srv/scratch/vafaeelab/AbhishekVijayan/CFRD_EV_biomarker
+
+source ~/.venvs/forR/bin/activate
+
+module load r/4.2.2
+
+Rscript FEMPipeline/pipeline_executor_prot.R --args ${PBS_ARRAY_INDEX} 

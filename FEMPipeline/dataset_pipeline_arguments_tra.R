@@ -1,4 +1,4 @@
-dataset_pipeline_arguments <- list(
+dataset_pipeline_arguments_tra <- list(
   #CFRDVsIGT
   list(phenotype_file_name = "data/formatted/phenotype.txt",
        read_count_dir_path = "data/formatted",

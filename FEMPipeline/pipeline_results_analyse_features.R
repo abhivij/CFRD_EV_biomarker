@@ -1,5 +1,7 @@
 setwd("~/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/FEMPipeline/")
 source("dataset_pipeline_arguments.R")
+source("dataset_pipeline_arguments_tra.R")
+source("dataset_pipeline_arguments_prot.R")
 source("utils.R")
 library(tidyverse)
 library(viridis)
@@ -1578,3 +1580,59 @@ create_data_subsets(dparg_id = 449,
 
 ###########
 ###########
+
+
+#tra after looking into proteomics
+#log_tmm + combat corrected prior to pipeline
+
+explore_common_features(dparg_id = 1,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("ranger_pos_impu_cor", "mrmr_perc50",
+                                         "mrmr10", "t-test", "RF_RFE", "mrmr100", "mrmr75"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_tra_combat",
+                        dir_path = "../plots/fem_pipeline_results_tra_combat/common_features_upset")
+explore_common_features(dparg_id = 1,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("ranger_pos_impu_cor", "ga_rf", "mrmr_perc50",
+                                         "wilcoxontest", "mrmr10", 
+                                         "t-test", "RF_RFE", "mrmr100", "mrmr75"),
+                        min_iter_feature_presence = 27,
+                        results_dir = "../fem_pipeline_results_tra_combat",
+                        dir_path = "../plots/fem_pipeline_results_tra_combat/common_features_upset")
+explore_common_features(dparg_id = 5,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("ranger_pos_impu_cor", "t-test", "wilcoxontest",
+                                         "ga_rf", "RF_RFE", "mrmr_perc50", "mrmr100"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_tra_combat",
+                        dir_path = "../plots/fem_pipeline_results_tra_combat/common_features_upset")
+explore_common_features(dparg_id = 9,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments,
+                        best_fsm_vec = c("wilcoxontest", "RF_RFE", "ranger_pos_impu_cor",
+                                         "ga_rf", "t-test", "mrmr_perc50", "mrmr100"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_tra_combat",
+                        dir_path = "../plots/fem_pipeline_results_tra_combat/common_features_upset")
+
+create_data_subsets(dparg_id = 1,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("ranger_pos_impu_cor")),
+                    subset_file_name_substr = "ranger_pos_impu_cor",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/CFRDVsIGT_umi_counts_combat_processed.csv")
+create_data_subsets(dparg_id = 5,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("ranger_pos_impu_cor")),
+                    subset_file_name_substr = "ranger_pos_impu_cor",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/CFRDVsNGT_umi_counts_combat_processed.csv")
+create_data_subsets(dparg_id = 9,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("ranger_pos_impu_cor")),
+                    subset_file_name_substr = "ranger_pos_impu_cor",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/IGTVsNGT_umi_counts_combat_processed.csv")

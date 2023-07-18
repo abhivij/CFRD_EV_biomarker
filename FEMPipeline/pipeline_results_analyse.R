@@ -3,6 +3,8 @@ library(tidyverse)
 library(viridis)
 library(ComplexHeatmap)
 source("dataset_pipeline_arguments.R")
+source("dataset_pipeline_arguments_tra.R")
+source("dataset_pipeline_arguments_prot.R")
 source("utils.R")
 
 dparg_vec = c(199, 203, 207)
@@ -1033,3 +1035,34 @@ plot_common_feature_heatmap(c(471:475),
 
 
 ##########
+
+#tra after looking into proteomics
+#log_tmm + combat corrected prior to pipeline
+
+plot_heatmap(
+  dparg_vec = c(1, 5, 9),
+  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  results_dir = "../fem_pipeline_results_tra_combat",
+  dir_path = "../plots/fem_pipeline_results_tra_combat/",
+  dataset_replace_string = "CF_EV_"
+)
+
+
+plot_common_feature_heatmap(c(13, 14, 15),
+                            results_dir = "../fem_pipeline_results_tra_combat_subset",
+                            dataset_replace_string = "CF_EV_",
+                            heatmap_file_name = "seurat3_norm_find_var_none_CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_tra_combat/subset/"
+)
+plot_common_feature_heatmap(c(16, 17, 18),
+                            results_dir = "../fem_pipeline_results_tra_combat_subset",
+                            dataset_replace_string = "CF_EV_",
+                            heatmap_file_name = "seurat3_norm_find_var_none_CFRDVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_tra_combat/subset/"
+)
+plot_common_feature_heatmap(c(19, 20, 21),
+                            results_dir = "../fem_pipeline_results_tra_combat_subset",
+                            dataset_replace_string = "CF_EV_",
+                            heatmap_file_name = "seurat3_norm_find_var_none_IGTVsNGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_tra_combat/subset/"
+)
