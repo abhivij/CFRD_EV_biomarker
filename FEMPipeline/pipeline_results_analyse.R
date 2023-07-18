@@ -1041,7 +1041,7 @@ plot_common_feature_heatmap(c(471:475),
 
 plot_heatmap(
   dparg_vec = c(1, 5, 9),
-  dataset_pipeline_arguments = dataset_pipeline_arguments,
+  dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
   results_dir = "../fem_pipeline_results_tra_combat",
   dir_path = "../plots/fem_pipeline_results_tra_combat/",
   dataset_replace_string = "CF_EV_"
