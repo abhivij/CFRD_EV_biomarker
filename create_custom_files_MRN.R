@@ -4,6 +4,8 @@ library(ComplexHeatmap)
 library(readxl)
 library(tidyverse)
 
+###below script is to append results sheet with MRN values
+
 results <- read_excel("prediction_pipeline/results_sch.xlsx")
 avatar_master_sheet_info <- xlsx::read.xlsx("data/Avatar Master Database_1MAR2022.xlsx", 
                                             password = "CF", sheetName = "Children_CF_Master") %>%
