@@ -1118,3 +1118,15 @@ prot_meta_data_corrected_tra <- prot_meta_data_corrected %>%
 
 summary(factor(prot_meta_data_corrected_notra$mq_batch))
 summary(factor(prot_meta_data_corrected_tra$mq_batch))
+
+prot_meta_data <- read.csv("data/proteomics/prot_metadata_all_corrected.csv") %>%
+  dplyr::select(c(label, rawfile, sample_long_name_t, condition))
+tra_meta_data <- read.csv("data/formatted/meta_data_updated.csv") %>%
+  mutate(sample_long_name_t = paste0("X", sample_long_name)) %>%
+  dplyr::select(c(sample_long_name_t, condition_updated)) %>%
+  rename(c("condition" = "condition_updated"))
+updated_mapping <- tra_meta_data %>%
+  full_join(prot_meta_data)
+length(unique(updated_mapping$sample_long_name_t))
+length(unique(updated_mapping$label))
+write.csv(updated_mapping, "data/formatted/updated_mapping.csv", row.names = FALSE)
