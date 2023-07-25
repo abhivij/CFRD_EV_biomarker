@@ -9,10 +9,6 @@ library(viridis)
 library(RColorBrewer)
 
 
-base_dir <- "/home/abhivij/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
-setwd(base_dir)
-
-
 
 
 plot_roc <- function(sample_wise_results, sample_type, current_comparison,
@@ -96,7 +92,7 @@ plot_roc <- function(sample_wise_results, sample_type, current_comparison,
 
 
 # sample_wise_results
-# sample_type = "test" 
+# sample_type = "test"
 # comparison_of_interest = "CFRDVsIGT"
 # classes = c("IGT", "CFRD")
 # phenotype <- read.table("data/formatted/phenotype.txt", sep = "\t", header = TRUE)

@@ -1,3 +1,9 @@
+library(tidyverse)
+
+base_dir <- "/home/abhivij/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
+setwd(base_dir)
+
+source('FEMPipeline/custom_plots_create.R')
 
 best_features <- read.csv("data/selected_features/best_features_with_is_best.csv")   %>%
   filter(is_best == 1, grepl("CF_EV_adult_filtered_seurat3_norm_find_var_none_", dataset_id)) %>%
@@ -14,16 +20,16 @@ sample_wise_results <- read.csv("fem_pipeline_results_adult_filtered_then_seurat
   mutate(Model = sub("Sigmoid Kernel SVM", "Sigmoid\nKernel SVM", Model))
 
 
-# sample_wise_results.train <- sample_wise_results %>%
-#   filter(Type == "train")
-# sample_wise_results.test <- sample_wise_results %>%
-#   filter(Type == "test")
-# 
-# current_comparison <- "CFRDVsNGT"
-# classes <- c("NGT", "CFRD")
-# 
-# sample_type <- "test"
-# dir_path <- "prediction_pipeline/plots/ROC/"
+sample_wise_results.train <- sample_wise_results %>%
+  filter(Type == "train")
+sample_wise_results.test <- sample_wise_results %>%
+  filter(Type == "test")
+
+current_comparison <- "CFRDVsNGT"
+classes <- c("NGT", "CFRD")
+
+sample_type <- "test"
+dir_path <- "prediction_pipeline/plots/ROC/"
 
 
 plot_roc(sample_wise_results, sample_type = "test", 
@@ -205,3 +211,90 @@ create_all_iter_prob_heatmap(sample_wise_results,
                              classes = c("NGT", "IGT"),
                              sample_type = "train", phenotype,
                              plot_dir_path = "plots/custom_heatmap/per_iter_prob/")
+
+
+########################
+
+#heatmaps for transcriptomics - created using latest set of predictions (after looking into proteomics data)
+
+best_features <- read.csv("data/selected_features/best_features_with_is_best.csv") %>%
+  filter(is_best == 1, grepl("CF_EV_tra_combat_", dataset_id)) %>%
+  separate(dataset_id, into = c(NA, NA, NA, NA, "comparison"), remove = FALSE) %>%
+  mutate(dataset_id = paste(dataset_id, description, 
+                            min_iter_feature_presence, comparison,
+                            sep = "_")) %>%
+  mutate(cm = c("Sigmoid Kernel SVM", "L2 Regularized logistic regression", "Random Forest")) %>%
+  dplyr::select(c(dataset_id, cm, comparison))
+
+sample_wise_results <- read.csv("fem_pipeline_results_tra_combat_subset/all_samplewise_result_df.csv") %>%
+  inner_join(best_features, by = c("DataSetId" = "dataset_id", "Model" = "cm")) %>%
+  mutate(Model = sub("L2 Regularized logistic regression", "L2 Regularized\nlogistic regression", Model)) %>%
+  mutate(Model = sub("Sigmoid Kernel SVM", "Sigmoid\nKernel SVM", Model))
+
+phenotype <- read.table("data/formatted/phenotype.txt", sep = "\t", header = TRUE)
+
+
+create_all_iter_pred_heatmap(sample_wise_results,
+                             comparison_of_interest = "CFRDVsIGT",
+                             classes = c("IGT", "CFRD"),
+                             sample_type = "test", phenotype,
+                             plot_dir_path = "plots_updated/custom_heatmap/per_iter_pred/")
+create_all_iter_pred_heatmap(sample_wise_results,
+                             comparison_of_interest = "CFRDVsNGT",
+                             classes = c("NGT", "CFRD"),
+                             sample_type = "test", phenotype,
+                             plot_dir_path = "plots_updated/custom_heatmap/per_iter_pred/")
+create_all_iter_pred_heatmap(sample_wise_results,
+                             comparison_of_interest = "IGTVsNGT",
+                             classes = c("NGT", "IGT"),
+                             sample_type = "test", phenotype,
+                             plot_dir_path = "plots_updated/custom_heatmap/per_iter_pred/")
+
+create_all_iter_prob_heatmap(sample_wise_results,
+                             comparison_of_interest = "CFRDVsIGT",
+                             classes = c("IGT", "CFRD"),
+                             sample_type = "test", phenotype,
+                             plot_dir_path = "plots_updated/custom_heatmap/per_iter_prob/")
+create_all_iter_prob_heatmap(sample_wise_results,
+                             comparison_of_interest = "CFRDVsNGT",
+                             classes = c("NGT", "CFRD"),
+                             sample_type = "test", phenotype,
+                             plot_dir_path = "plots_updated/custom_heatmap/per_iter_prob/")
+create_all_iter_prob_heatmap(sample_wise_results,
+                             comparison_of_interest = "IGTVsNGT",
+                             classes = c("NGT", "IGT"),
+                             sample_type = "test", phenotype,
+                             plot_dir_path = "plots_updated/custom_heatmap/per_iter_prob/")
+
+
+create_all_iter_pred_heatmap(sample_wise_results,
+                             comparison_of_interest = "CFRDVsIGT",
+                             classes = c("IGT", "CFRD"),
+                             sample_type = "train", phenotype,
+                             plot_dir_path = "plots_updated/custom_heatmap/per_iter_pred/")
+create_all_iter_pred_heatmap(sample_wise_results,
+                             comparison_of_interest = "CFRDVsNGT",
+                             classes = c("NGT", "CFRD"),
+                             sample_type = "train", phenotype,
+                             plot_dir_path = "plots_updated/custom_heatmap/per_iter_pred/")
+create_all_iter_pred_heatmap(sample_wise_results,
+                             comparison_of_interest = "IGTVsNGT",
+                             classes = c("NGT", "IGT"),
+                             sample_type = "train", phenotype,
+                             plot_dir_path = "plots_updated/custom_heatmap/per_iter_pred/")
+
+create_all_iter_prob_heatmap(sample_wise_results,
+                             comparison_of_interest = "CFRDVsIGT",
+                             classes = c("IGT", "CFRD"),
+                             sample_type = "train", phenotype,
+                             plot_dir_path = "plots_updated/custom_heatmap/per_iter_prob/")
+create_all_iter_prob_heatmap(sample_wise_results,
+                             comparison_of_interest = "CFRDVsNGT",
+                             classes = c("NGT", "CFRD"),
+                             sample_type = "train", phenotype,
+                             plot_dir_path = "plots_updated/custom_heatmap/per_iter_prob/")
+create_all_iter_prob_heatmap(sample_wise_results,
+                             comparison_of_interest = "IGTVsNGT",
+                             classes = c("NGT", "IGT"),
+                             sample_type = "train", phenotype,
+                             plot_dir_path = "plots_updated/custom_heatmap/per_iter_prob/")
