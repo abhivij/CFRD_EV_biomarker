@@ -1048,3 +1048,73 @@ summary(factor(prot_meta_data$mq_batch))
 
 write.csv(prot_meta_data, 
           "data/proteomics/prot_metadata_all.csv", row.names = FALSE)
+
+
+#identifying duplicates incorrectly created in proteomics meta-data
+prot_meta_data <- read.csv("data/proteomics/prot_metadata_all.csv") 
+length(unique(prot_meta_data$label))
+
+non_unique_label <- prot_meta_data %>%
+  group_by(label) %>%
+  summarize(count = n()) %>%
+  filter(count > 1)
+
+duplicates <- prot_meta_data %>%
+  filter(label %in% non_unique_label$label) %>%
+  dplyr::select(c(label, rawfile, technicalreplicate, sample_long_name_t, 
+                  individual_id, sample_intake_date, sample_intake_year)) %>%
+  arrange(label)
+write.csv(duplicates, "data/proteomics/incorrectly_added_duplicates.csv", row.names = FALSE)
+
+
+
+#special case for 179AH sample 105 - corresponds to X11_16_179AH_28_03_2017_S227
+tra_meta_data_179AH_2017 <- read.csv("data/formatted/meta_data_updated.csv") %>%
+  rename(c("condition" = "condition_updated")) %>%
+  rename("Sample" = "sample_long_name") %>%
+  mutate(Sample = paste0("X", Sample)) %>%
+  filter(Sample == "X11_16_179AH_28_03_2017_S227") %>%
+  mutate(sample_long_name_p = "SW.exo.16.9.21.105.90min", rawfile = "SW-exo-16-9-21-105-90min",
+         technicalreplicate = "t1", mq_batch = "main") %>%
+  rename(c("sample_long_name_t" = "Sample", "label" = "sample_long_name_p")) %>%
+  dplyr::select(c(label, rawfile, technicalreplicate, 
+                  sample_long_name_t, condition, individual_id, 
+                  sample_name, cohort, country, 
+                  sample_intake_date, sample_intake_year, 
+                  pre_post_modulator, modulator, 
+                  age, age_group, sex, FEV1, mutation, 
+                  illumina_sample_number, quant_batch, biotype, 
+                  patient_recruitment_year, 
+                  seq_plate, seq_miR_library_quality, 
+                  condition_from_OGTT, condition_initially_used, 
+                  OGTT_1h, OGTT_2h,
+                  OGTT_date, OGTT_2h_b, comment, condition_other, mq_batch))
+
+prot_meta_data_corrected <- read.csv("data/proteomics/prot_metadata_all_corrected.csv") 
+
+all.equal(colnames(prot_meta_data_corrected), colnames(tra_meta_data_179AH_2017))
+
+
+write.csv(tra_meta_data_179AH_2017, "data/proteomics/179AH_105_entry.csv", row.names = FALSE)
+#manually copied this row into data/proteomics/prot_metadata_all_corrected.csv
+
+#also manually corrected technicalreplicate column in data/proteomics/prot_metadata_all_corrected.csv
+#   so that entries marked 't2' have corresponding 
+#  't1' with same tra mapping / if no tra mapping, then same sample date
+
+
+
+prot_meta_data_corrected <- read.csv("data/proteomics/prot_metadata_all_corrected.csv") 
+length(unique(prot_meta_data_corrected$label))
+length(unique(prot_meta_data_corrected$rawfile))
+
+summary(factor(prot_meta_data_corrected$mq_batch))
+sum(is.na(prot_meta_data_corrected$sample_long_name_t))
+
+prot_meta_data_corrected_notra <- prot_meta_data_corrected %>%
+  filter(is.na(sample_long_name_t))
+prot_meta_data_corrected_tra <- prot_meta_data_corrected %>%
+  filter(!is.na(sample_long_name_t))
+
+summary(factor(prot_meta_data_corrected_notra$mq_batch))
+summary(factor(prot_meta_data_corrected_tra$mq_batch))
