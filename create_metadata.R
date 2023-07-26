@@ -1103,23 +1103,34 @@ write.csv(tra_meta_data_179AH_2017, "data/proteomics/179AH_105_entry.csv", row.n
 #  't1' with same tra mapping / if no tra mapping, then same sample date
 
 
+#found that for mq_batch = 'other', labels contain -
+# should be updated to .
+prot_meta_data_corrected <- read.csv("data/proteomics/prot_metadata_all_corrected.csv") %>%
+  mutate(label = case_when(mq_batch == "other" ~ gsub("-", ".", label, fixed = TRUE),
+                           TRUE ~ label)) %>%
+  arrange(cohort, sample_long_name_t, label)
+write.csv(prot_meta_data_corrected, "data/proteomics/prot_metadata_updated.csv", row.names = FALSE)
 
-prot_meta_data_corrected <- read.csv("data/proteomics/prot_metadata_all_corrected.csv") 
-length(unique(prot_meta_data_corrected$label))
-length(unique(prot_meta_data_corrected$rawfile))
+#main proteomics metadata file : "data/proteomics/prot_metadata_updated.csv"           
 
-summary(factor(prot_meta_data_corrected$mq_batch))
-sum(is.na(prot_meta_data_corrected$sample_long_name_t))
 
-prot_meta_data_corrected_notra <- prot_meta_data_corrected %>%
+
+prot_meta_data <- read.csv("data/proteomics/prot_metadata_updated.csv") 
+length(unique(prot_meta_data$label))
+length(unique(prot_meta_data$rawfile))
+
+summary(factor(prot_meta_data$mq_batch))
+sum(is.na(prot_meta_data$sample_long_name_t))
+
+prot_meta_data_notra <- prot_meta_data %>%
   filter(is.na(sample_long_name_t))
-prot_meta_data_corrected_tra <- prot_meta_data_corrected %>%
+prot_meta_data_tra <- prot_meta_data %>%
   filter(!is.na(sample_long_name_t))
 
-summary(factor(prot_meta_data_corrected_notra$mq_batch))
-summary(factor(prot_meta_data_corrected_tra$mq_batch))
+summary(factor(prot_meta_data_notra$mq_batch))
+summary(factor(prot_meta_data_tra$mq_batch))
 
-prot_meta_data <- read.csv("data/proteomics/prot_metadata_all_corrected.csv") %>%
+prot_meta_data <- read.csv("data/proteomics/prot_metadata_updated.csv") %>%
   dplyr::select(c(label, rawfile, sample_long_name_t, condition))
 tra_meta_data <- read.csv("data/formatted/meta_data_updated.csv") %>%
   mutate(sample_long_name_t = paste0("X", sample_long_name)) %>%
