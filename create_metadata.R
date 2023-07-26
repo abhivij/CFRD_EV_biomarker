@@ -1129,4 +1129,10 @@ updated_mapping <- tra_meta_data %>%
   full_join(prot_meta_data)
 length(unique(updated_mapping$sample_long_name_t))
 length(unique(updated_mapping$label))
+sum(is.na(updated_mapping$sample_long_name_t))
+#21
+sum(is.na(updated_mapping$label))
+#33
+sum(is.na(updated_mapping$rawfile))
+#33
 write.csv(updated_mapping, "data/formatted/updated_mapping.csv", row.names = FALSE)
