@@ -183,6 +183,8 @@ setwd(base_dir)
 meta_data <- read.csv("data/formatted/meta_data_updated.csv") %>%
   rename(c("condition" = "condition_updated"))
 
+summary(factor(meta_data$condition))
+
 phenotype <- meta_data %>%
   rename("Sample" = "sample_long_name") %>%
   mutate(Sample = paste0("X", Sample))
@@ -234,11 +236,10 @@ all.equal(phenotype, p2)
 #######################################################
 #phenotype for proteomics
 
-meta_data <- read.csv("data/proteomics/prot_metadata_all.csv")
-
+meta_data <- read.csv("data/proteomics/prot_metadata_updated.csv")
 phenotype <- meta_data %>%
-  rename("Sample" = "label") %>%
-  mutate(Sample = paste0("X", Sample))
+  dplyr::rename(c("Sample" = "label")) %>%
+  mutate(Sample = paste0("lfq_", Sample))
 
 phenotype <- phenotype %>%
   mutate("CFRDVsIGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
@@ -270,11 +271,19 @@ phenotype <- phenotype %>%
   mutate("PreModulatorVsPostModulator" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ "PostModulator",
                                                    TRUE ~ "PreModulator"))
 
-#two samples are not prepended with X in the data file. Replicating that here
-phenotype <- phenotype %>%
-  mutate(Sample = sub("XCPH10_S271", "CPH10_S271", Sample)) %>%
-  mutate(Sample = sub("XCPH22_S272", "CPH22_S272", Sample))
+phenotype_only_main <- phenotype %>%
+  filter(mq_batch == "main")
+
+
+#check data read
+data.imputed.combined <- read.csv("data/proteomics/imputed_combined.csv", row.names = 1) %>%
+  dplyr::select(phenotype$Sample)
+
+data.imputed.main <- read.csv("data/proteomics/imputed_main.csv", row.names = 1) %>%
+  dplyr::select(phenotype_only_main$Sample)
 
 
 write.table(phenotype, 
-            file = "data/formatted/phenotype.txt", sep="\t", row.names=FALSE)
+            file = "data/formatted/prot_phenotype.txt", sep="\t", row.names=FALSE)
+write.table(phenotype_only_main, 
+            file = "data/formatted/prot_phenotype_only_main.txt", sep="\t", row.names=FALSE)
