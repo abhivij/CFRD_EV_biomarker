@@ -689,7 +689,7 @@ dataset_pipeline_arguments_prot <- list(
   
 
   #CFRDVsIGT
-  list(phenotype_file_name = "data/formatted/prot_phenotype.txt",
+  list(phenotype_file_name = "data/formatted/prot_phenotype_only_main.txt",
        read_count_dir_path = "data/proteomics",
        read_count_file_name = "imputed_main.csv",
        sep = ",",
@@ -705,7 +705,7 @@ dataset_pipeline_arguments_prot <- list(
                        "ranger_pos_impu_cor",
                        "mrmr10", "mrmr75", "mrmr100")),
   
-  list(phenotype_file_name = "data/formatted/prot_phenotype.txt",
+  list(phenotype_file_name = "data/formatted/prot_phenotype_only_main.txt",
        read_count_dir_path = "data/proteomics",
        read_count_file_name = "imputed_main.csv",
        sep = ",",
@@ -718,7 +718,7 @@ dataset_pipeline_arguments_prot <- list(
        norm = "quantile_train_param",
        fems_to_run = c("mrmr_perc50")),
   
-  list(phenotype_file_name = "data/formatted/prot_phenotype.txt",
+  list(phenotype_file_name = "data/formatted/prot_phenotype_only_main.txt",
        read_count_dir_path = "data/proteomics",
        read_count_file_name = "imputed_main.csv",
        sep = ",",
@@ -731,7 +731,7 @@ dataset_pipeline_arguments_prot <- list(
        norm = "quantile_train_param",
        fems_to_run = c("RF_RFE")),
   
-  list(phenotype_file_name = "data/formatted/prot_phenotype.txt",
+  list(phenotype_file_name = "data/formatted/prot_phenotype_only_main.txt",
        read_count_dir_path = "data/proteomics",
        read_count_file_name = "imputed_main.csv",
        sep = ",",
@@ -746,7 +746,7 @@ dataset_pipeline_arguments_prot <- list(
   
   
   #CFRDVsNGT
-  list(phenotype_file_name = "data/formatted/prot_phenotype.txt",
+  list(phenotype_file_name = "data/formatted/prot_phenotype_only_main.txt",
        read_count_dir_path = "data/proteomics",
        read_count_file_name = "imputed_main.csv",
        sep = ",",
@@ -762,7 +762,7 @@ dataset_pipeline_arguments_prot <- list(
                        "ranger_pos_impu_cor",
                        "mrmr10", "mrmr75", "mrmr100")),
   
-  list(phenotype_file_name = "data/formatted/prot_phenotype.txt",
+  list(phenotype_file_name = "data/formatted/prot_phenotype_only_main.txt",
        read_count_dir_path = "data/proteomics",
        read_count_file_name = "imputed_main.csv",
        sep = ",",
@@ -775,7 +775,7 @@ dataset_pipeline_arguments_prot <- list(
        norm = "quantile_train_param",
        fems_to_run = c("mrmr_perc50")),
   
-  list(phenotype_file_name = "data/formatted/prot_phenotype.txt",
+  list(phenotype_file_name = "data/formatted/prot_phenotype_only_main.txt",
        read_count_dir_path = "data/proteomics",
        read_count_file_name = "imputed_main.csv",
        sep = ",",
@@ -788,7 +788,7 @@ dataset_pipeline_arguments_prot <- list(
        norm = "quantile_train_param",
        fems_to_run = c("RF_RFE")),
   
-  list(phenotype_file_name = "data/formatted/prot_phenotype.txt",
+  list(phenotype_file_name = "data/formatted/prot_phenotype_only_main.txt",
        read_count_dir_path = "data/proteomics",
        read_count_file_name = "imputed_main.csv",
        sep = ",",
@@ -803,7 +803,7 @@ dataset_pipeline_arguments_prot <- list(
   
   
   #IGTVsNGT
-  list(phenotype_file_name = "data/formatted/prot_phenotype.txt",
+  list(phenotype_file_name = "data/formatted/prot_phenotype_only_main.txt",
        read_count_dir_path = "data/proteomics",
        read_count_file_name = "imputed_main.csv",
        sep = ",",
@@ -819,7 +819,7 @@ dataset_pipeline_arguments_prot <- list(
                        "ranger_pos_impu_cor",
                        "mrmr10", "mrmr75", "mrmr100")),
   
-  list(phenotype_file_name = "data/formatted/prot_phenotype.txt",
+  list(phenotype_file_name = "data/formatted/prot_phenotype_only_main.txt",
        read_count_dir_path = "data/proteomics",
        read_count_file_name = "imputed_main.csv",
        sep = ",",
@@ -832,7 +832,7 @@ dataset_pipeline_arguments_prot <- list(
        norm = "quantile_train_param",
        fems_to_run = c("mrmr_perc50")),
   
-  list(phenotype_file_name = "data/formatted/prot_phenotype.txt",
+  list(phenotype_file_name = "data/formatted/prot_phenotype_only_main.txt",
        read_count_dir_path = "data/proteomics",
        read_count_file_name = "imputed_main.csv",
        sep = ",",
@@ -845,7 +845,7 @@ dataset_pipeline_arguments_prot <- list(
        norm = "quantile_train_param",
        fems_to_run = c("RF_RFE")),
   
-  list(phenotype_file_name = "data/formatted/prot_phenotype.txt",
+  list(phenotype_file_name = "data/formatted/prot_phenotype_only_main.txt",
        read_count_dir_path = "data/proteomics",
        read_count_file_name = "imputed_main.csv",
        sep = ",",
@@ -856,5 +856,5 @@ dataset_pipeline_arguments_prot <- list(
        perform_filter = FALSE,
        results_dir_path = "fem_pipeline_results_prot_main",
        norm = "quantile_train_param",
-       fems_to_run = c("ga_rf"))    
+       fems_to_run = c("ga_rf"))  
 )
