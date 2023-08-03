@@ -7,6 +7,7 @@ library(umap)
 library(ggvenn)
 library(sva)
 library(harmony)
+library(xlsx)
 
 base_dir <- "~/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
 setwd(base_dir)
@@ -636,20 +637,20 @@ plot_best_biomarker_venn("IGTVsNGT")
 
 ###############
 #create box plots of best biomarker sets and all transcripts
-
-use_best_features = TRUE
 train_cohort_country = "AU"
+
+data_file_path = "data/formatted/umi_counts_filtered_seurat3_with_norm_and_find_var_feat.csv"
+comparison = "CFRDVsIGT"
+classes  = c("IGT", "CFRD")
+use_best_features = TRUE
 norm = "none"
 best_features_file_path = "data/selected_features/best_features_with_is_best.csv"
-perform_filter = TRUE
-combat_seq = FALSE
-filter_type = "regular"
-dataset_replace_str = ""
-plot_width_cm = 20
-dir_path = "prediction_pipeline/plots/box_plots"
-data_file_path = NA
-combined_plot = FALSE
-plot_title_input = NA
+perform_filter = FALSE
+combined_plot = TRUE
+dataset_replace_str = "CF_EV_adult_filtered_seurat3_norm_find_var_none_"
+plot_width_cm = 25
+dir_path = "prediction_pipeline/plots/box_plots/filtered_then_seurat3_norm_and_find_var_feat_custom"
+plot_title_input = "filter and then seurat3 best biomarkers CFRD Vs IGT"
 
 data_file_path = "data/formatted/umi_counts_filtered_seurat3_with_norm_and_find_var_feat.csv"
 comparison = "CFRDVsNGT"
@@ -704,7 +705,7 @@ create_transcript_box_plots <- function(comparison,
   test_cohort_country <- ifelse(train_cohort_country == "AU", "DK", "AU") 
   
   train.output_labels <- phenotype %>%
-    rename("Label" = comparison) %>%
+    dplyr::rename("Label" = comparison) %>%
     filter(Label %in% classes, country == train_cohort_country) %>%
     dplyr::select(Sample, Label) %>%
     dplyr::mutate(Label = factor(Label)) %>%
@@ -712,7 +713,7 @@ create_transcript_box_plots <- function(comparison,
   train.tra_data <- data[, train.output_labels$Sample]
   
   test.output_labels <- phenotype %>%
-    rename("Label" = comparison) %>%
+    dplyr::rename("Label" = comparison) %>%
     filter(Label %in% classes, country == test_cohort_country) %>%
     dplyr::select(Sample, Label) %>%
     dplyr::mutate(Label = factor(Label)) %>%    
@@ -861,6 +862,12 @@ create_transcript_box_plots <- function(comparison,
   
   biomarkers_ordered <- c(biomarkers_specific, biomarkers_rem)
 
+  data_to_write <- data.frame(transcripts = biomarkers_ordered)
+  write.xlsx(data_to_write,
+             "data/formatted/identified_biomarkers.xlsx",
+             sheetName = comparison,
+             col.names = TRUE, row.names = FALSE, append = TRUE)
+  
   data_to_plot <- data_to_plot %>%
     mutate(transcripts = factor(transcripts, levels = biomarkers_ordered)) %>%
     mutate(plot_num = ifelse(transcripts %in% biomarkers_specific,
@@ -926,38 +933,70 @@ comparison = "CFRDVsIGT"
 classes = c("CFRD", "IGT")
 class_colours = c("red", "orange")
 dim_red = "UMAP"
-norm = "none"
-data_file_path = "data/formatted/umi_counts_seurat3_with_norm_and_find_var_feat.csv"
+norm = "log_tmm"
+combat = TRUE
+dir_path = "plots_updated/dim_red"
+plot_width_cm = 21
+
+best_features_file_path  = "data/selected_features/best_features_with_is_best.csv"
+dataset_replace_str = "CF_EV_tra_combat_"
+colour_column = "age_group"
+
+data_file_path = "data/proteomics/imputed_combined.csv"
+phenotype_file_path = "data/formatted/prot_phenotype.txt"
+comparison = "CFRDVsIGT"
+classes = c("CFRD", "IGT")
+class_colours = c("red", "orange")
+dim_red = "UMAP"
+norm = "quantile"
+combat = TRUE
+dir_path = "plots_updated/prot_dim_red"
+plot_width_cm = 21
 perform_filter = FALSE
-dir_path = "prediction_pipeline/plots/dimred_seurat3_with_norm_and_find_var_feat/"
-filter_out_child = TRUE
+best_features_file_path  = NA
+dataset_replace_str = NA
+colour_column = "mq_batch"
+plot_title_prefix = "1 "
+plot_title_suffix = " imputed combined"
+
+combattwice = FALSE
+
 
 create_dim_red_plots <- function(comparison, classes,
                                  class_colours,
                                  dim_red, norm,
                                  fill_column = NA,
+                                 colour_column = "age_group",
                                  combat_seq = FALSE, combat_seq_specify_group = FALSE,
                                  combatref = FALSE,
+                                 combat = FALSE,
+                                 combattwice = FALSE,
                                  shownames = FALSE,
                                  perform_filter = TRUE,
                                  best_features_file_path = NA, 
                                  dataset_replace_str = NA,
                                  dir_path = NA,
                                  data_file_path = "data/formatted/umi_counts.csv",
-                                 filter_out_child = FALSE){
+                                 phenotype_file_path = "data/formatted/phenotype.txt",
+                                 filter_out_child = FALSE,
+                                 plot_width_cm = 21,
+                                 plot_title_prefix = "",
+                                 plot_title_suffix = ""){
   data <- read.table(data_file_path, header=TRUE, sep=",", row.names=1, skip=0,
                      nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
-  phenotype <- read.table("data/formatted/phenotype.txt", header=TRUE, sep="\t")
+  phenotype <- read.table(phenotype_file_path, header=TRUE, sep="\t")
   
   title <- paste0(dim_red, " plot of ", paste(classes, collapse = ", "), " samples from ", norm, " data")
   
   if(!is.na(comparison)){
     output_labels <- phenotype %>%
-      rename("Label" = comparison)
+      rename("Label" = comparison) %>%
+      rename("colour_column" = colour_column)
   } else{
     #this case is to include greater than 2 conditions in the plot
     output_labels <- phenotype %>%
       rename("Label" = "condition") %>%
+      rename("colour_column" = colour_column) %>%
       #ensure that samples on modulator are not chosen
       #using comparison field does not require the below, because comparison field creation 
       #                 incorporates this filter
@@ -965,7 +1004,7 @@ create_dim_red_plots <- function(comparison, classes,
   }
   output_labels <- output_labels %>%
     filter(Label %in% classes) %>%
-    dplyr::select(Sample, Label, country, age_group, mutation, 
+    dplyr::select(Sample, Label, country, colour_column, mutation, 
                   sex, cohort, patient_recruitment_year,
                   seq_plate, seq_miR_library_quality,
                   quant_batch) %>%
@@ -994,31 +1033,6 @@ create_dim_red_plots <- function(comparison, classes,
   group_counts_text <- paste(apply(group_counts, MARGIN = 1, FUN = function(x){paste(x[1], x[2], sep = ":")}),
                              collapse = "  ")
   data <- data[, output_labels$Sample]
-  
-  if(!is.na(best_features_file_path) & !is.na(dataset_replace_str)){
-    best_features <- read.csv(best_features_file_path)  
-    best_features_sub <- best_features %>%
-      mutate(dataset_id = gsub(dataset_replace_str, "", dataset_id)) %>%
-      filter(is_best == 1, dataset_id == comparison)
-    
-    biomarkers <- strsplit(best_features_sub$biomarkers, split = "|", fixed = TRUE)[[1]]  
-    
-    data <- as.data.frame(t(as.matrix(data)))
-    features_with_slash <- colnames(data)[grepl("/", colnames(data), fixed = TRUE)] 
-    for(f in features_with_slash){
-      f_replaced <- gsub("/|-", ".", f) 
-      if(f_replaced %in% biomarkers){
-        biomarkers[biomarkers == f_replaced] = f
-      }
-    }
-    biomarkers <- gsub(".", "-", biomarkers, fixed = TRUE)
-    data <- data[, biomarkers]
-    data <- as.data.frame(t(as.matrix(data)))
-    
-    title <- paste0(title, " best biomarkers")
-  }
-  
-
   
   #currently data format : (transcripts x samples)
   if(perform_filter){
@@ -1057,6 +1071,27 @@ create_dim_red_plots <- function(comparison, classes,
     data <- log2(data)
   } else if(norm == "log_cpm"){
     data <- edgeR::cpm(data, log = TRUE)
+  } else if(norm == "quantile"){
+    #adapted from https://davetang.org/muse/2014/07/07/quantile-normalisation-in-r/
+    data.rank <- apply(data, 2, rank, ties.method="average")
+    data.sorted <- data.frame(apply(data, 2, sort))
+    data.mean <- apply(data.sorted, 1, mean)
+    index_to_mean <- function(index, data_mean){
+      #index can be int or int+0.5
+      #if int+0.5, take average of the numbers in those positions
+      int.result <- data_mean[index]
+      index.int <- floor(index)
+      #some of the values in point5.result might be NA
+      #but they won't be chosen
+      point5.result <- (data_mean[index.int] + data_mean[index.int+1])/2
+      point5.indices <- index%%1 != 0
+      result <- int.result
+      result[point5.indices] <- point5.result[point5.indices]
+      return (result)
+    }
+    data.norm <- apply(data.rank, 2, index_to_mean, data_mean = data.mean)
+    rownames(data.norm) <- rownames(data)
+    data <- data.norm    
   }
   data <- as.data.frame(t(as.matrix(data)))
   
@@ -1096,6 +1131,45 @@ create_dim_red_plots <- function(comparison, classes,
     data <- data_of_interest.combat
     
     title <- paste(title, '+ combat with ref as', ref_batch)
+  } else if(combat){
+    data_of_interest <- as.data.frame(t(as.matrix(data)))
+    
+    all.equal(colnames(data_of_interest), output_labels$Sample)
+    
+    data_of_interest.combat = ComBat(dat=data_of_interest, 
+                                     batch=output_labels$country)
+    if(combattwice){
+      data_of_interest.combat = ComBat(dat=data_of_interest.combat, 
+                                       batch=output_labels$colour_column)
+    }
+    data_of_interest.combat <- as.data.frame(t(as.matrix(data_of_interest.combat)))
+    data <- data_of_interest.combat
+    
+    title <- paste(title, '+ combat')
+  }
+  
+  if(!is.na(best_features_file_path) & !is.na(dataset_replace_str)){
+    print('selecting best biomarkers')
+    best_features <- read.csv(best_features_file_path)  
+    best_features_sub <- best_features %>%
+      mutate(dataset_id = gsub(dataset_replace_str, "", dataset_id)) %>%
+      filter(is_best == 1, dataset_id == comparison)
+    
+    biomarkers <- strsplit(best_features_sub$biomarkers, split = "|", fixed = TRUE)[[1]]  
+    
+    data <- as.data.frame(t(as.matrix(data)))
+    features_with_slash <- colnames(data)[grepl("/", colnames(data), fixed = TRUE)] 
+    for(f in features_with_slash){
+      f_replaced <- gsub("/|-", ".", f) 
+      if(f_replaced %in% biomarkers){
+        biomarkers[biomarkers == f_replaced] = f
+      }
+    }
+    biomarkers <- gsub(".", "-", biomarkers, fixed = TRUE)
+    data <- data[biomarkers, ]
+    data <- as.data.frame(t(as.matrix(data)))
+    
+    title <- paste0(title, " best biomarkers")
   }
   
   
@@ -1116,19 +1190,20 @@ create_dim_red_plots <- function(comparison, classes,
     xlab <- "UMAP 1"
     ylab <- "UMAP 2"
   }
+  title <- paste0(plot_title_prefix, title, plot_title_suffix)
   
   if(is.na(fill_column)){
     ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_point(ggplot2::aes(fill = output_labels$Label,
                                        shape = output_labels$country,
-                                       colour = output_labels$age_group), size = 3) +
+                                       colour = output_labels$colour_column), size = 3) +
       geom_text_repel(aes(label = text)) +
       ggplot2::scale_fill_manual(name = "Condition", values = class_colours) +
       ggplot2::guides(fill = guide_legend(override.aes = list(shape = 21,
                                                               colour = class_colours))) +
       ggplot2::scale_shape_manual(name = "Country", values = c(21, 22)) +
       ggplot2::guides(shape = guide_legend(override.aes = list(fill = c("black", "black")))) +
-      ggplot2::scale_colour_manual(name = "Age group", values = c("black", "green")) +
+      ggplot2::scale_colour_manual(name = sub("_", " ", colour_column), values = c("black", "green")) +
       ggplot2::guides(colour = guide_legend(override.aes = list(shape = 1))) +
       ggplot2::labs(title = title) +
       ggplot2::xlab(xlab) +
@@ -1164,6 +1239,88 @@ create_dim_red_plots <- function(comparison, classes,
   file_name <- paste0(gsub(title, pattern = " |,", replacement = "-"), ".jpg")
   file_path <- paste(dir_path, file_name, sep = "/")
   ggplot2::ggsave(file_path, units = "cm", width = 30)
+  
+  ###############
+  #create transcript box plots if best biomarkers only
+  
+  if(!is.na(best_features_file_path) & !is.na(dataset_replace_str)){
+    data_to_plot <- data %>%
+      rownames_to_column("sample_name") %>%
+      inner_join(output_labels %>%
+                   dplyr::select(c(Sample, Label)) %>%
+                   rename(c("sample_name" = "Sample")))
+    group_counts <- data_to_plot %>%
+      group_by(Label) %>%
+      summarize(n = n())
+    
+    data_to_plot <- data_to_plot %>%
+      inner_join(group_counts) %>%
+      mutate(Label = paste0(Label, " (", n, ") ")) %>%
+      select(-c(n))
+    
+    data_to_plot <- data_to_plot %>%
+      pivot_longer(!c(sample_name, Label), names_to = "transcripts") %>%
+      arrange(transcripts, Label)
+    
+    data_to_plot_sub <- data_to_plot %>%
+      group_by(transcripts) %>%
+      summarize(median = median(value), mean = mean(value)) %>%
+      arrange(desc(median), desc(mean))
+    # biomarkers_rem <- data_to_plot_sub$transcripts
+    # 
+    # biomarkers_ordered <- c(biomarkers_specific, biomarkers_rem)
+    # 
+    data_to_write <- as.data.frame(data_to_plot_sub)
+    write.xlsx(data_to_write,
+               "data/selected_features/biomarkers_expr.xlsx",
+               sheetName = comparison,
+               col.names = TRUE, row.names = FALSE, append = TRUE)
+    
+    data_to_plot <- data_to_plot %>%
+      mutate(transcripts = factor(transcripts, levels = data_to_plot_sub$transcripts))
+    # 
+    # %>%
+    #   mutate(plot_num = ifelse(transcripts %in% biomarkers_specific,
+    #                            1, 2))
+    # plot <- ggplot() +
+    #   aes(x = transcripts, y = value, fill = label) +
+    #   geom_boxplot(data = (data_to_plot %>% filter(plot_num == 1))) +
+    #   geom_boxplot(data = (data_to_plot %>% filter(plot_num == 2))) +
+    #   xlab(paste0("Transcripts (", num_transcripts, ")")) +
+    #   ylab(y_lab) +
+    #   ggtitle(plot_title) +
+    #   labs(fill = "") +
+    #   facet_wrap(~plot_num, scales = "free") + 
+    #   theme(
+    #     strip.text.x = element_blank()
+    #   )
+    plot_title <- sub("UMAP plot of ", "", title)
+    if(norm == "log_tmm"){
+      y_lab <- "Log TMM of expression level across samples"
+    }
+    num_transcripts <- nrow(data_to_plot_sub)
+    plot <- ggplot() +
+      aes(x = transcripts, y = value, fill = Label) +
+      geom_boxplot(data = data_to_plot) +
+      xlab(paste0("Transcripts (", num_transcripts, ")")) +
+      ylab(y_lab) +
+      ggtitle(plot_title) +
+      labs(fill = "") +
+      theme(
+        strip.text.x = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+      )
+    
+    plot
+    dir_path <- "plots_updated/boxplots"
+    if(!dir.exists(dir_path)){
+      dir.create(dir_path, recursive = TRUE)
+    }
+    file_name <- paste0(gsub(plot_title, pattern = " ", replacement = "-"), ".png")
+    file_path <- paste(dir_path, file_name, sep = "/")
+    ggplot2::ggsave(file_path, units = "cm", width = plot_width_cm)
+  }
+
 }
 
 
