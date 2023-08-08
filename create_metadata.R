@@ -1147,3 +1147,60 @@ sum(is.na(updated_mapping$label))
 sum(is.na(updated_mapping$rawfile))
 #33
 write.csv(updated_mapping, "data/formatted/updated_mapping.csv", row.names = FALSE)
+
+
+
+#creating/including meta data of new samples
+summary_info <- read.table("data/proteomics/2023_samples/2_MaxQuant_Processed/exec1_with_default_parameters/summary.txt", 
+                           header = TRUE, sep = "\t") 
+
+sample_info <- summary_info %>%
+  select(Raw.file, Experiment) %>%
+  filter(Raw.file != "Total")
+colnames(sample_info) <- c("rawfile", "label")
+
+summary_info <- read.table("data/proteomics/2023_samples/2_MaxQuant_Processed/exec2_with_modified_parameters/summary.txt", 
+                           header = TRUE, sep = "\t") 
+
+sample_info2 <- summary_info %>%
+  select(Raw.file, Experiment) %>%
+  filter(Raw.file != "Total")
+colnames(sample_info2) <- c("rawfile", "label")
+
+all.equal(sample_info, sample_info2)
+
+library(XLConnect)
+#add password before running the below line and do not commit the password
+# wb <- loadWorkbook("data/CFdiabF-ShipmentDataAll2022.xlsx", password="")
+data_from_bibi <- readWorksheet(wb, sheet = 1)[-c(1), ] %>%
+  dplyr::select(c(record_id, age, date_visit_22, record_id_22, ogtt_0h_22, ogtt_1h_22, ogtt_2h_22,
+                  diabstatus_22, early_impairment_22)) %>%
+  filter(!is.na(record_id_22)) %>%
+  mutate(record_id = as.integer(record_id)) %>%
+  mutate(record_id_22 = as.integer(record_id_22)) %>%
+  arrange(record_id_22)
+
+data_from_bibi <- data_from_bibi  %>%
+  mutate(ogtt_2h_22 = as.numeric(str_squish(ogtt_2h_22))) %>%
+  mutate(diabstatus_22 = as.numeric(str_squish(diabstatus_22))) %>%
+  dplyr::mutate(disease_status = case_when(is.na(ogtt_2h_22) ~ NA_character_,
+                                                   ogtt_2h_22 >= 11.1 ~ "CFRD",
+                                                   ogtt_2h_22 < 7.8 ~ "NGT",
+                                                   TRUE ~ "IGT")) %>%
+  dplyr::mutate(disease_status_directly_available = case_when(is.na(diabstatus_22) ~ NA_character_,
+                                                         diabstatus_22 == 1 ~ "NGT",
+                                                         diabstatus_22 == 2 ~ "Indet",
+                                                         diabstatus_22 == 3 ~ "IGT",
+                                                         diabstatus_22 == 4 ~ "CFRD")) %>%
+  mutate(modulator_status = "postmod")
+
+sample_info <- sample_info %>%
+  separate(rawfile, into = c(NA, NA, NA, NA, "record_id_22", NA), remove = FALSE) %>%
+  mutate(record_id_22 = as.integer(record_id_22))
+
+new_sample_metadata <- sample_info %>%
+  inner_join(data_from_bibi) %>%
+  arrange(record_id_22)
+write.csv(new_sample_metadata, 
+          "data/proteomics/prot_metadata_new_samples.csv", 
+          row.names = FALSE)
