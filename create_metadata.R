@@ -1204,3 +1204,113 @@ new_sample_metadata <- sample_info %>%
 write.csv(new_sample_metadata, 
           "data/proteomics/prot_metadata_new_samples.csv", 
           row.names = FALSE)
+
+
+
+#check if raw files copied to external hard drive new location matches combined meta-data
+
+meta_data1 <- read.csv("data/proteomics/prot_metadata_updated.csv") %>%
+  dplyr::select(c(label, rawfile))
+meta_data2 <- read.csv("data/proteomics/prot_metadata_new_samples.csv") %>%
+  dplyr::select(c(label, rawfile))
+
+combined_meta_data <- rbind(meta_data1, meta_data2) %>%
+  filter(label != "21-7-23-31-90min") %>%
+  mutate(rawfile = paste0(rawfile, ".raw")) %>%
+  arrange(rawfile)
+file_list <- read.csv("data/proteomics/exoCF_rawfile_names.csv", header = FALSE, col.names = c("rawfile")) %>%
+  arrange(rawfile)
+
+all.equal(combined_meta_data$rawfile, file_list$rawfile)
+#TRUE
+
+
+
+
+#create meta-data file for proteomics new mq_analysis results with all samples (333 samples)
+summary_info <- read.table("data/proteomics/all/summary.txt", header = TRUE, sep = "\t") %>%
+  select(Raw.file, Experiment) %>%
+  filter(Raw.file != "Total")
+colnames(summary_info) <- c("rawfile", "label")
+# summary_info <- summary_info %>%
+#   mutate(label_prev_analysis = paste0("S", label))
+
+meta_data1 <- read.csv("data/proteomics/prot_metadata_updated.csv") %>%
+  dplyr::rename(c("label_old" = "label")) 
+
+meta_data1 <- summary_info %>%
+  inner_join(meta_data1, by = "rawfile")
+
+meta_data1 <- meta_data1 %>%
+  dplyr::select(-c(label_old)) %>%
+  dplyr::rename(c("batch_name" = "mq_batch"))
+
+#get other samples - i.e. the new ones
+meta_data2 <- summary_info %>%
+  anti_join(meta_data1, by = "rawfile")
+
+
+library(XLConnect)
+#add password before running the below line and do not commit the password
+# wb <- loadWorkbook("data/CFdiabF-ShipmentDataAll2022.xlsx", password="")
+data_from_bibi <- readWorksheet(wb, sheet = 1)[-c(1), ]
+data_from_bibi <- data_from_bibi %>%
+  mutate(cf_mutation1 = case_when(cf_mutation1 == "Andet" ~ cf_mutation1other,
+                                  TRUE ~ cf_mutation1),
+         cf_mutation2 = case_when(cf_mutation2 == "Andet" ~ cf_mutation2other,
+                                  TRUE ~ cf_mutation2)) %>%
+  mutate(mutation = case_when(cf_mutation1 == "F508del" ~ paste0("F508del___", cf_mutation2),
+                              cf_mutation2 == "F508del" ~ paste0("F508del___", cf_mutation1),
+                              cf_mutation1 < cf_mutation2 ~ paste(cf_mutation1, cf_mutation2, sep = "___"),
+                              TRUE ~ paste(cf_mutation2, cf_mutation1, sep = "___"))) %>%
+  dplyr::select(c(record_id, age, date_visit_22, record_id_22, ogtt_0h_22, ogtt_1h_22, ogtt_2h_22,
+                  diabstatus_22, early_impairment_22, mutation, age, sex, fev1_pp)) %>%
+  mutate(MF = case_when(sex == 1 ~ "M",
+                        sex == 2 ~ "F",
+                        TRUE ~ NA_character_)) %>%
+  mutate(sex = MF) %>%
+  dplyr::select(-c(MF)) %>%
+  filter(!is.na(record_id_22)) %>%
+  mutate(record_id = as.integer(record_id)) %>%
+  mutate(record_id_22 = as.integer(record_id_22)) %>%
+  arrange(record_id_22)
+
+data_from_bibi <- data_from_bibi  %>%
+  mutate(ogtt_2h_22 = as.numeric(str_squish(ogtt_2h_22))) %>%
+  mutate(diabstatus_22 = as.numeric(str_squish(diabstatus_22))) %>%
+  dplyr::mutate(disease_status = case_when(is.na(ogtt_2h_22) ~ NA_character_,
+                                           ogtt_2h_22 >= 11.1 ~ "CFRD",
+                                           ogtt_2h_22 < 7.8 ~ "NGT",
+                                           TRUE ~ "IGT")) %>%
+  dplyr::mutate(disease_status_directly_available = case_when(is.na(diabstatus_22) ~ NA_character_,
+                                                              diabstatus_22 == 1 ~ "NGT",
+                                                              diabstatus_22 == 2 ~ "Indet",
+                                                              diabstatus_22 == 3 ~ "IGT",
+                                                              diabstatus_22 == 4 ~ "CFRD")) %>%
+  mutate(pre_post_modulator = 1)
+
+meta_data2 <- meta_data2 %>%
+  separate(rawfile, into = c(NA, NA, NA, NA, "record_id_22", NA), remove = FALSE) %>%
+  mutate(record_id_22 = as.integer(record_id_22))
+
+new_sample_metadata <- meta_data2 %>%
+  inner_join(data_from_bibi, by = "record_id_22") %>%
+  arrange(record_id_22)
+
+#taking record_id as the id that follows CPH
+# i.e. record_id = 42, record_id_22 = 1   -----> CPH42
+# manually checked the corresponding FEV values for few entries and they match
+
+#The FEV value and age is from previous intake
+#cant calculate current age since previous sample intake date is not available 
+#to subtract from new sample intake date
+
+new_sample_metadata <- new_sample_metadata %>%
+  mutate(individual_id = paste0("CPH", record_id)) %>%
+  dplyr::select(-c(record_id_22, age, early_impairment_22, 
+                   fev1_pp, record_id, diabstatus_22)) %>%
+  mutate(sample_intake_date = as.Date(date_visit_22, format = "%Y-%M-%d %H:%M:%S"),
+         .after = "date_visit_22") %>%
+  mutate(sample_intake_year = format(sample_intake_date, format = "%Y"), .after = sample_intake_date) %>%
+  mutate(sample_name = paste(sample_intake_year, individual_id, sep = "_"))
+
