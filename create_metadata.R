@@ -1309,42 +1309,56 @@ new_sample_metadata <- new_sample_metadata %>%
   mutate(individual_id = paste0("CPH", record_id)) %>%
   dplyr::select(-c(record_id_22, age, early_impairment_22, 
                    fev1_pp, record_id, diabstatus_22)) %>%
-  mutate(sample_intake_date = as.Date(date_visit_22, format = "%Y-%M-%d %H:%M:%S"),
+  mutate(sample_intake_date = as.Date(date_visit_22, format = "%Y-%m-%d %H:%M:%S"),
          .after = "date_visit_22") %>%
   mutate(sample_intake_year = format(sample_intake_date, format = "%Y"), .after = sample_intake_date) %>%
   mutate(sample_name = paste(sample_intake_year, individual_id, sep = "_"))
 
+new_sample_metadata <- new_sample_metadata %>%
+  mutate(sample_intake_date = format(sample_intake_date, "%Y-%m-%d"),
+         sample_intake_year = as.integer(sample_intake_year)) 
 #not using ogtt_0h since that's not available for previous cohort
 new_sample_metadata <- new_sample_metadata %>%
   mutate("technicalreplicate" = "t1",
-         "sample_long_name_t" = NA,
+         "sample_long_name_t" = NA_character_,
          "condition" = disease_status,
          "cohort" = "CPH",
          "country" = "DK",
          "modulator" = "combination",
-         "age" = NA,
+         "age" = NA_character_,
          "age_group" = "adult",
-         "FEV1" = NA,
-         "illumina_sample_number" = NA,
-         "quant_batch" = NA,
+         "FEV1" = NA_character_,
+         "illumina_sample_number" = NA_integer_,
+         "quant_batch" = NA_integer_,
          "biotype" = "serum",
-         "patient_recruitment_year" = NA,
-         "seq_plate" = NA,
-         "seq_miR_library_quality" = NA,
-         "condition_from_OGTT" = NA,
+         "patient_recruitment_year" = NA_integer_,
+         "seq_plate" = NA_integer_,
+         "seq_miR_library_quality" = NA_character_,
+         "condition_from_OGTT" = NA_character_,
          "condition_initially_used" = disease_status_directly_available,
-         "OGTT_1h" = ogtt_1h_22,
-         "OGTT_2h" = ogtt_2h_22,
-         "OGTT_date" = NA,
-         "OGTT_2h_b" = NA,
-         "comment" = NA,
-         "condition_other" = NA,
+         "OGTT_1h" = as.numeric(ogtt_1h_22),
+         "OGTT_2h" = as.numeric(ogtt_2h_22),
+         "OGTT_date" = NA_character_,
+         "OGTT_2h_b" = NA_real_,
+         "comment" = NA_character_,
+         "condition_other" = NA_character_,
          "batch_name" = "new"
          )
-
 new_sample_metadata <- new_sample_metadata %>%
   dplyr::select(all_of(colnames(meta_data1)))
 
+
+meta_data1 <- meta_data1 %>%
+  mutate(OGTT_2h = trimws(OGTT_2h)) %>%
+  mutate(OGTT_2h = case_when(OGTT_2h == "" ~ NA_character_,
+                             TRUE ~ OGTT_2h))
+meta_data1 <- meta_data1 %>%
+  mutate(OGTT_2h = as.numeric(OGTT_2h))
+#gives below warning because some entries were actually typed as 'NA'. So safe to ignore the warning
+
+#Warning message:
+# Problem while computing `OGTT_2h_new = as.numeric(OGTT_2h)`.
+# ℹ NAs introduced by coercion 
 
 meta_data_all <- rbind(meta_data1, new_sample_metadata)
 
