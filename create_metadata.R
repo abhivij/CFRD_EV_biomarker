@@ -1224,9 +1224,9 @@ file_list <- read.csv("data/proteomics/exoCF_rawfile_names.csv", header = FALSE,
 all.equal(combined_meta_data$rawfile, file_list$rawfile)
 #TRUE
 
-
-
-
+##############################################
+##############################################
+##############################################
 #create meta-data file for proteomics new mq_analysis results with all samples (333 samples)
 summary_info <- read.table("data/proteomics/all/summary.txt", header = TRUE, sep = "\t") %>%
   select(Raw.file, Experiment) %>%
@@ -1302,8 +1302,8 @@ new_sample_metadata <- meta_data2 %>%
 # manually checked the corresponding FEV values for few entries and they match
 
 #The FEV value and age is from previous intake
-#cant calculate current age since previous sample intake date is not available 
-#to subtract from new sample intake date
+#Can't calculate current age since previous sample intake date is not available 
+#       to subtract from new sample intake date
 
 new_sample_metadata <- new_sample_metadata %>%
   mutate(individual_id = paste0("CPH", record_id)) %>%
@@ -1314,3 +1314,44 @@ new_sample_metadata <- new_sample_metadata %>%
   mutate(sample_intake_year = format(sample_intake_date, format = "%Y"), .after = sample_intake_date) %>%
   mutate(sample_name = paste(sample_intake_year, individual_id, sep = "_"))
 
+#not using ogtt_0h since that's not available for previous cohort
+new_sample_metadata <- new_sample_metadata %>%
+  mutate("technicalreplicate" = "t1",
+         "sample_long_name_t" = NA,
+         "condition" = disease_status,
+         "cohort" = "CPH",
+         "country" = "DK",
+         "modulator" = "combination",
+         "age" = NA,
+         "age_group" = "adult",
+         "FEV1" = NA,
+         "illumina_sample_number" = NA,
+         "quant_batch" = NA,
+         "biotype" = "serum",
+         "patient_recruitment_year" = NA,
+         "seq_plate" = NA,
+         "seq_miR_library_quality" = NA,
+         "condition_from_OGTT" = NA,
+         "condition_initially_used" = disease_status_directly_available,
+         "OGTT_1h" = ogtt_1h_22,
+         "OGTT_2h" = ogtt_2h_22,
+         "OGTT_date" = NA,
+         "OGTT_2h_b" = NA,
+         "comment" = NA,
+         "condition_other" = NA,
+         "batch_name" = "new"
+         )
+
+new_sample_metadata <- new_sample_metadata %>%
+  dplyr::select(all_of(colnames(meta_data1)))
+
+
+meta_data_all <- rbind(meta_data1, new_sample_metadata)
+
+write.csv(meta_data_all, 
+          "data/proteomics/prot_metadata_all_2023Aug.csv", 
+          row.names = FALSE)
+
+##############################################
+##############################################
+##############################################
