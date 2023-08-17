@@ -287,3 +287,67 @@ write.table(phenotype,
             file = "data/formatted/prot_phenotype.txt", sep="\t", row.names=FALSE)
 write.table(phenotype_only_main, 
             file = "data/formatted/prot_phenotype_only_main.txt", sep="\t", row.names=FALSE)
+
+
+#######################################################
+#phenotype for proteomics with 333 samples - includes the 2023 DK samples
+
+meta_data <- read.csv("data/proteomics/prot_metadata_all_2023Aug.csv")
+phenotype <- meta_data %>%
+  mutate(label = gsub(pattern = "-", replacement = ".", label, fixed = TRUE)) %>%
+  dplyr::rename(c("Sample" = "label")) %>%
+  mutate(Sample = paste0("lfq_", Sample))
+
+phenotype <- phenotype %>%
+  mutate("CFRDVsIGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                 condition == "CFRD" ~ "CFRD",
+                                 condition == "IGT" ~ "IGT",
+                                 TRUE ~ NA_character_))
+summary(factor(phenotype$CFRDVsIGT))
+phenotype <- phenotype %>%
+  mutate("CFRDVsNGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                 condition == "CFRD" ~ "CFRD",
+                                 condition == "NGT" ~ "NGT",
+                                 TRUE ~ NA_character_))
+summary(factor(phenotype$CFRDVsNGT))
+
+phenotype <- phenotype %>%
+  mutate("IGTVsNGT" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                                condition == "IGT" ~ "IGT",
+                                condition == "NGT" ~ "NGT",
+                                TRUE ~ NA_character_))
+summary(factor(phenotype$IGTVsNGT))
+
+phenotype <- phenotype %>%
+  mutate("CFVsHC" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ NA_character_,
+                              condition == "HC" ~ "HC",
+                              TRUE ~ "CF"))
+summary(factor(phenotype$CFVsHC))
+
+phenotype <- phenotype %>%
+  mutate("PreModulatorVsPostModulator" = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ "PostModulator",
+                                                   TRUE ~ "PreModulator"))
+summary(factor(phenotype$PreModulatorVsPostModulator))
+
+phenotype_no_other <- phenotype %>%
+  filter(batch_name != "other")
+
+
+#check data read
+data.imputed.mf <- read.csv("data/proteomics/data_333samples_imputed_mf.csv", row.names = 1) %>%
+  dplyr::select(phenotype$Sample)
+data.imputed.zero <- read.csv("data/proteomics/data_333samples_imputed_zero.csv", row.names = 1) %>%
+  dplyr::select(phenotype$Sample)
+
+data_no_other.imputed.mf <- read.csv("data/proteomics/data_no_other_315samples_imputed_mf.csv", 
+                                     row.names = 1) %>%
+  dplyr::select(phenotype_no_other$Sample)
+data_no_other.imputed.zero <- read.csv("data/proteomics/data_no_other_315samples_imputed_zero.csv", 
+                                       row.names = 1) %>%
+  dplyr::select(phenotype_no_other$Sample)
+
+
+write.table(phenotype, 
+            file = "data/formatted/prot_phenotype_333.txt", sep="\t", row.names=FALSE)
+write.table(phenotype_no_other, 
+            file = "data/formatted/prot_phenotype_no_other_315.txt", sep="\t", row.names=FALSE)
