@@ -928,6 +928,9 @@ dataset_replace_str = NA
 dir_path = NA
 data_file_path = "data/formatted/umi_counts.csv"
 filter_out_child = FALSE
+plot_title_prefix = ""
+plot_title_suffix = ""
+box_plot_dir_path <- "plots_updated/boxplots"
 
 comparison = "CFRDVsIGT"
 classes = c("CFRD", "IGT")
@@ -942,25 +945,26 @@ best_features_file_path  = "data/selected_features/best_features_with_is_best.cs
 dataset_replace_str = "CF_EV_tra_combat_"
 colour_column = "age_group"
 
-data_file_path = "data/proteomics/imputed_combined.csv"
-phenotype_file_path = "data/formatted/prot_phenotype.txt"
+
+combattwice = FALSE
+
 comparison = "CFRDVsIGT"
 classes = c("CFRD", "IGT")
 class_colours = c("red", "orange")
 dim_red = "UMAP"
 norm = "quantile"
 combat = TRUE
-dir_path = "plots_updated/prot_dim_red"
-plot_width_cm = 21
+dir_path = "plots_updated/prot_333_dim_red/zero_imputed_best"
+plot_width = 21
 perform_filter = FALSE
-best_features_file_path  = NA
-dataset_replace_str = NA
-colour_column = "mq_batch"
+colour_column = "batch_name"
+data_file_path = "data/proteomics/data_333samples_imputed_mf.csv"
+phenotype_file_path = "data/formatted/prot_phenotype_333.txt"
 plot_title_prefix = "1 "
-plot_title_suffix = " imputed combined"
-
-combattwice = FALSE
-
+best_features_file_path  = "data/selected_features/best_features_with_is_best.csv"
+dataset_replace_str = "CF_EV_prot_mf_quantile_combat_"
+omics_type = "prot"
+box_plot_dir_path <- "plots_updated/boxplots_prot"
 
 create_dim_red_plots <- function(comparison, classes,
                                  class_colours,
@@ -981,7 +985,9 @@ create_dim_red_plots <- function(comparison, classes,
                                  filter_out_child = FALSE,
                                  plot_width_cm = 21,
                                  plot_title_prefix = "",
-                                 plot_title_suffix = ""){
+                                 plot_title_suffix = "",
+                                 omics_type = "tra",
+                                 box_plot_dir_path = "plots_updated/boxplots"){
   data <- read.table(data_file_path, header=TRUE, sep=",", row.names=1, skip=0,
                      nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
   phenotype <- read.table(phenotype_file_path, header=TRUE, sep="\t")
@@ -1241,7 +1247,7 @@ create_dim_red_plots <- function(comparison, classes,
   ggplot2::ggsave(file_path, units = "cm", width = 30)
   
   ###############
-  #create transcript box plots if best biomarkers only
+  #create biomarker box plots if best biomarkers only
   
   if(!is.na(best_features_file_path) & !is.na(dataset_replace_str)){
     data_to_plot <- data %>%
@@ -1259,50 +1265,53 @@ create_dim_red_plots <- function(comparison, classes,
       select(-c(n))
     
     data_to_plot <- data_to_plot %>%
-      pivot_longer(!c(sample_name, Label), names_to = "transcripts") %>%
-      arrange(transcripts, Label)
+      pivot_longer(!c(sample_name, Label), names_to = "biomarkers") %>%
+      arrange(biomarkers, Label)
     
     data_to_plot_sub <- data_to_plot %>%
-      group_by(transcripts) %>%
+      group_by(biomarkers) %>%
       summarize(median = median(value), mean = mean(value)) %>%
       arrange(desc(median), desc(mean))
-    # biomarkers_rem <- data_to_plot_sub$transcripts
+    
+    if(omics_type == "prot"){
+      protein_names <- read.csv("data/proteomics/protein_names.csv") %>%
+        dplyr::select(c(gene_name, protein_name, protein_id))
+      
+      data_to_plot_sub <- protein_names %>%
+        inner_join(data_to_plot_sub, by = c("gene_name" = "biomarkers")) %>%
+        dplyr::rename(c("biomarkers" = "gene_name"))
+    }
+    
+    # biomarkers_rem <- data_to_plot_sub$biomarkers
     # 
     # biomarkers_ordered <- c(biomarkers_specific, biomarkers_rem)
     # 
     data_to_write <- as.data.frame(data_to_plot_sub)
     write.xlsx(data_to_write,
                "data/selected_features/biomarkers_expr.xlsx",
-               sheetName = comparison,
+               sheetName = paste(omics_type, comparison, sep = "_"),
                col.names = TRUE, row.names = FALSE, append = TRUE)
     
     data_to_plot <- data_to_plot %>%
-      mutate(transcripts = factor(transcripts, levels = data_to_plot_sub$transcripts))
-    # 
-    # %>%
-    #   mutate(plot_num = ifelse(transcripts %in% biomarkers_specific,
-    #                            1, 2))
-    # plot <- ggplot() +
-    #   aes(x = transcripts, y = value, fill = label) +
-    #   geom_boxplot(data = (data_to_plot %>% filter(plot_num == 1))) +
-    #   geom_boxplot(data = (data_to_plot %>% filter(plot_num == 2))) +
-    #   xlab(paste0("Transcripts (", num_transcripts, ")")) +
-    #   ylab(y_lab) +
-    #   ggtitle(plot_title) +
-    #   labs(fill = "") +
-    #   facet_wrap(~plot_num, scales = "free") + 
-    #   theme(
-    #     strip.text.x = element_blank()
-    #   )
+      mutate(biomarkers = factor(biomarkers, levels = data_to_plot_sub$biomarkers))
     plot_title <- sub("UMAP plot of ", "", title)
     if(norm == "log_tmm"){
       y_lab <- "Log TMM of expression level across samples"
+    } else if(norm == "quantile"){
+      y_lab <- "Quantile normed expression level across samples"
     }
-    num_transcripts <- nrow(data_to_plot_sub)
+    
+    num_biomarkers <- nrow(data_to_plot_sub)
+    if(omics_type == "tra"){
+      x_lab <- paste0("Transcripts (", num_biomarkers, ")")
+    } else{
+      x_lab <- paste0("Proteins (", num_biomarkers, ")")
+    }
+    
     plot <- ggplot() +
-      aes(x = transcripts, y = value, fill = Label) +
+      aes(x = biomarkers, y = value, fill = Label) +
       geom_boxplot(data = data_to_plot) +
-      xlab(paste0("Transcripts (", num_transcripts, ")")) +
+      xlab(x_lab) +
       ylab(y_lab) +
       ggtitle(plot_title) +
       labs(fill = "") +
@@ -1312,12 +1321,11 @@ create_dim_red_plots <- function(comparison, classes,
       )
     
     plot
-    dir_path <- "plots_updated/boxplots"
-    if(!dir.exists(dir_path)){
-      dir.create(dir_path, recursive = TRUE)
+    if(!dir.exists(box_plot_dir_path)){
+      dir.create(box_plot_dir_path, recursive = TRUE)
     }
     file_name <- paste0(gsub(plot_title, pattern = " ", replacement = "-"), ".png")
-    file_path <- paste(dir_path, file_name, sep = "/")
+    file_path <- paste(box_plot_dir_path, file_name, sep = "/")
     ggplot2::ggsave(file_path, units = "cm", width = plot_width_cm)
   }
 

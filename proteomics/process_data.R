@@ -208,3 +208,251 @@ write.csv(data.zeroimputed.main, "data/proteomics/zeroimputed_main.csv")
 data.zeroimputed.main2 <- read.csv("data/proteomics/zeroimputed_main.csv", row.names = 1)
 all.equal(data.zeroimputed.main, data.zeroimputed.main2)
 
+
+
+
+####################
+################################################
+
+#processing the MQ result with all samples i.e. 333 samples
+#         this includes the DK samples provided in 2023
+
+data <- read.table(file = "data/proteomics/all/proteinGroups.txt", sep = "\t", header = TRUE)
+
+meta_data <- read.csv("data/proteomics/prot_metadata_all_2023Aug.csv") %>%
+  mutate(modulator_status = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ 'postmod',
+                                      TRUE ~ 'premod')) %>%
+  mutate(mstat_condition_country = paste(modulator_status, condition, country, sep = "_")) %>%
+  dplyr::rename(c("disease_status" = "condition"))
+summary(factor(meta_data$mstat_condition_country))
+#assuming that similar to tra, batches will be for country and not the cohorts within AU
+# using this mstat_condition_country column to identify proteins to be filtered
+
+
+data <- data[data$Reverse != "+" & data$Potential.contaminant != "+" & data$Unique.peptides >= 2,]
+data <- data[data$Gene.names != "",] #removes rows with no Gene names
+data <- data[complete.cases(data),] #removes NAs at the end 
+data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";") 
+# data_unique <- data_unique %>%
+#   select(-contains("glufib.")) %>% #remove glufib
+#   select(-contains("QC"))#remove QC samples
+
+
+######create protein names file
+
+protein_names <- data_unique %>% dplyr::select("Protein.IDs", "Protein.names", "Gene.names", "name", "ID")
+colnames(protein_names) <- c("protein_id", "protein_name", "gene_name", "name", "ID")
+write.csv(protein_names, file="data/proteomics/protein_names.csv", row.names = F)
+
+######################
+
+
+meta_data <- add_replicate_column(meta_data, "mstat_condition_country")
+
+exp_design <- meta_data %>%
+  select(label,condition,replicate) %>%
+  mutate(label=as.character(label))
+exp_design$label <- paste("LFQ.intensity.",exp_design$label,sep="")
+
+columns <- grep("LFQ.intensity.", colnames(data_unique))
+
+se <- make_se(data_unique, columns, exp_design)
+
+#plot_coverage(se)
+
+dim(assays(se)[[1]])
+
+summary(summary(factor(meta_data$condition)) / dim(meta_data)[1])
+# Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+# 0.009009 0.037538 0.066066 0.066667 0.084084 0.186186
+
+filt <- filter_proteins(se, "fraction", min = 0.009009/2)
+dim(assays(filt)[[1]])
+
+filt_data <- get_df_long(filt) %>%
+  dplyr::select(c(label, name, intensity)) %>%
+  pivot_wider(names_from = name, values_from = intensity) %>%
+  mutate(label = sub("LFQ.intensity.", "lfq_", label)) %>%
+  column_to_rownames("label") 
+
+
+sum(!is.na(filt_data)) / (nrow(filt_data) * ncol(filt_data))
+#0.2377119
+
+#to be noted : percentage of non-NAs are really low
+
+# data in sample x proteins
+
+data.imputed.mf <- t(missForest(filt_data, verbose = TRUE)$ximp)
+# missForest iteration 1 in progress...done!
+#   estimated error(s): 0.3976678 
+# difference(s): 0.00098186 
+# time: 259.585 seconds
+# 
+# missForest iteration 2 in progress...done!
+#   estimated error(s): 0.3959015 
+# difference(s): 6.932778e-05 
+# time: 297.052 seconds
+# 
+# missForest iteration 3 in progress...done!
+#   estimated error(s): 0.3953103 
+# difference(s): 4.393199e-05 
+# time: 292.296 seconds
+# 
+# missForest iteration 4 in progress...done!
+#   estimated error(s): 0.3965392 
+# difference(s): 4.068473e-05 
+# time: 304.098 seconds
+# 
+# missForest iteration 5 in progress...done!
+#   estimated error(s): 0.395222 
+# difference(s): 3.894847e-05 
+# time: 294.523 seconds
+# 
+# missForest iteration 6 in progress...done!
+#   estimated error(s): 0.3968719 
+# difference(s): 4.013596e-05 
+# time: 287.009 seconds
+
+
+data.imputed.mf <- as.data.frame(data.imputed.mf)
+
+sum(is.na(data.imputed.mf))
+#0
+
+data.imputed.zero <- filt_data
+sum(is.na(data.imputed.zero))
+#393455
+data.imputed.zero[is.na(data.imputed.zero)] <- 0
+data.imputed.zero <- as.data.frame(t(data.imputed.zero))
+sum(is.na(data.imputed.zero))
+
+write.csv(data.imputed.mf, "data/proteomics/data_333samples_imputed_mf.csv")
+
+write.csv(data.imputed.zero, "data/proteomics/data_333samples_imputed_zero.csv")
+
+#writing once again to get column names in format converted to by read.csv
+data.imputed.mf <- read.csv("data/proteomics/data_333samples_imputed_mf.csv", row.names = 1)
+data.imputed.zero <- read.csv("data/proteomics/data_333samples_imputed_zero.csv", row.names = 1)
+
+write.csv(data.imputed.mf, "data/proteomics/data_333samples_imputed_mf.csv")
+write.csv(data.imputed.zero, "data/proteomics/data_333samples_imputed_zero.csv")
+##########################################
+#ignoring the 'other' batch samples
+
+data <- read.table(file = "data/proteomics/all/proteinGroups.txt", sep = "\t", header = TRUE)
+
+meta_data_no_other <- read.csv("data/proteomics/prot_metadata_all_2023Aug.csv") %>%
+  mutate(modulator_status = case_when((!is.na(pre_post_modulator) & pre_post_modulator == 1) ~ 'postmod',
+                                      TRUE ~ 'premod')) %>%
+  mutate(mstat_condition_country = paste(modulator_status, condition, country, sep = "_")) %>%
+  dplyr::rename(c("disease_status" = "condition")) %>%
+  filter(batch_name != "other")
+summary(factor(meta_data_no_other$mstat_condition_country))
+
+
+data <- data[data$Reverse != "+" & data$Potential.contaminant != "+" & data$Unique.peptides >= 2,]
+data <- data[data$Gene.names != "",] #removes rows with no Gene names
+data <- data[complete.cases(data),] #removes NAs at the end 
+data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";") 
+# data_unique <- data_unique %>%
+#   select(-contains("glufib.")) %>% #remove glufib
+#   select(-contains("QC"))#remove QC samples
+
+
+meta_data_no_other <- add_replicate_column(meta_data_no_other, "mstat_condition_country")
+
+exp_design_no_other <- meta_data_no_other %>%
+  select(label,condition,replicate) %>%
+  mutate(label=as.character(label))
+exp_design_no_other$label <- paste("LFQ.intensity.",exp_design_no_other$label,sep="")
+
+columns <- grep("LFQ.intensity.", colnames(data_unique))
+
+se_no_other <- make_se(data_unique, columns, exp_design_no_other)
+
+#plot_coverage(se_no_other)
+
+dim(assays(se_no_other)[[1]])
+# [1] 1658  315
+
+summary(summary(factor(meta_data_no_other$condition)) / dim(meta_data_no_other)[1])
+# Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+# 0.009524 0.038095 0.060317 0.066667 0.084127 0.184127 
+
+filt_no_other <- filter_proteins(se_no_other, "fraction", min = 0.009524/2)
+dim(assays(filt_no_other)[[1]])
+# [1] 1546  315
+
+filt_data_no_other <- get_df_long(filt_no_other) %>%
+  dplyr::select(c(label, name, intensity)) %>%
+  pivot_wider(names_from = name, values_from = intensity) %>%
+  mutate(label = sub("LFQ.intensity.", "lfq_", label)) %>%
+  column_to_rownames("label") 
+
+
+sum(!is.na(filt_data_no_other)) / (nrow(filt_data_no_other) * ncol(filt_data_no_other))
+#0.2388673
+
+#to be noted : percentage of non-NAs still low 
+# 0.2377119 became 0.2388673
+
+
+# data in sample x proteins
+data_no_other.imputed.mf <- t(missForest(filt_data_no_other, verbose = TRUE)$ximp)
+# missForest iteration 1 in progress...done!
+#   estimated error(s): 0.396851 
+# difference(s): 0.0009781329 
+# time: 229.65 seconds
+# 
+# missForest iteration 2 in progress...done!
+#   estimated error(s): 0.3956837 
+# difference(s): 6.474067e-05 
+# time: 268.447 seconds
+# 
+# missForest iteration 3 in progress...done!
+#   estimated error(s): 0.3959579 
+# difference(s): 4.357137e-05 
+# time: 272.157 seconds
+# 
+# missForest iteration 4 in progress...done!
+#   estimated error(s): 0.3953812 
+# difference(s): 4.03907e-05 
+# time: 288.288 seconds
+# 
+# missForest iteration 5 in progress...done!
+#   estimated error(s): 0.3946 
+# difference(s): 3.813403e-05 
+# time: 288.526 seconds
+# 
+# missForest iteration 6 in progress...done!
+#   estimated error(s): 0.3959512 
+# difference(s): 3.794324e-05 
+# time: 288.897 seconds
+# 
+# missForest iteration 7 in progress...done!
+#   estimated error(s): 0.3956366 
+# difference(s): 3.889752e-05 
+# time: 289.967 seconds
+data_no_other.imputed.mf <- as.data.frame(data_no_other.imputed.mf)
+
+sum(is.na(data_no_other.imputed.mf))
+#0
+
+data_no_other.imputed.zero <- filt_data_no_other
+sum(is.na(data_no_other.imputed.zero))
+#370664
+data_no_other.imputed.zero[is.na(data_no_other.imputed.zero)] <- 0
+data_no_other.imputed.zero <- as.data.frame(t(data_no_other.imputed.zero))
+sum(is.na(data_no_other.imputed.zero))
+
+write.csv(data_no_other.imputed.mf, "data/proteomics/data_no_other_315samples_imputed_mf.csv")
+
+write.csv(data_no_other.imputed.zero, "data/proteomics/data_no_other_315samples_imputed_zero.csv")
+
+#writing once again to get column names in format converted to by read.csv
+data_no_other.imputed.mf <- read.csv("data/proteomics/data_no_other_315samples_imputed_mf.csv", row.names = 1)
+data_no_other.imputed.zero <- read.csv("data/proteomics/data_no_other_315samples_imputed_zero.csv", row.names = 1)
+
+write.csv(data_no_other.imputed.mf, "data/proteomics/data_no_other_315samples_imputed_mf.csv")
+write.csv(data_no_other.imputed.zero, "data/proteomics/data_no_other_315samples_imputed_zero.csv")
