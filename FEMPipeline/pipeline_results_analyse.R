@@ -1156,3 +1156,26 @@ plot_heatmap(
   dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/",
   dataset_replace_string = "CF_EV_"
 )
+
+
+plot_common_feature_heatmap(c(73:78),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                            results_dir = "../fem_pipeline_results_prot_mf_quantile_combat_subset",
+                            dataset_replace_string = "CF_EV_prot_mf_quantile_combat_",
+                            heatmap_file_name = "CFRDVsIGT.png",
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/subset/"
+)
+plot_common_feature_heatmap(c(79:81),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                            results_dir = "../fem_pipeline_results_prot_mf_quantile_combat_subset",
+                            dataset_replace_string = "CF_EV_prot_mf_quantile_combat_",
+                            heatmap_file_name = "CFRDVsNGT.png",
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/subset/"
+)
+plot_common_feature_heatmap(c(82:86),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                            results_dir = "../fem_pipeline_results_prot_mf_quantile_combat_subset",
+                            dataset_replace_string = "CF_EV_prot_mf_quantile_combat_",
+                            heatmap_file_name = "IGTVsNGT.png",
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/subset/"
+)
