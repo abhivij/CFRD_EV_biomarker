@@ -45,42 +45,42 @@ plot_heatmap <- function(dparg_vec,
     filter(DataSetId %in% dataset_id_vec) %>%
     mutate(DataSetId = gsub(dataset_replace_string, "", DataSetId, fixed = TRUE))
   
-  # model <- "L2 Regularized logistic regression"
-  for(model in unique(model_results$Model)){
-    print(model)
-    
-    model_results_sub <- model_results %>%
-      filter(Model == model)
-    
-    data_to_plot <- model_results_sub %>%
-      select(DataSetId, FSM, Mean_AUC) %>%
-      # pivot_wider(names_from = DataSetId, values_from = Mean_AUC, values_fn = length) %>%          
-      pivot_wider(names_from = DataSetId, values_from = Mean_AUC) %>%
-      column_to_rownames("FSM")
-    data_to_plot <- data.matrix(data_to_plot)
-    
-    file_name_curr <- paste0("Mean_AUC",
-                             gsub(" ", "_", model),
-                             ".png")
-    file_name_curr <- paste0(dir_path, file_name_curr)
-    
-    png(file_name_curr, units = "cm", width = 20, height = 15, res = 1200)
-    ht <- Heatmap(data_to_plot, name = "Mean AUC",
-                  col = magma(5),
-                  rect_gp = gpar(col = "white", lwd = 1),
-                  cluster_columns = FALSE,
-                  column_order = replaced_dataset_id_vec[replaced_dataset_id_vec %in% colnames(data_to_plot)],
-                  column_names_rot = 60,
-                  column_names_gp = gpar(fontsize = 10),
-                  row_title = "Feature Selection Methods",
-                  row_names_side = "left",
-                  cell_fun = function(j, i, x, y, width, height, fill) {
-                    grid.text(sprintf("%.3f", data_to_plot[i, j]), x, y, gp = gpar(fontsize = 7, col = "slateblue3"))
-                  })
-    draw(ht, column_title = paste("Mean AUC results from", model))
-    dev.off()
-    
-  }
+  # # model <- "L2 Regularized logistic regression"
+  # for(model in unique(model_results$Model)){
+  #   print(model)
+  #   
+  #   model_results_sub <- model_results %>%
+  #     filter(Model == model)
+  #   
+  #   data_to_plot <- model_results_sub %>%
+  #     select(DataSetId, FSM, Mean_AUC) %>%
+  #     # pivot_wider(names_from = DataSetId, values_from = Mean_AUC, values_fn = length) %>%          
+  #     pivot_wider(names_from = DataSetId, values_from = Mean_AUC) %>%
+  #     column_to_rownames("FSM")
+  #   data_to_plot <- data.matrix(data_to_plot)
+  #   
+  #   file_name_curr <- paste0("Mean_AUC",
+  #                            gsub(" ", "_", model),
+  #                            ".png")
+  #   file_name_curr <- paste0(dir_path, file_name_curr)
+  #   
+  #   png(file_name_curr, units = "cm", width = 20, height = 15, res = 1200)
+  #   ht <- Heatmap(data_to_plot, name = "Mean AUC",
+  #                 col = magma(5),
+  #                 rect_gp = gpar(col = "white", lwd = 1),
+  #                 cluster_columns = FALSE,
+  #                 column_order = replaced_dataset_id_vec[replaced_dataset_id_vec %in% colnames(data_to_plot)],
+  #                 column_names_rot = 60,
+  #                 column_names_gp = gpar(fontsize = 10),
+  #                 row_title = "Feature Selection Methods",
+  #                 row_names_side = "left",
+  #                 cell_fun = function(j, i, x, y, width, height, fill) {
+  #                   grid.text(sprintf("%.3f", data_to_plot[i, j]), x, y, gp = gpar(fontsize = 7, col = "slateblue3"))
+  #                 })
+  #   draw(ht, column_title = paste("Mean AUC results from", model))
+  #   dev.off()
+  #   
+  # }
   
   ds_heatmap_dir_path <- paste0(dir_path, "/ds/") 
   if(!dir.exists(ds_heatmap_dir_path)){
@@ -215,6 +215,7 @@ plot_common_feature_heatmap(c(163:165),
 )
 
 plot_common_feature_heatmap <- function(dparg_vec, 
+                                        dataset_pipeline_arguments = dataset_pipeline_arguments,
                                         results_dir = "fem_pipeline_results",
                                         dataset_replace_string = "",
                                         heatmap_file_name,
@@ -1048,21 +1049,110 @@ plot_heatmap(
 )
 
 
-plot_common_feature_heatmap(c(13, 14, 15),
+plot_common_feature_heatmap(c(13:16),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
                             results_dir = "../fem_pipeline_results_tra_combat_subset",
-                            dataset_replace_string = "CF_EV_",
-                            heatmap_file_name = "seurat3_norm_find_var_none_CFRDVsIGT.png",
+                            dataset_replace_string = "CF_EV_tra_combat_",
+                            heatmap_file_name = "CFRDVsIGT.png",
                             plot_dir_path = "../plots/fem_pipeline_results_tra_combat/subset/"
 )
-plot_common_feature_heatmap(c(16, 17, 18),
+plot_common_feature_heatmap(c(17:26),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
                             results_dir = "../fem_pipeline_results_tra_combat_subset",
-                            dataset_replace_string = "CF_EV_",
-                            heatmap_file_name = "seurat3_norm_find_var_none_CFRDVsNGT.png",
+                            dataset_replace_string = "CF_EV_tra_combat_",
+                            heatmap_file_name = "CFRDVsNGT.png",
                             plot_dir_path = "../plots/fem_pipeline_results_tra_combat/subset/"
 )
-plot_common_feature_heatmap(c(19, 20, 21),
+plot_common_feature_heatmap(c(27:30),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
                             results_dir = "../fem_pipeline_results_tra_combat_subset",
-                            dataset_replace_string = "CF_EV_",
-                            heatmap_file_name = "seurat3_norm_find_var_none_IGTVsNGT.png",
+                            dataset_replace_string = "CF_EV_tra_combat_",
+                            heatmap_file_name = "IGTVsNGT.png",
                             plot_dir_path = "../plots/fem_pipeline_results_tra_combat/subset/"
+)
+
+
+
+##########
+
+#prot combined of 2 mq_batches with combat
+
+plot_heatmap(
+  dparg_vec = c(1, 5, 9),
+  dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+  results_dir = "../fem_pipeline_results_prot_combined_combat/",
+  dir_path = "../plots/fem_pipeline_results_prot_combined_combat/",
+  dataset_replace_string = "CF_EV_"
+)
+
+
+plot_common_feature_heatmap(c(13:16),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
+                            results_dir = "../fem_pipeline_results_prot_combined_combat_subset",
+                            dataset_replace_string = "CF_EV_prot_combined_combat_",
+                            heatmap_file_name = "CFRDVsIGT.png",
+                            plot_dir_path = "../plots/fem_pipeline_results_prot_combined_combat/subset/"
+)
+
+
+##########
+
+#prot combined of 2 mq_batches with combat twice
+
+plot_heatmap(
+  dparg_vec = c(13, 17, 21),
+  dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+  results_dir = "../fem_pipeline_results_prot_combined_combattwice/",
+  dir_path = "../plots/fem_pipeline_results_prot_combined_combattwice/",
+  dataset_replace_string = "CF_EV_"
+)
+
+##########
+
+#prot only main mq_batch with combat
+
+plot_heatmap(
+  dparg_vec = c(25, 29, 33),
+  dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+  results_dir = "../fem_pipeline_results_prot_main_combat/",
+  dir_path = "../plots/fem_pipeline_results_prot_main_combat/",
+  dataset_replace_string = "CF_EV_"
+)
+
+
+##########
+
+#prot combined of 2 mq_batches without batch correction
+
+plot_heatmap(
+  dparg_vec = c(37, 41, 45),
+  dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+  results_dir = "../fem_pipeline_results_prot_combined/",
+  dir_path = "../plots/fem_pipeline_results_prot_combined/",
+  dataset_replace_string = "CF_EV_"
+)
+
+##########
+
+#prot combined of main batch without batch correction
+
+plot_heatmap(
+  dparg_vec = c(49, 53, 57),
+  dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+  results_dir = "../fem_pipeline_results_prot_main/",
+  dir_path = "../plots/fem_pipeline_results_prot_main/",
+  dataset_replace_string = "CF_EV_"
+)
+
+
+##########
+
+#prot from the 333 samples MaxQuant processing with combat
+
+plot_heatmap(
+  dparg_vec = c(61, 65, 69),
+  dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+  results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+  dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/",
+  dataset_replace_string = "CF_EV_"
 )

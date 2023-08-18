@@ -1716,3 +1716,285 @@ create_data_subsets(dparg_id = 9,
                     subset_file_name_substr = "mrmr75",
                     create_all_common = FALSE,
                     data_file_path = "../data/formatted/IGTVsNGT_umi_counts_combat_processed.csv")
+
+
+##########
+
+#prot combined of 2 mq_batches with combat
+
+
+##########
+
+#prot combined of 2 mq_batches with combat twice
+
+explore_common_features(dparg_id = 13,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "RF_RFE", "wilcoxontest", 
+                                         "mrmr75", "mrmr100", "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_prot_combined_combattwice",
+                        dir_path = "../plots/fem_pipeline_results_prot_combined_combattwice/common_features_upset")
+
+explore_common_features(dparg_id = 13,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "RF_RFE", "wilcoxontest", 
+                                         "mrmr75", "mrmr100", "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 27,
+                        results_dir = "../fem_pipeline_results_prot_combined_combattwice",
+                        dir_path = "../plots/fem_pipeline_results_prot_combined_combattwice/common_features_upset")
+
+explore_common_features(dparg_id = 17,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("wilcoxontest", "mrmr75", "mrmr100", 
+                                         "RF_RFE", "mrmr10",
+                                         "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_prot_combined_combattwice",
+                        dir_path = "../plots/fem_pipeline_results_prot_combined_combattwice/common_features_upset")
+
+explore_common_features(dparg_id = 17,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("wilcoxontest", "mrmr75", "mrmr100", 
+                                         "RF_RFE", "mrmr10",
+                                         "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 29,
+                        results_dir = "../fem_pipeline_results_prot_combined_combattwice",
+                        dir_path = "../plots/fem_pipeline_results_prot_combined_combattwice/common_features_upset")
+
+explore_common_features(dparg_id = 17,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("wilcoxontest", "mrmr75", "mrmr100", 
+                                         "RF_RFE", "mrmr10",
+                                         "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 30,
+                        results_dir = "../fem_pipeline_results_prot_combined_combattwice",
+                        dir_path = "../plots/fem_pipeline_results_prot_combined_combattwice/common_features_upset")
+
+explore_common_features(dparg_id = 21,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr75", "mrmr100", "wilcoxontest", 
+                                         "mrmr10", "ga_rf", "RF_RFE"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_prot_combined_combattwice",
+                        dir_path = "../plots/fem_pipeline_results_prot_combined_combattwice/common_features_upset")
+
+explore_common_features(dparg_id = 21,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr75", "mrmr100", "wilcoxontest", 
+                                         "mrmr10", "ga_rf", "RF_RFE"),
+                        min_iter_feature_presence = 29,
+                        results_dir = "../fem_pipeline_results_prot_combined_combattwice",
+                        dir_path = "../plots/fem_pipeline_results_prot_combined_combattwice/common_features_upset")
+
+explore_common_features(dparg_id = 21,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr75", "mrmr100", "wilcoxontest", 
+                                         "mrmr10", "ga_rf", "RF_RFE"),
+                        min_iter_feature_presence = 30,
+                        results_dir = "../fem_pipeline_results_prot_combined_combattwice",
+                        dir_path = "../plots/fem_pipeline_results_prot_combined_combattwice/common_features_upset")
+
+##########
+
+#prot from the 333 samples MaxQuant processing with combat
+
+explore_common_features(dparg_id = 61,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "wilcoxontest", "mrmr75", "mrmr100", 
+                                         "t-test", "RF_RFE"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/common_features_upset")
+explore_common_features(dparg_id = 61,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "wilcoxontest", "mrmr75", "mrmr100", 
+                                         "t-test", "RF_RFE"),
+                        min_iter_feature_presence = 27,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/common_features_upset")
+explore_common_features(dparg_id = 61,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "wilcoxontest", "mrmr75", "mrmr100", 
+                                         "t-test", "RF_RFE"),
+                        min_iter_feature_presence = 29,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/common_features_upset")
+explore_common_features(dparg_id = 61,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "wilcoxontest", "mrmr75", "mrmr100", 
+                                         "t-test", "RF_RFE"),
+                        min_iter_feature_presence = 30,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/common_features_upset")
+
+
+explore_common_features(dparg_id = 65,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "mrmr75", "mrmr100", 
+                                         "t-test", "mrmr_perc50", "ranger_pos_impu_cor",
+                                         "wilcoxontest"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/common_features_upset")
+explore_common_features(dparg_id = 65,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "mrmr75", "mrmr100", 
+                                         "t-test", "mrmr_perc50", "ranger_pos_impu_cor",
+                                         "wilcoxontest"),
+                        min_iter_feature_presence = 27,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/common_features_upset")
+explore_common_features(dparg_id = 65,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "mrmr75", "mrmr100", 
+                                         "t-test", "mrmr_perc50", "ranger_pos_impu_cor",
+                                         "wilcoxontest"),
+                        min_iter_feature_presence = 29,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/common_features_upset")
+explore_common_features(dparg_id = 65,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "mrmr75", "mrmr100", 
+                                         "t-test", "mrmr_perc50", "ranger_pos_impu_cor",
+                                         "wilcoxontest"),
+                        min_iter_feature_presence = 30,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/common_features_upset")
+
+
+explore_common_features(dparg_id = 69,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "wilcoxontest", "t-test", "mrmr75", 
+                                         "mrmr100", "RF_RFE", "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/common_features_upset")
+explore_common_features(dparg_id = 69,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "wilcoxontest", "t-test", "mrmr75", 
+                                         "mrmr100", "RF_RFE", "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 27,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/common_features_upset")
+explore_common_features(dparg_id = 69,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "wilcoxontest", "t-test", "mrmr75", 
+                                         "mrmr100", "RF_RFE", "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 29,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/common_features_upset")
+explore_common_features(dparg_id = 69,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "wilcoxontest", "t-test", "mrmr75", 
+                                         "mrmr100", "RF_RFE", "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 30,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_combat/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/common_features_upset")
+
+
+
+create_data_subsets(dparg_id = 61,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("wilcoxontest")),
+                    subset_file_name_substr = "wilcoxontest",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/CFRDVsIGT_imputed333_mf_quantile_combat.csv")
+create_data_subsets(dparg_id = 61,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 29,
+                    subset_creation_criteria <- list("i"= c("wilcoxontest")),
+                    subset_file_name_substr = "wilcoxontest",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/CFRDVsIGT_imputed333_mf_quantile_combat.csv")
+create_data_subsets(dparg_id = 61,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 30,
+                    subset_creation_criteria <- list("i"= c("wilcoxontest")),
+                    subset_file_name_substr = "wilcoxontest",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/CFRDVsIGT_imputed333_mf_quantile_combat.csv")
+create_data_subsets(dparg_id = 61,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/CFRDVsIGT_imputed333_mf_quantile_combat.csv")
+create_data_subsets(dparg_id = 61,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 29,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/CFRDVsIGT_imputed333_mf_quantile_combat.csv")
+create_data_subsets(dparg_id = 61,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 30,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/CFRDVsIGT_imputed333_mf_quantile_combat.csv")
+
+
+create_data_subsets(dparg_id = 65,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/CFRDVsNGT_imputed333_mf_quantile_combat.csv")
+create_data_subsets(dparg_id = 65,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 29,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/CFRDVsNGT_imputed333_mf_quantile_combat.csv")
+create_data_subsets(dparg_id = 65,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 30,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/CFRDVsNGT_imputed333_mf_quantile_combat.csv")
+
+
+create_data_subsets(dparg_id = 69,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 27,
+                    subset_creation_criteria <- list("i"= c("wilcoxontest")),
+                    subset_file_name_substr = "wilcoxontest",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/IGTVsNGT_imputed333_mf_quantile_combat.csv")
+create_data_subsets(dparg_id = 69,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("wilcoxontest")),
+                    subset_file_name_substr = "wilcoxontest",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/IGTVsNGT_imputed333_mf_quantile_combat.csv")
+
+
+create_data_subsets(dparg_id = 69,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/IGTVsNGT_imputed333_mf_quantile_combat.csv")
+create_data_subsets(dparg_id = 69,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 29,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/IGTVsNGT_imputed333_mf_quantile_combat.csv")
+create_data_subsets(dparg_id = 69,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 30,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/formatted/proteomics/IGTVsNGT_imputed333_mf_quantile_combat.csv")
+
