@@ -948,23 +948,22 @@ colour_column = "age_group"
 
 combattwice = FALSE
 
-comparison = "CFRDVsIGT"
-classes = c("CFRD", "IGT")
-class_colours = c("red", "orange")
+comparison = "IGTVsNGT"
+classes = c("IGT", "NGT")
+class_colours = c("orange", "yellow")
 dim_red = "UMAP"
 norm = "quantile"
 combat = TRUE
-dir_path = "plots_updated/prot_333_dim_red/zero_imputed_best"
+dir_path = "plots_updated/dim_red_best_prot"
 plot_width = 21
 perform_filter = FALSE
 colour_column = "batch_name"
 data_file_path = "data/proteomics/data_333samples_imputed_mf.csv"
 phenotype_file_path = "data/formatted/prot_phenotype_333.txt"
-plot_title_prefix = "1 "
 best_features_file_path  = "data/selected_features/best_features_with_is_best.csv"
 dataset_replace_str = "CF_EV_prot_mf_quantile_combat_"
 omics_type = "prot"
-box_plot_dir_path <- "plots_updated/boxplots_prot"
+box_plot_dir_path = "plots_updated/boxplots_prot"
 
 create_dim_red_plots <- function(comparison, classes,
                                  class_colours,
@@ -1273,14 +1272,17 @@ create_dim_red_plots <- function(comparison, classes,
       summarize(median = median(value), mean = mean(value)) %>%
       arrange(desc(median), desc(mean))
     
-    if(omics_type == "prot"){
-      protein_names <- read.csv("data/proteomics/protein_names.csv") %>%
-        dplyr::select(c(gene_name, protein_name, protein_id))
-      
-      data_to_plot_sub <- protein_names %>%
-        inner_join(data_to_plot_sub, by = c("gene_name" = "biomarkers")) %>%
-        dplyr::rename(c("biomarkers" = "gene_name"))
-    }
+    # biomarker is already gene-name
+    # adding this below mapping causes issues when multiple names present in protein names file
+    
+    # if(omics_type == "prot"){
+    #   protein_names <- read.csv("data/proteomics/protein_names.csv") %>%
+    #     dplyr::select(c(gene_name, protein_name, protein_id))
+    #   
+    #   data_to_plot_sub <- protein_names %>%
+    #     right_join(data_to_plot_sub, by = c("gene_name" = "biomarkers")) %>%
+    #     dplyr::rename(c("biomarkers" = "gene_name"))
+    # }
     
     # biomarkers_rem <- data_to_plot_sub$biomarkers
     # 
