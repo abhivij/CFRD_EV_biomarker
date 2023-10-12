@@ -1149,7 +1149,7 @@ sum(is.na(updated_mapping$rawfile))
 write.csv(updated_mapping, "data/formatted/updated_mapping.csv", row.names = FALSE)
 
 
-
+######################################
 #creating/including meta data of new samples
 summary_info <- read.table("data/proteomics/2023_samples/2_MaxQuant_Processed/exec1_with_default_parameters/summary.txt", 
                            header = TRUE, sep = "\t") 
@@ -1369,3 +1369,29 @@ write.csv(meta_data_all,
 ##############################################
 ##############################################
 ##############################################
+
+
+#later prot_metadata_all_2023Aug.csv should be updated with new transcript sample names
+
+# for now, using prot_metadata_new_samples.csv to get mapping and meta data
+qiagen_samples <- read.csv("data/formatted/rna_new/qiagen_processed_sample_names.csv") %>%
+  separate(Sample, into = c(NA, "id", NA), sep = "_", remove = FALSE) %>%
+  mutate(id = as.numeric(sub("CPH", "", id))) %>%
+  arrange(id)
+prot_new_sample_metadata <- read.csv("data/proteomics/prot_metadata_new_samples.csv") %>%
+  filter(!grepl(pattern = "-r", x = label, fixed = TRUE))
+
+tra_new_sample_metadata <- qiagen_samples %>%
+  inner_join(prot_new_sample_metadata, by = c("id" = "record_id_22")) %>%
+  dplyr::select(-c(id))
+
+write.csv(tra_new_sample_metadata, "data/formatted/rna_new/meta_data.csv", 
+          row.names = FALSE)
+
+minimal_metadata <- tra_new_sample_metadata %>%
+  dplyr::select(c(Sample, disease_status))
+write.csv(minimal_metadata, "data/formatted/rna_new/meta_data_minimal.csv", 
+          row.names = FALSE)
+
+#also manually created a file meta_data_minimal_randomized.csv by 
+#just randomly assigning A, B, C to disease_status in meta_data_minimal.csv

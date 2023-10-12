@@ -564,3 +564,88 @@ data.int <- as.data.frame(rnaseq.integrated$integrated@data)
 all.equal(colnames(data.int), rownames(phenotype))
 colnames(data.int) <- phenotype$Sample
 write.csv(data.int, "data/formatted/umi_counts_filtered_seurat3_with_more_samples.csv")
+
+
+
+############ create subsets of this
+
+best_features <- read.csv("data/selected_features/best_features_with_is_best.csv")   %>%
+  filter(is_best == 1, grepl("CF_EV_adult_filtered_seurat3_norm_find_var_none_", dataset_id)) %>%
+  separate(dataset_id, into = c(NA, NA, NA, NA, NA, NA, NA, NA, NA, "comparison"), remove = FALSE) 
+
+#write_subset_file from pipeline_results_analyze_features.R
+
+
+
+####################
+#check number of mirnas and piRNAs
+data <- read.table("data/formatted/umi_counts.csv", header=TRUE, sep=",", row.names=1, skip=0,
+                   nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
+transcripts <- rownames(data)
+pirnas <- transcripts[grepl("piR", transcripts)]
+mirnas <- transcripts[!grepl("piR", transcripts)]
+
+
+####################
+
+#check and obtain umi counts from the new set of 62 samples
+
+data <- read_excel("../../Qiagen/qiagen_expression_output/Test experiment piRNA matrix.xlsx")
+
+sum(is.na(data$Name))
+#1
+
+which(is.na(data$Name))
+#3101
+
+data <- read_excel("../../Qiagen/qiagen_expression_output/Test experiment piRNA matrix.xlsx") %>%
+  filter(!is.na(Name)) %>%
+  mutate(across(!contains("Name"), as.numeric))
+
+###############
+#the above was with spikein - but rnaseq in Ramaciotti did not use spikein
+#below are the processed files without spikein
+
+data1 <- read_excel("data/formatted/rna_new/qiagen_output/disease_NGT_control/disease_status piRNA matrix.xlsx")
+data2 <- read_excel("data/formatted/rna_new/qiagen_output/disease_all_pairs/disease_status_all_comparison piRNA matrix.xlsx")
+data3 <- read_excel("data/formatted/rna_new/qiagen_output/disease_random/disease_status_random piRNA matrix.xlsx")
+
+all.equal(data1, data2)
+all.equal(data1, data3)
+all.equal(data2, data3)
+
+#all true
+# therefore expression count doesn't consider condition i.e. normalize it in some way
+rm(data1, data2, data3)
+
+all.equal(data, data1)
+#there is mismatch b/w this and processing assuming spikein
+
+data <- read_excel("data/formatted/rna_new/qiagen_output/disease_NGT_control/disease_status piRNA matrix.xlsx")
+sum(is.na(data$Name))
+
+which(is.na(data$Name))
+
+data <- data %>%
+  filter(!is.na(Name)) %>%
+  mutate(across(!contains("Name"), as.numeric))
+dim(data)
+# [1] 6574   63
+data_grouped <- data %>% 
+  group_by(Name) %>%
+  summarize(n = n()) %>%
+  filter(n > 1)
+#0
+
+length(unique(data$Name))
+#6574
+
+data <- data %>%
+  column_to_rownames("Name")
+
+rsum <- rowSums(data)
+
+data <- data %>%
+  filter(rowSums(data) != 0)
+dim(data)
+# [1] 5359   62
