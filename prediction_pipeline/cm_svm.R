@@ -8,7 +8,7 @@ svm_model <- function(data.train, label.train, data.test, label.test,
   
   kernel_name <- paste(toupper(substring(kernel, 1, 1)), substring(kernel, 2), sep = "")
   model_name <- paste(kernel_name, "Kernel SVM")
-
+  
   
   try({
     set.seed(random_seed)
@@ -20,17 +20,19 @@ svm_model <- function(data.train, label.train, data.test, label.test,
     
     pred <- predict(model, data.test, probability = TRUE)
     pred_prob <- data.frame(attr(pred, 'probabilities'))[classes[2]]
-
+    
     
     result_df.train <- data.frame("TrueLabel" = label.train$Label,
                                   "Pred_prob" = pred_prob.train[,1],
                                   "PredictedLabel" = pred.train,
-                                  "Type" = "train")
+                                  "Type" = "train",
+                                  "cutoff" = NA)
     
     result_df.test <- data.frame("TrueLabel" = label.test$Label,
                                  "Pred_prob" = pred_prob[,1],
                                  "PredictedLabel" = pred,
-                                 "Type" = "test")
+                                 "Type" = "test",
+                                 "cutoff" = NA)
     
     result_df <- rbind(result_df.train %>%
                          rownames_to_column("sample"), 
@@ -38,8 +40,8 @@ svm_model <- function(data.train, label.train, data.test, label.test,
                          rownames_to_column("sample"))
     
     result_df <- result_df %>%
-      mutate(Pred_prob = as.double(Pred_prob))
-    
+      mutate(Pred_prob = as.double(Pred_prob)) %>%
+      mutate(model = model_name)
     
     return (result_df)
     

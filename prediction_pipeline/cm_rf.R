@@ -10,15 +10,18 @@ rf_model <- function(data.train, label.train, data.test, label.test,
   
   try({
     set.seed(random_seed)
-    if(sum(data.train - colMeans(data.train)) != 0){
+    data.sanity_check <- data.train - colMeans(data.train)
+    if(sum(data.sanity_check != 0) != 0){
       #ensure that atleast one column is not a constant vector
+      #does this by checking if sum of all entries is non-zero after subtracting column mean
+      
       #all columns constant causes the below line to run forever
       model <- randomForest::randomForest(x = data.train, y = factor(label.train$Label, levels = classes))
-
+      
       best_acc <- -1
       best_cut_off <- 0.5
       for(cut_off in c(0.5, seq(0.2, 0.8, 0.01))){
-        print(cut_off)
+        #print(cut_off)
         pred_prob.train <- predict(model, data.train, type = "prob")
         pred_prob.train <- data.frame(pred_prob.train)[classes[2]]
         pred.train <- ifelse(pred_prob.train > best_cut_off, classes[2], classes[1])
@@ -33,12 +36,12 @@ rf_model <- function(data.train, label.train, data.test, label.test,
       pred_prob.train <- predict(model, data.train, type = "prob")
       pred_prob.train <- data.frame(pred_prob.train)[classes[2]]
       pred.train <- ifelse(pred_prob.train > best_cut_off, classes[2], classes[1])
-
+      
       
       pred_prob <- predict(model, data.test, type="prob")
       pred_prob <- data.frame(pred_prob)[classes[2]]
       pred <- ifelse(pred_prob > best_cut_off, classes[2], classes[1])
-
+      
       
       result_df.train <- data.frame("TrueLabel" = label.train$Label,
                                     "Pred_prob" = pred_prob.train[,1],
@@ -67,6 +70,7 @@ rf_model <- function(data.train, label.train, data.test, label.test,
     }
     
   })
-  
+  result_df <- result_df %>%
+    mutate(model = model_name)
   return (result_df)
 }
