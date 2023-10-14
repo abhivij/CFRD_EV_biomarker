@@ -649,3 +649,26 @@ data <- data %>%
   filter(rowSums(data) != 0)
 dim(data)
 # [1] 5359   62
+
+
+#check if all samples uploaded are unique - i.e. no re-upload of same data
+rna_new_rough_data <- read.table("data/rna_new/all_sample_names_initial.txt", header = FALSE, sep = "\n")
+(dim(rna_new_rough_data)[1]-4)/4
+
+rna_new <- data.frame(matrix(ncol = 4, nrow = (dim(rna_new_rough_data)[1]-4)/4))
+colnames(rna_new) <- rna_new_rough_data[c(1:4), 1]
+
+i <- 5
+row_num <- floor((i-1) / 4)
+while(row_num < nrow(rna_new)){
+  # print(i)
+  row_num <- floor((i-1) / 4)
+  # print(row_num)
+  rna_new[row_num, ] <- c(rna_new_rough_data[c(i:(i+3)), 1])
+  i <- i + 4
+}
+
+length(unique(rna_new$`Sample name`))
+#334
+
+#hence verified that all uploaded samples are different
