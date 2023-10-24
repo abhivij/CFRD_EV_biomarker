@@ -1395,3 +1395,117 @@ write.csv(minimal_metadata, "data/formatted/rna_new/meta_data_minimal.csv",
 
 #also manually created a file meta_data_minimal_randomized.csv by 
 #just randomly assigning A, B, C to disease_status in meta_data_minimal.csv
+
+
+#################
+
+#updating proteomics meta-data file with new transcriptomic sample names
+#also creating a separate metadata file for transcriptomic - 
+#   without replicate proteomics samples mapped to same transcriptomics sample, so as to upload to Qiagen
+
+#Note - the above was the initial thought, but actually tra meta data also needs to be updated, check below 
+
+qiagen_samples <- read.csv("data/formatted/rna_new/qiagen_processed_sample_names.csv") %>%
+  separate(Sample, into = c(NA, "id", NA), sep = "_", remove = FALSE) %>%
+  mutate(id = as.numeric(sub("CPH", "", id))) %>%
+  arrange(id)
+prot_new_sample_metadata <- read.csv("data/proteomics/prot_metadata_new_samples.csv") %>%
+  filter(!grepl(pattern = "-r", x = label, fixed = TRUE))
+
+tra_new_sample_metadata <- qiagen_samples %>%
+  inner_join(prot_new_sample_metadata, by = c("id" = "record_id_22"))
+
+prot_333_sample_metadata <- read.csv("data/proteomics/prot_metadata_all_2023Aug.csv")
+
+new_sample_prot_333_sample_metadata <- prot_333_sample_metadata %>%
+  dplyr::filter(batch_name == "new")
+other_sample_prot_333_sample_metadata <- prot_333_sample_metadata %>%
+  dplyr::filter(batch_name != "new")
+
+tra_new_sample_metadata <- tra_new_sample_metadata %>%
+  dplyr::select(c(Sample, rawfile)) %>%
+  dplyr::rename(c("sample_long_name_t" = "Sample"))
+
+#repeat prot sample used for tra - replacing that name
+tra_new_sample_metadata <- tra_new_sample_metadata %>%
+  mutate(rawfile = ifelse(rawfile == "SW-21-7-23-31-90min", "SW-21-7-23-31-90min-r", rawfile))
+
+new_sample_prot_333_sample_metadata <- new_sample_prot_333_sample_metadata %>%
+  dplyr::select(-c(sample_long_name_t)) %>%
+  left_join(tra_new_sample_metadata, by = "rawfile") %>%
+  relocate(sample_long_name_t, .after = technicalreplicate)
+
+updated_prot_meta_data <- rbind(other_sample_prot_333_sample_metadata,
+                                new_sample_prot_333_sample_metadata)
+
+write.csv(updated_prot_meta_data, 
+          "data/proteomics/prot_metadata_all_2023Oct.csv", 
+          row.names = FALSE)
+
+tra_meta_data_for_qiagen <- updated_prot_meta_data %>%
+  dplyr::select(c(sample_long_name_t, condition)) %>%
+  filter(!is.na(sample_long_name_t))
+dim(tra_meta_data_for_qiagen)
+# [1] 311   2
+#already less than 334 i.e. 272 + 62
+
+tra_meta_data_for_qiagen <- tra_meta_data_for_qiagen %>%
+  distinct()
+dim(tra_meta_data_for_qiagen)
+# [1] 301   2
+length(unique(tra_meta_data_for_qiagen$sample_long_name_t))
+#301
+
+#so the tra meta data file should be used and updated
+
+#the old tra meta-data file needs to be updated with new set of samples
+#using the info from updated prot meta data file to create updated tra meta data file
+
+#Creation of updated tra meta data file below with additional 62 samples - total : 272 + 62 = 334
+
+tra_meta_data <- read.csv("data/formatted/meta_data_updated.csv") %>%
+  rename(c("condition" = "condition_updated"))
+prot_meta_data_new <- read.csv("data/proteomics/prot_metadata_all_2023Oct.csv") %>%
+  filter(batch_name == "new" & !is.na(sample_long_name_t))
+
+prot_meta_data_new <- prot_meta_data_new %>%
+  dplyr::select(-c(rawfile, label, technicalreplicate)) %>%
+  dplyr::rename(c("sample_long_name" = "sample_long_name_t")) %>%
+  separate("sample_long_name", into = c(NA, "illumina_sample_number"), sep = "_S", remove = FALSE) %>%
+  mutate(illumina_sample_number = strtoi(illumina_sample_number))
+
+#quant_batch is no longer required since all the samples are being processed in RNA Seq Portal
+tra_meta_data <- tra_meta_data %>%
+  dplyr::select(-c(quant_batch)) %>%
+  mutate(batch_name = "initial")
+
+prot_meta_data_new <- prot_meta_data_new %>%
+  dplyr::select(-c(quant_batch))
+
+all.equal(sort(colnames(tra_meta_data)), sort(colnames(prot_meta_data_new)))
+
+prot_meta_data_new <- prot_meta_data_new %>%
+  dplyr::select(c(colnames(tra_meta_data)))
+
+updated_tra_meta_data <- rbind(tra_meta_data, prot_meta_data_new) %>%
+  dplyr::relocate(condition, .after = sample_long_name)
+
+#no need to create a proper grouping combining condition and modulator status
+#   since qiagen rna seq portal doesn't rely on condition for quantified result
+#   but created the metadata with other fields, as above, for general purposes
+#   further fields can be computed as and when necessary
+
+write.csv(updated_tra_meta_data, 
+          "data/formatted/tra_metadata_all_2023Oct.csv", 
+          row.names = FALSE)
+
+minimal_metadata <- updated_tra_meta_data %>%
+  dplyr::select(c(sample_long_name, condition))
+colnames(minimal_metadata) <- c("Sample", "disease_status")
+
+length(unique(minimal_metadata$Sample))
+#334
+
+write.csv(minimal_metadata, 
+          "data/formatted/rna_all/tra_metadata_2023Oct.csv", 
+          row.names = FALSE)
