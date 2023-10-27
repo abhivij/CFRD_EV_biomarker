@@ -163,7 +163,7 @@ create_mean_prob_heatmap <- function(results_file_path,
                 column_split = meta_data.col$omics_type,
                 column_title = NULL,
                 show_column_names = FALSE,
-                row_names_gp = gpar(fontsize = 5),
+                row_names_gp = gpar(fontsize = 4.5),
                 bottom_annotation = HeatmapAnnotation(
                   "Omics type" = meta_data.col$omics_type,
                   "Model" = meta_data.col$model,
@@ -186,34 +186,28 @@ create_mean_prob_heatmap <- function(results_file_path,
   
 }
 
-create_mean_prob_heatmap(sample_wise_results.transcriptomics,
-                         sample_wise_results.proteomics,
+create_mean_prob_heatmap(results_file_path = "integration_prediction_result/CFRDVsIGT.csv",
                          comparison_of_interest = "CFRDVsIGT",
                          classes = c("IGT", "CFRD"),
                          sample_type = "train")
-create_mean_prob_heatmap(sample_wise_results.transcriptomics,
-                         sample_wise_results.proteomics,
+create_mean_prob_heatmap(results_file_path = "integration_prediction_result/CFRDVsNGT.csv",
                          comparison_of_interest = "CFRDVsNGT",
                          classes = c("NGT", "CFRD"),
                          sample_type = "train")
-create_mean_prob_heatmap(sample_wise_results.transcriptomics,
-                         sample_wise_results.proteomics,
+create_mean_prob_heatmap(results_file_path = "integration_prediction_result/IGTVsNGT.csv",
                          comparison_of_interest = "IGTVsNGT",
                          classes = c("NGT", "IGT"),
-                         sample_type = "train")               
+                         sample_type = "train")
 
-create_mean_prob_heatmap(sample_wise_results.transcriptomics,
-                         sample_wise_results.proteomics,
+create_mean_prob_heatmap(results_file_path = "integration_prediction_result/CFRDVsIGT.csv",
                          comparison_of_interest = "CFRDVsIGT",
                          classes = c("IGT", "CFRD"),
                          sample_type = "test")
-create_mean_prob_heatmap(sample_wise_results.transcriptomics,
-                         sample_wise_results.proteomics,
+create_mean_prob_heatmap(results_file_path = "integration_prediction_result/CFRDVsNGT.csv",
                          comparison_of_interest = "CFRDVsNGT",
                          classes = c("NGT", "CFRD"),
                          sample_type = "test")
-create_mean_prob_heatmap(sample_wise_results.transcriptomics,
-                         sample_wise_results.proteomics,
+create_mean_prob_heatmap(results_file_path = "integration_prediction_result/IGTVsNGT.csv",
                          comparison_of_interest = "IGTVsNGT",
                          classes = c("NGT", "IGT"),
-                         sample_type = "test")                         
+                         sample_type = "test")                     
