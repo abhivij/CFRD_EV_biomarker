@@ -9,6 +9,10 @@ library(Seurat)
 library(ggvenn)
 library(ggplot2)
 
+library(ComplexHeatmap)
+library(viridis)
+library(RColorBrewer)
+
 
 base_dir <- "/home/abhivij/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
 setwd(base_dir)
@@ -756,6 +760,7 @@ filt_data <- data[perc_zero$perc < 90, ]
 nrow(filt_data)
 #1607
 
+# about 0.2 transcripts have < 95% zeros across all samples
 filt_data <- data[perc_zero$perc < 95, ]
 nrow(filt_data)
 #2071
@@ -772,3 +777,68 @@ nrow(filt_data)
 
 
 #use which of the above ?
+# maybe compare using expression heatmap
+
+meta_data <- read.csv("data/formatted/tra_metadata_all_2023Oct.csv") %>%
+  dplyr::select(c(sample_long_name, condition, cohort, pre_post_modulator, batch_name)) %>%
+  mutate(modulator_status = ifelse(is.na(pre_post_modulator) | pre_post_modulator == 0, "pre", "post")) %>%
+  dplyr::select(-c(pre_post_modulator)) %>%
+  mutate(condition = factor(condition),
+         cohort = factor(cohort),
+         modulator_status = factor(modulator_status),
+         batch_name = factor(batch_name))
+
+create_expression_heatmap <- function(expr_data, meta_data, file_name){
+  expr_data <- expr_data[, meta_data$sample_long_name]
+  all.equal(meta_data$sample_long_name, colnames(expr_data))
+  
+  data_to_plot <- as.matrix(log2(expr_data + 2^-10))
+  
+  ht <- Heatmap(data_to_plot, name = "Log2 Transcriptomics expression",
+          col = viridis(n = 10, option = "magma"),
+          show_column_names = FALSE,
+          show_column_dend = FALSE,
+          show_row_names = FALSE,
+          show_row_dend = FALSE,
+          row_title = paste0("Transcripts (", nrow(data_to_plot), ")"),
+          column_title = "Samples",
+          bottom_annotation = HeatmapAnnotation(
+            "Condition" = meta_data$condition,
+            "Modulator Status" = meta_data$modulator_status,
+            "Cohort" = meta_data$cohort,
+            "Batch name" = meta_data$batch_name,
+            col = list("Condition" = c("CFRD" = "red",
+                                       "IGT" = "orange",
+                                       "NGT" = "yellow",
+                                       "HC" = "green",
+                                       "UNKNOWN TO PREDICT" = "gray60"),
+                       "Modulator Status" = c("pre" = "aquamarine",
+                                              "post" = "seagreen"),
+                       "Cohort" = c("CPH" = "green",
+                                    "RPA_NSW" = "magenta",
+                                    "SCH_NSW" = "plum",
+                                    "UNSW" = "red"),
+                       "Batch name" = c("initial" = "coral",
+                                        "new" = "cyan"))
+          ))
+  plot_dir_path <- "data/formatted/rna_all/qc/heatmap/"
+  if(!dir.exists(plot_dir_path)){
+    dir.create(plot_dir_path, recursive = TRUE)
+  }
+  file_path <- paste0(plot_dir_path, file_name)
+  png(file_path, units = "cm", width = 20, height = 25, res = 1200)  
+  draw(ht)    
+  dev.off()
+}
+
+create_expression_heatmap(data, meta_data, "1_zero_filtered.png")
+
+filt_data <- data[perc_zero$perc < 99.4, ]
+nrow(filt_data)
+create_expression_heatmap(filt_data, meta_data, "2_median_filtered.png")
+
+filt_data <- data[perc_zero$perc < 95, ]
+create_expression_heatmap(filt_data, meta_data, "3_95_filtered.png")
+
+filt_data <- data[perc_zero$perc < 90, ]
+create_expression_heatmap(filt_data, meta_data, "4_90_filtered.png")
