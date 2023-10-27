@@ -7,6 +7,7 @@ library(sva)
 library(Seurat)
 
 library(ggvenn)
+library(ggplot2)
 
 
 base_dir <- "/home/abhivij/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
@@ -672,3 +673,102 @@ length(unique(rna_new$`Sample name`))
 #334
 
 #hence verified that all uploaded samples are different
+
+
+############
+#formatting quantified results from Qiagen RNASeqPortal for all samples : 334 (as of Oct 27, 2023)
+data <- read_excel("data/formatted/rna_all/Quantify_all_334 piRNA matrix.xlsx")
+sum(is.na(data$Name))
+
+which(is.na(data$Name))
+
+data <- data %>%
+  filter(!is.na(Name)) %>%
+  mutate(across(!contains("Name"), as.numeric))
+dim(data)
+# [1] 11449   335
+
+data_grouped <- data %>% 
+  group_by(Name) %>%
+  summarize(n = n()) %>%
+  filter(n > 1)
+#0
+
+length(unique(data$Name))
+# [1] 11449
+#so all unique
+
+data <- data %>%
+  column_to_rownames("Name")
+
+rsum <- rowSums(data)
+
+data <- data %>%
+  filter(rowSums(data) != 0)
+dim(data)
+# [1] 10654   334
+
+write.csv(data, "data/formatted/rna_all/umi_counts.csv")
+
+#perform some qc to check :
+#for each of the transcripts, perc of zeroes of that transcript across all samples
+zero_entries <- as.data.frame(data == 0)
+perc_zero <- data.frame(perc = 100 * rowSums(zero_entries) / ncol(zero_entries))
+
+summary(perc_zero$perc)
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 0.00   97.31   99.40   90.57   99.70   99.70
+
+ggplot(perc_zero, aes(x = "", y = perc)) +
+  geom_boxplot() +
+  labs(x = "",
+       y = "% of zeroes across all samples",
+       title = "Boxplot of % of zeroes in each transcript across all samples")
+ggsave("data/formatted/rna_all/qc/perc_zero_boxplot.png")
+
+ggplot(perc_zero, aes(x = perc)) +
+  geom_histogram(binwidth = 1) +
+  labs(x = "% of zeroes across all samples",
+       y = "number of transcripts",
+       title = "Frequency of % of zeroes in each transcript across all samples",
+       caption = paste("Total number of transcripts =", nrow(perc_zero))) +
+  scale_x_continuous(breaks = seq(0, 100, by = 5)) +
+  scale_y_continuous(n.breaks = 10)
+ggsave("data/formatted/rna_all/qc/perc_zero_barplot.png")
+
+ggplot(perc_zero, aes(x = perc)) +
+  stat_ecdf(geom = "step") +
+  labs(x = "% of zeroes across all samples",
+       y = "Cumulative proportion of transcripts",
+       title = "Cumulative distribution of % of zeroes in each transcript across all samples",
+       caption = paste("Total number of transcripts =", nrow(perc_zero))) +
+  scale_x_continuous(breaks = seq(0, 100, by = 5)) +
+  scale_y_continuous(n.breaks = 10)
+ggsave("data/formatted/rna_all/qc/perc_zero_cumulative.png")
+
+#from the cumulative dist plot, about 0.15 transcripts have < 90% zeros across all samples
+
+#verifying
+sum(perc_zero$perc < 90) / nrow(perc_zero) 
+# [1] 0.1508354
+
+filt_data <- data[perc_zero$perc < 90, ]
+nrow(filt_data)
+#1607
+
+filt_data <- data[perc_zero$perc < 95, ]
+nrow(filt_data)
+#2071
+
+#using median
+filt_data <- data[perc_zero$perc < 99.4, ]
+nrow(filt_data)
+#4989
+
+#using 3rd quartile
+filt_data <- data[perc_zero$perc < 99.7, ]
+nrow(filt_data)
+#6615
+
+
+#use which of the above ?
