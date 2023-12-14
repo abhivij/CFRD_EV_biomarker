@@ -842,3 +842,8 @@ create_expression_heatmap(filt_data, meta_data, "3_95_filtered.png")
 
 filt_data <- data[perc_zero$perc < 90, ]
 create_expression_heatmap(filt_data, meta_data, "4_90_filtered.png")
+
+nrow(filt_data)
+#1607
+
+write.csv(filt_data, "data/formatted/rna_all/umi_counts_filter90.csv")
