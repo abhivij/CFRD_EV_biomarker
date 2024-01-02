@@ -1509,3 +1509,23 @@ length(unique(minimal_metadata$Sample))
 write.csv(minimal_metadata, 
           "data/formatted/rna_all/tra_metadata_2023Oct.csv", 
           row.names = FALSE)
+
+
+#creating a new metadata file just to quantify re-demultiplexed new sample data provided by Ramaciotti
+
+updated_tra_meta_data <- read.csv("data/formatted/tra_metadata_all_2023Oct.csv")
+
+new_sample_metadata_minimal <- updated_tra_meta_data %>%
+  filter(batch_name == "new") %>%
+  dplyr::select(c(sample_long_name, condition))
+colnames(new_sample_metadata_minimal) <- c("Sample", "disease_status")
+
+length(unique(new_sample_metadata_minimal$Sample))
+#62
+
+meta_data_minimal.original <- read.csv("data/formatted/rna_new/meta_data_minimal.csv")
+
+all.equal(new_sample_metadata_minimal, meta_data_minimal.original)
+#TRUE
+
+#so no need to save new_sample_metadata_minimal, since nothing has changed from previously saved version
