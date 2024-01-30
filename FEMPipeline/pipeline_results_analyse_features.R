@@ -231,10 +231,16 @@ create_data_subsets <- function(dparg_id,
   
   if(length(subset_creation_criteria) != 0){
     # example subset_creation_criteria
+    # read the subset creation criteria as 
+    #               diff( union(intersection(features from FSMs in i),
+    #                          intersection(features from FSMs in u)),
+    #                     features from FSM in d 
+    #                   )
     # subset_creation_criteria <- list("i"= c("t-test",
     #                                         "wilcoxontest",
     #                                         "wilcoxontest_pval_0.005"),
-    #                                  "d"= c("mrmr75"))
+    #                                  "d"= c("mrmr75"),
+    #                                  "u"= c("RF_RFE", "ga_rf"))
     intersect_list <- list()
     i <- 1
     for(i_fsm in subset_creation_criteria[["i"]]){
@@ -242,8 +248,19 @@ create_data_subsets <- function(dparg_id,
       intersect_list[[i]] <- get_features_from_df(features_df, i_fsm)
       i <- i + 1
     }
-    
     features <- Reduce(intersect, intersect_list)
+    
+    union_list <- list()
+    i <- 1
+    for(u_fsm in subset_creation_criteria[["u"]]){
+      print(u_fsm)
+      union_list[[i]] <- get_features_from_df(features_df, u_fsm)
+      i <- i + 1
+    }
+    features_u <- Reduce(intersect, union_list)
+    
+    features <- union(features, features_u)
+    
     #currently handles case when "d" has single value only
     if(length(subset_creation_criteria[["d"]]) == 1){
       features <- setdiff(features,
