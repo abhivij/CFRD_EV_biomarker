@@ -111,6 +111,8 @@ create_combat_files <- function(comparison, classes,
   }
   data_of_interest.combat <- as.data.frame(as.matrix(data_of_interest.combat))
   data <- data_of_interest.combat
+  
+  print(dim(data))
 
   file_path <- paste0(file_dir_path, comparison, file_suffix)
   write.csv(data, file_path)  
@@ -239,3 +241,35 @@ create_combat_files(comparison = "IGTVsNGT",
                     perform_filter = FALSE,
                     file_dir_path = "data/formatted/proteomics/",
                     file_suffix = "_imputed333_mf_quantile_combat.csv")
+
+
+#tra 334 samples
+
+create_combat_files(comparison = "CFRDVsIGT", 
+                    classes = c("CFRD", "IGT"), 
+                    norm = "log_cpm",
+                    data_file_path = "data/formatted/rna_all/umi_counts_filter90.csv",
+                    phenotype_file_path = "data/formatted/tra_phenotype_2024Jan.txt",
+                    combattwice = FALSE,
+                    perform_filter = TRUE,
+                    file_dir_path = "data/formatted/rna_all/",
+                    file_suffix = "_log_cpm_combat.csv")
+create_combat_files(comparison = "CFRDVsNGT", 
+                    classes = c("CFRD", "NGT"), 
+                    norm = "log_cpm",
+                    data_file_path = "data/formatted/rna_all/umi_counts_filter90.csv",
+                    phenotype_file_path = "data/formatted/tra_phenotype_2024Jan.txt",
+                    combattwice = FALSE,
+                    perform_filter = TRUE,
+                    file_dir_path = "data/formatted/rna_all/",
+                    file_suffix = "_log_cpm_combat.csv")
+create_combat_files(comparison = "IGTVsNGT", 
+                    classes = c("IGT", "NGT"), 
+                    norm = "log_cpm",
+                    data_file_path = "data/formatted/rna_all/umi_counts_filter90.csv",
+                    phenotype_file_path = "data/formatted/tra_phenotype_2024Jan.txt",
+                    combattwice = FALSE,
+                    perform_filter = TRUE,
+                    file_dir_path = "data/formatted/rna_all/",
+                    file_suffix = "_log_cpm_combat.csv")
+
