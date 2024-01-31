@@ -429,7 +429,7 @@ dataset_pipeline_arguments_tra <- list(
                        "ranger_pos_impu_cor",
                        "mrmr10", "mrmr75", "mrmr100")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "umi_counts_filter90.csv",
        sep = ",",
@@ -442,7 +442,7 @@ dataset_pipeline_arguments_tra <- list(
        norm = "log_cpm",
        fems_to_run = c("mrmr_perc50")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "umi_counts_filter90.csv",
        sep = ",",
@@ -455,7 +455,7 @@ dataset_pipeline_arguments_tra <- list(
        norm = "log_cpm",
        fems_to_run = c("RF_RFE")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "umi_counts_filter90.csv",
        sep = ",",
@@ -469,7 +469,7 @@ dataset_pipeline_arguments_tra <- list(
        fems_to_run = c("ga_rf")),  
   
   #CFRDVsNGT
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "umi_counts_filter90.csv",
        sep = ",",
@@ -485,7 +485,7 @@ dataset_pipeline_arguments_tra <- list(
                        "ranger_pos_impu_cor",
                        "mrmr10", "mrmr75", "mrmr100")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "umi_counts_filter90.csv",
        sep = ",",
@@ -498,7 +498,7 @@ dataset_pipeline_arguments_tra <- list(
        norm = "log_cpm",
        fems_to_run = c("mrmr_perc50")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "umi_counts_filter90.csv",
        sep = ",",
@@ -511,7 +511,7 @@ dataset_pipeline_arguments_tra <- list(
        norm = "log_cpm",
        fems_to_run = c("RF_RFE")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "umi_counts_filter90.csv",
        sep = ",",
@@ -525,7 +525,7 @@ dataset_pipeline_arguments_tra <- list(
        fems_to_run = c("ga_rf")),  
   
   #IGTVsNGT
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "umi_counts_filter90.csv",
        sep = ",",
@@ -541,7 +541,7 @@ dataset_pipeline_arguments_tra <- list(
                        "ranger_pos_impu_cor",
                        "mrmr10", "mrmr75", "mrmr100")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "umi_counts_filter90.csv",
        sep = ",",
@@ -554,7 +554,7 @@ dataset_pipeline_arguments_tra <- list(
        norm = "log_cpm",
        fems_to_run = c("mrmr_perc50")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "umi_counts_filter90.csv",
        sep = ",",
@@ -567,7 +567,7 @@ dataset_pipeline_arguments_tra <- list(
        norm = "log_cpm",
        fems_to_run = c("RF_RFE")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "umi_counts_filter90.csv",
        sep = ",",
@@ -600,7 +600,7 @@ dataset_pipeline_arguments_tra <- list(
                        "ranger_pos_impu_cor",
                        "mrmr10", "mrmr75", "mrmr100")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "CFRDVsIGT_log_cpm_combat.csv",
        sep = ",",
@@ -613,7 +613,7 @@ dataset_pipeline_arguments_tra <- list(
        norm = "none",
        fems_to_run = c("mrmr_perc50")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "CFRDVsIGT_log_cpm_combat.csv",
        sep = ",",
@@ -626,7 +626,7 @@ dataset_pipeline_arguments_tra <- list(
        norm = "none",
        fems_to_run = c("RF_RFE")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "CFRDVsIGT_log_cpm_combat.csv",
        sep = ",",
@@ -640,7 +640,7 @@ dataset_pipeline_arguments_tra <- list(
        fems_to_run = c("ga_rf")),  
   
   #CFRDVsNGT
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "CFRDVsNGT_log_cpm_combat.csv",
        sep = ",",
@@ -656,7 +656,7 @@ dataset_pipeline_arguments_tra <- list(
                        "ranger_pos_impu_cor",
                        "mrmr10", "mrmr75", "mrmr100")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "CFRDVsNGT_log_cpm_combat.csv",
        sep = ",",
@@ -669,7 +669,7 @@ dataset_pipeline_arguments_tra <- list(
        norm = "none",
        fems_to_run = c("mrmr_perc50")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "CFRDVsNGT_log_cpm_combat.csv",
        sep = ",",
@@ -682,7 +682,7 @@ dataset_pipeline_arguments_tra <- list(
        norm = "none",
        fems_to_run = c("RF_RFE")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "CFRDVsNGT_log_cpm_combat.csv",
        sep = ",",
@@ -696,7 +696,7 @@ dataset_pipeline_arguments_tra <- list(
        fems_to_run = c("ga_rf")),  
   
   #IGTVsNGT
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "IGTVsNGT_log_cpm_combat.csv",
        sep = ",",
@@ -712,7 +712,7 @@ dataset_pipeline_arguments_tra <- list(
                        "ranger_pos_impu_cor",
                        "mrmr10", "mrmr75", "mrmr100")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "IGTVsNGT_log_cpm_combat.csv",
        sep = ",",
@@ -725,7 +725,7 @@ dataset_pipeline_arguments_tra <- list(
        norm = "none",
        fems_to_run = c("mrmr_perc50")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "IGTVsNGT_log_cpm_combat.csv",
        sep = ",",
@@ -738,7 +738,7 @@ dataset_pipeline_arguments_tra <- list(
        norm = "none",
        fems_to_run = c("RF_RFE")),
   
-  list(phenotype_file_name = "data/formatted/phenotype.txt",
+  list(phenotype_file_name = "data/formatted/tra_phenotype_2024Jan.txt",
        read_count_dir_path = "data/formatted/rna_all",
        read_count_file_name = "IGTVsNGT_log_cpm_combat.csv",
        sep = ",",
@@ -750,4 +750,7 @@ dataset_pipeline_arguments_tra <- list(
        results_dir_path = "fem_pipeline_results_tra_334_combat",
        norm = "none",
        fems_to_run = c("ga_rf"))
+  
+  
+
 )
