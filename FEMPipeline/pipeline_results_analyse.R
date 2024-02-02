@@ -1179,3 +1179,52 @@ plot_common_feature_heatmap(c(82:86),
                             heatmap_file_name = "IGTVsNGT.png",
                             plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/subset/"
 )
+
+
+
+##########
+
+#tra from the 334 samples requantified and without combat
+#log_cpm
+
+plot_heatmap(
+  dparg_vec = c(31, 35, 39),
+  dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
+  results_dir = "../fem_pipeline_results_tra_334",
+  dir_path = "../plots_updated/fem_pipeline_results_tra_334/",
+  dataset_replace_string = "CF_EV_"
+)
+
+plot_common_feature_heatmap(c(55:58),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
+                            results_dir = "../fem_pipeline_results_tra_334_subset",
+                            dataset_replace_string = "CF_EV_",
+                            heatmap_file_name = "CFRDVsIGT.png",
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334/subset/"
+)
+plot_common_feature_heatmap(c(59:65),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
+                            results_dir = "../fem_pipeline_results_tra_334_subset",
+                            dataset_replace_string = "CF_EV_",
+                            heatmap_file_name = "CFRDVsNGT.png",
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334/subset/"
+)
+plot_common_feature_heatmap(c(66:68),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
+                            results_dir = "../fem_pipeline_results_tra_334_subset",
+                            dataset_replace_string = "CF_EV_",
+                            heatmap_file_name = "IGTVsNGT.png",
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334/subset/"
+)
+##########
+
+#tra from the 334 samples requantified and with combat
+#log_cpm + combat
+
+plot_heatmap(
+  dparg_vec = c(43, 47, 51),
+  dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
+  results_dir = "../fem_pipeline_results_tra_334_combat",
+  dir_path = "../plots_updated/fem_pipeline_results_tra_334_combat/",
+  dataset_replace_string = "CF_EV_"
+)
