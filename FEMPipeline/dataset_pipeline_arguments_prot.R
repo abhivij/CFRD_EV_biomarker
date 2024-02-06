@@ -1282,7 +1282,7 @@ dataset_pipeline_arguments_prot <- list(
   #CFRDVsNGT
   list(phenotype_file_name = "data/formatted/prot_phenotype_333_2024Jan.txt",
        read_count_dir_path = "data/proteomics",
-       read_count_file_name = "CFRDVsNGT_imputed333_mf_quantile_combat.csv",
+       read_count_file_name = "data_333samples_imputed_mf.csv",
        sep = ",",
        dataset_id = "CF_EV_prot_mf_quantile_333",
        classification_criteria = "CFRDVsNGT",
@@ -1298,7 +1298,7 @@ dataset_pipeline_arguments_prot <- list(
   
   list(phenotype_file_name = "data/formatted/prot_phenotype_333_2024Jan.txt",
        read_count_dir_path = "data/proteomics",
-       read_count_file_name = "CFRDVsNGT_imputed333_mf_quantile_combat.csv",
+       read_count_file_name = "data_333samples_imputed_mf.csv",
        sep = ",",
        dataset_id = "CF_EV_prot_mf_quantile_333",
        classification_criteria = "CFRDVsNGT",
@@ -1311,7 +1311,7 @@ dataset_pipeline_arguments_prot <- list(
   
   list(phenotype_file_name = "data/formatted/prot_phenotype_333_2024Jan.txt",
        read_count_dir_path = "data/proteomics",
-       read_count_file_name = "CFRDVsNGT_imputed333_mf_quantile_combat.csv",
+       read_count_file_name = "data_333samples_imputed_mf.csv",
        sep = ",",
        dataset_id = "CF_EV_prot_mf_quantile_333",
        classification_criteria = "CFRDVsNGT",
@@ -1324,7 +1324,7 @@ dataset_pipeline_arguments_prot <- list(
   
   list(phenotype_file_name = "data/formatted/prot_phenotype_333_2024Jan.txt",
        read_count_dir_path = "data/proteomics",
-       read_count_file_name = "CFRDVsNGT_imputed333_mf_quantile_combat.csv",
+       read_count_file_name = "data_333samples_imputed_mf.csv",
        sep = ",",
        dataset_id = "CF_EV_prot_mf_quantile_333",
        classification_criteria = "CFRDVsNGT",
@@ -1339,7 +1339,7 @@ dataset_pipeline_arguments_prot <- list(
   #IGTVsNGT
   list(phenotype_file_name = "data/formatted/prot_phenotype_333_2024Jan.txt",
        read_count_dir_path = "data/proteomics",
-       read_count_file_name = "IGTVsNGT_imputed333_mf_quantile_combat.csv",
+       read_count_file_name = "data_333samples_imputed_mf.csv",
        sep = ",",
        dataset_id = "CF_EV_prot_mf_quantile_333",
        classification_criteria = "IGTVsNGT",
@@ -1355,7 +1355,7 @@ dataset_pipeline_arguments_prot <- list(
   
   list(phenotype_file_name = "data/formatted/prot_phenotype_333_2024Jan.txt",
        read_count_dir_path = "data/proteomics",
-       read_count_file_name = "IGTVsNGT_imputed333_mf_quantile_combat.csv",
+       read_count_file_name = "data_333samples_imputed_mf.csv",
        sep = ",",
        dataset_id = "CF_EV_prot_mf_quantile_333",
        classification_criteria = "IGTVsNGT",
@@ -1368,7 +1368,7 @@ dataset_pipeline_arguments_prot <- list(
   
   list(phenotype_file_name = "data/formatted/prot_phenotype_333_2024Jan.txt",
        read_count_dir_path = "data/proteomics",
-       read_count_file_name = "IGTVsNGT_imputed333_mf_quantile_combat.csv",
+       read_count_file_name = "data_333samples_imputed_mf.csv",
        sep = ",",
        dataset_id = "CF_EV_prot_mf_quantile_333",
        classification_criteria = "IGTVsNGT",
@@ -1381,7 +1381,7 @@ dataset_pipeline_arguments_prot <- list(
   
   list(phenotype_file_name = "data/formatted/prot_phenotype_333_2024Jan.txt",
        read_count_dir_path = "data/proteomics",
-       read_count_file_name = "IGTVsNGT_imputed333_mf_quantile_combat.csv",
+       read_count_file_name = "data_333samples_imputed_mf.csv",
        sep = ",",
        dataset_id = "CF_EV_prot_mf_quantile_333",
        classification_criteria = "IGTVsNGT",
@@ -1390,6 +1390,6 @@ dataset_pipeline_arguments_prot <- list(
        perform_filter = FALSE,
        results_dir_path = "fem_pipeline_results_prot_mf_quantile_333",
        norm = "quantile",
-       fems_to_run = c("ga_rf"))    
+       fems_to_run = c("ga_rf"))
   
 )
