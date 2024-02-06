@@ -483,7 +483,7 @@ write.table(phenotype,
 write.table(phenotype_no_other, 
             file = "data/formatted/prot_phenotype_no_other_315_2024Jan.txt", sep="\t", row.names=FALSE)
 
-
+phenotype <- read.table("data/formatted/prot_phenotype_333_2024Jan.txt", header = TRUE, sep = "\t")
 phenotype.old <- read.table("data/formatted/prot_phenotype_333.txt", header = TRUE, sep = "\t")
 
 all.equal(phenotype.old, phenotype)
@@ -508,3 +508,29 @@ missing_in_tra <- setdiff(tra_sample_names, tra_sample_names_all)
 
 prot_sample_names_all <- unique(phenotype.prot$rawfile)
 #334 - but includes replicates
+
+
+
+#check batches in cfrd, igt
+phenotype <- read.table("data/formatted/prot_phenotype_333_2024Jan.txt", header = TRUE, sep = "\t")
+summary(factor(phenotype$batch_name))
+# main   new other 
+# 252    63    18   
+
+phenotype_sub <- phenotype %>%
+  filter(!is.na(CFRDVsIGT))
+summary(factor(phenotype_sub$batch_name))
+# main other 
+# 67     9 
+
+phenotype_sub_2 <- phenotype %>%
+  filter(batch_name == "new")
+summary(factor(phenotype_sub_2$condition))
+# CFRD  IGT  NGT 
+# 16   16   31 
+
+summary(factor(phenotype_sub_2$PreModulatorVsPostModulator))
+# PostModulator 
+# 63 
+
+#verified that all samples from new batch are post modulator
