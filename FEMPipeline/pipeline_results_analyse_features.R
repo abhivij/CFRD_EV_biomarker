@@ -2284,3 +2284,210 @@ create_data_subsets(dparg_id = 51,
                     subset_file_name_substr = "mrmr75",
                     create_all_common = FALSE,
                     data_file_path = "../data/formatted/rna_all/umi_counts_filter90.csv")
+
+
+##########
+
+#prot from the 333 samples MaxQuant processing without combat
+
+explore_common_features(dparg_id = 87,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr100", "mrmr75", "RF_RFE", "mrmr10",
+                                         "t-test", "wilcoxontest", "ranger_pos_impu_cor",
+                                         "mrmr_perc50", "ga_rf"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_333/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/common_features_upset")
+explore_common_features(dparg_id = 87,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr100", "mrmr75", "RF_RFE", "mrmr10",
+                                         "t-test", "wilcoxontest", "ranger_pos_impu_cor",
+                                         "mrmr_perc50", "ga_rf"),
+                        min_iter_feature_presence = 29,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_333/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/common_features_upset")
+explore_common_features(dparg_id = 87,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr100", "mrmr75", "RF_RFE", "mrmr10",
+                                         "t-test", "wilcoxontest", "ranger_pos_impu_cor",
+                                         "mrmr_perc50", "ga_rf"),
+                        min_iter_feature_presence = 30,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_333/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/common_features_upset")
+
+explore_common_features(dparg_id = 91,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "mrmr100", "mrmr75", "mrmr_perc50",
+                                         "ranger_pos_impu_cor", "RF_RFE", "ga_rf"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_333/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/common_features_upset")
+explore_common_features(dparg_id = 91,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "mrmr100", "mrmr75", "mrmr_perc50",
+                                         "ranger_pos_impu_cor", "RF_RFE", "ga_rf"),
+                        min_iter_feature_presence = 29,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_333/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/common_features_upset")
+explore_common_features(dparg_id = 91,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "mrmr100", "mrmr75", "mrmr_perc50",
+                                         "ranger_pos_impu_cor", "RF_RFE", "ga_rf"),
+                        min_iter_feature_presence = 30,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_333/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/common_features_upset")
+
+explore_common_features(dparg_id = 95,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "mrmr75", "mrmr100", "wilcoxontest",
+                                         "RF_RFE", "mrmr_perc50", "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 28,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_333/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/common_features_upset")
+explore_common_features(dparg_id = 95,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "mrmr75", "mrmr100", "wilcoxontest",
+                                         "RF_RFE", "mrmr_perc50", "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 29,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_333/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/common_features_upset")
+explore_common_features(dparg_id = 95,
+                        dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                        best_fsm_vec = c("mrmr10", "mrmr75", "mrmr100", "wilcoxontest",
+                                         "RF_RFE", "mrmr_perc50", "ranger_pos_impu_cor"),
+                        min_iter_feature_presence = 30,
+                        results_dir = "../fem_pipeline_results_prot_mf_quantile_333/",
+                        dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/common_features_upset")
+
+
+create_data_subsets(dparg_id = 87,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 87,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 29,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 87,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 30,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 87,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 87,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 29,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 87,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 30,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+
+
+create_data_subsets(dparg_id = 91,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 91,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 29,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 91,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 30,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 91,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 91,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 29,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 91,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 30,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+
+
+
+create_data_subsets(dparg_id = 95,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 95,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 29,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 95,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 30,
+                    subset_creation_criteria <- list("i"= c("mrmr100")),
+                    subset_file_name_substr = "mrmr100",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 95,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 28,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 95,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 29,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")
+create_data_subsets(dparg_id = 95,
+                    dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                    min_iter_feature_presence = 30,
+                    subset_creation_criteria <- list("i"= c("mrmr75")),
+                    subset_file_name_substr = "mrmr75",
+                    create_all_common = FALSE,
+                    data_file_path = "../data/proteomics/data_333samples_imputed_mf.csv")

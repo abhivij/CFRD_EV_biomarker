@@ -1252,3 +1252,16 @@ plot_common_feature_heatmap(c(77:81),
                             heatmap_file_name = "IGTVsNGT.png",
                             plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334_combat/subset/"
 )
+
+
+##########
+
+#prot from the 333 samples MaxQuant processing without combat
+
+plot_heatmap(
+  dparg_vec = c(87, 91, 95),
+  dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+  results_dir = "../fem_pipeline_results_prot_mf_quantile_333/",
+  dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/",
+  dataset_replace_string = "CF_EV_"
+)
