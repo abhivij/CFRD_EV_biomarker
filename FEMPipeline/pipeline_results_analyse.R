@@ -1265,3 +1265,25 @@ plot_heatmap(
   dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/",
   dataset_replace_string = "CF_EV_"
 )
+
+plot_common_feature_heatmap(c(99:104),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                            results_dir = "../fem_pipeline_results_prot_mf_quantile_333_subset",
+                            dataset_replace_string = "CF_EV_",
+                            heatmap_file_name = "CFRDVsIGT.png",
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/subset/"
+)
+plot_common_feature_heatmap(c(105:110),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                            results_dir = "../fem_pipeline_results_prot_mf_quantile_333_subset",
+                            dataset_replace_string = "CF_EV_",
+                            heatmap_file_name = "CFRDVsNGT.png",
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/subset/"
+)
+plot_common_feature_heatmap(c(111:116),
+                            dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
+                            results_dir = "../fem_pipeline_results_prot_mf_quantile_333_subset",
+                            dataset_replace_string = "CF_EV_",
+                            heatmap_file_name = "IGTVsNGT.png",
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/subset/"
+)
