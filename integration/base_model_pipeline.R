@@ -10,10 +10,6 @@ source("prediction_pipeline/cm_svm.R")
 source("prediction_pipeline/cm_rf.R")
 source("integration/run_all_models.R")
 
-# data_file_path_prot <- "data/formatted/proteomics/CFRDVsIGT_imputed333_mf_quantile_combat.csv"
-# data_file_path_tra <- "data/formatted/CFRDVsIGT_umi_counts_combat_processed.csv"
-# comparison = "CFRDVsIGT"
-# conditions = c("IGT", "CFRD")
 
 convert_format_and_select_biomarkers <- function(data, biomarkers){
   data <- as.data.frame(t(as.matrix(data)))
@@ -36,17 +32,74 @@ convert_format_and_select_biomarkers <- function(data, biomarkers){
   return (data)
 }
 
+
+preprocess_data <- function(data, output_labels, perform_filter, norm){
+  #data format : (features x samples)
+  
+  if(perform_filter){
+    keep <- edgeR::filterByExpr(data, group = output_labels$Label)
+    data <- data[keep, ]
+  }
+  
+  if(norm == "log_tmm"){
+    dge <- edgeR::DGEList(counts = data, group = output_labels$Label)
+    dge <- edgeR::calcNormFactors(dge, method = "TMM")
+    tmm <- edgeR::cpm(dge, log = TRUE)
+    data <- tmm
+  }else if(norm == "log"){
+    #taking log of 0, causes UMAP/PCA computation to fail
+    #so replace 0 with aribitrary small number
+    #min value in this data other than 0 is 10
+    data[data == 0] <- 2^-30
+    data <- log2(data)
+  } else if(norm == "log_cpm"){
+    data <- edgeR::cpm(data, log = TRUE)
+  } else if(norm == "quantile"){
+    #adapted from https://davetang.org/muse/2014/07/07/quantile-normalisation-in-r/
+    data.rank <- apply(data, 2, rank, ties.method="average")
+    data.sorted <- data.frame(apply(data, 2, sort))
+    data.mean <- apply(data.sorted, 1, mean)
+    index_to_mean <- function(index, data_mean){
+      #index can be int or int+0.5
+      #if int+0.5, take average of the numbers in those positions
+      int.result <- data_mean[index]
+      index.int <- floor(index)
+      #some of the values in point5.result might be NA
+      #but they won't be chosen
+      point5.result <- (data_mean[index.int] + data_mean[index.int+1])/2
+      point5.indices <- index%%1 != 0
+      result <- int.result
+      result[point5.indices] <- point5.result[point5.indices]
+      return (result)
+    }
+    data.norm <- apply(data.rank, 2, index_to_mean, data_mean = data.mean)
+    rownames(data.norm) <- rownames(data)
+    data <- data.norm    
+  }
+}
+
+comparison = "CFRDVsIGT"
+conditions = c("IGT", "CFRD")
+data_file_path_prot = "data/formatted/proteomics/CFRDVsIGT_imputed333_mf_quantile_combat.csv"
+data_file_path_tra = "data/formatted/rna_all/umi_counts_filter90.csv"
+prot_bec = "combat"
+tra_bec = "none"
+dataset_replace_string_prot = "CF_EV_prot_mf_quantile_combat_"
+dataset_replace_string_tra = "CF_EV_tra_334_"
+
 base_model_pipeline <- function(comparison, conditions, 
                                 data_file_path_prot,
-                                data_file_path_tra){
+                                data_file_path_tra,
+                                prot_bec = "combat",
+                                tra_bec = "combat",
+                                dataset_replace_string_prot = "CF_EV_prot_mf_quantile_combat_",
+                                dataset_replace_string_tra = "CF_EV_tra_combat_"){
   
-  phenotype_file_path_prot <- "data/formatted/prot_phenotype_333.txt"
-  phenotype_file_path_tra <- "data/formatted/phenotype.txt"
-  mapping_file_path <- "data/formatted/pt_mapping_and_common_sample_name.txt"
+  phenotype_file_path_prot <- "data/formatted/prot_phenotype_333_2024Jan.txt"
+  phenotype_file_path_tra <- "data/formatted/tra_phenotype_2024Jan.txt"
+  mapping_file_path <- "data/formatted/pt_mapping_and_common_sample_name_Jan2024.txt"
   
   best_features_file_path <- "data/selected_features/best_features_with_is_best.csv"
-  dataset_replace_string_prot = "CF_EV_prot_mf_quantile_combat_"
-  dataset_replace_string_tra = "CF_EV_tra_combat_"
   
   best_features <- read.csv(best_features_file_path)  
   
@@ -129,6 +182,17 @@ base_model_pipeline <- function(comparison, conditions,
   
   all_labels[!all_labels$Sample %in% label_prot$Sample, ]
   all_labels[!all_labels$Sample %in% label_tra$Sample,]
+  
+  # data_prot, data_tra in (features x samples) format
+  
+  #if data has been batch corrected using combat, then the data has been 
+  #    filtered or normalized as required prior to that. Otherwise do that now
+  if(prot_bec == "none"){
+    data_prot <- preprocess_data(data_prot, label_prot, perform_filter = FALSE, norm = "quantile")
+  }   
+  if(tra_bec == "none"){
+    data_tra <- preprocess_data(data_tra, label_tra, perform_filter = TRUE, norm = "log_cpm")
+  }
   
   data_prot <- as.data.frame(t(data_prot))
   data_tra <- as.data.frame(t(data_tra))
