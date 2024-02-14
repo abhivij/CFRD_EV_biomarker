@@ -1,4 +1,4 @@
-#to combine predictions from multiple models into 1 using l2log_reg
+#to combine predictions from multiple models into 1 using a specified classification model
 library(tidyverse)
 
 level2_stack <- function(comparison,
