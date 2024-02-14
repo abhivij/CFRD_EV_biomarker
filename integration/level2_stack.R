@@ -1,14 +1,6 @@
 #to combine predictions from multiple models into 1 using l2log_reg
 library(tidyverse)
 
-# comparison = "POSTOPE_TPVsREC_TP"
-# conditions = c("REC_TP", "POSTOPE_TP")
-# data_file_path = "Data/prediction_result/integration/POSTOPE_TPVsREC_TP.csv"
-# o_type = "prot"
-# o_type = "tra"
-# o_type = "both"
-# k_prod_times = 30
-
 level2_stack <- function(comparison,
                          conditions,
                          data_file_path,
@@ -54,24 +46,29 @@ level2_stack <- function(comparison,
     #                                  classes = conditions, regularize = 'l2'))
     
     if(stack_model == "rf"){
-      result_df <- cbind(iter = i,
-                         omics_type = paste(o_type, "stacked", sep = "_"),
-                         rf_model(data.train, label.train, data.test, label.test,
-                                  classes = conditions))      
+      model_result <- rf_model(data.train, label.train, data.test, label.test,
+                               classes = conditions)
     } else if(stack_model == "l2_log_reg"){
-      result_df <- cbind(iter = i,
-                         omics_type = paste(o_type, "stacked", sep = "_"),
-                         log_reg_model(data.train, label.train, data.test, label.test,
-                                  classes = conditions, regularize = 'l2'))   
+      model_result <- log_reg_model(data.train, label.train, data.test, label.test,
+                                    classes = conditions, regularize = 'l2')
     } else if(stack_model == "l1_log_reg"){
-      result_df <- cbind(iter = i,
-                         omics_type = paste(o_type, "stacked", sep = "_"),
-                         log_reg_model(data.train, label.train, data.test, label.test,
-                                       classes = conditions, regularize = 'l1'))   
+      model_result <- log_reg_model(data.train, label.train, data.test, label.test,
+                                    classes = conditions, regularize = 'l1')
+    } else if(stack_model == "el_log_reg"){
+      model_result <- log_reg_model(data.train, label.train, data.test, label.test,
+                                    classes = conditions, regularize = 'el')
+    } else if(stack_model == "sig_svm"){
+      model_result <- svm_model(data.train, label.train, data.test, label.test,
+                                    classes = conditions, kernel = "sigmoid")
+    } else if(stack_model == "rad_svm"){
+      model_result <- svm_model(data.train, label.train, data.test, label.test,
+                                classes = conditions, kernel = "radial")
     }
+    
+    result_df <- cbind(iter = i,
+                       omics_type = paste(o_type, "stacked", sep = "_"),
+                       model_result)
 
-    
-    
     if(i == 1){
       result_df_all <- result_df
     } else{
