@@ -215,6 +215,11 @@ for(s_model in names(classification_models)){
   }
 
 }
+
+
+
+
+
 # 
 # 
 # for(o in c("tra", "prot", "both")){
@@ -296,3 +301,63 @@ for(s_model in names(classification_models)){
 #                     Variable(s) ‘prot_L1.Regularized.logistic.regression’ and ‘prot_Elastic.net.logistic.regression’ constant. Cannot scale data.
 
 
+
+delegated_ensemble(comparison = "CFRDVsIGT",
+                   conditions = c("IGT", "CFRD"),
+                   prot_stacked_result_file_path = "integration_prediction_result/stacked/rf/CFRDVsIGT_prot.csv",
+                   alternate_stacked_result_file_path = "integration_prediction_result/stacked/rf/CFRDVsIGT_tra.csv",
+                   alt_type = "tra")
+delegated_ensemble(comparison = "CFRDVsIGT",
+                   conditions = c("IGT", "CFRD"),
+                   prot_stacked_result_file_path = "integration_prediction_result/stacked/rf/CFRDVsIGT_prot.csv",
+                   alternate_stacked_result_file_path = "integration_prediction_result/stacked/rf/CFRDVsIGT_both.csv",
+                   alt_type = "both")
+delegated_ensemble(comparison = "CFRDVsNGT",
+                   conditions = c("NGT", "CFRD"),
+                   prot_stacked_result_file_path = "integration_prediction_result/stacked/rf/CFRDVsNGT_prot.csv",
+                   alternate_stacked_result_file_path = "integration_prediction_result/stacked/rf/CFRDVsNGT_tra.csv",
+                   alt_type = "tra")
+delegated_ensemble(comparison = "CFRDVsNGT",
+                   conditions = c("NGT", "CFRD"),
+                   prot_stacked_result_file_path = "integration_prediction_result/stacked/rf/CFRDVsNGT_prot.csv",
+                   alternate_stacked_result_file_path = "integration_prediction_result/stacked/rf/CFRDVsNGT_both.csv",
+                   alt_type = "both")
+delegated_ensemble(comparison = "IGTVsNGT",
+                   conditions = c("NGT", "IGT"),
+                   prot_stacked_result_file_path = "integration_prediction_result/stacked/rf/IGTVsNGT_prot.csv",
+                   alternate_stacked_result_file_path = "integration_prediction_result/stacked/rf/IGTVsNGT_tra.csv",
+                   alt_type = "tra")
+delegated_ensemble(comparison = "IGTVsNGT",
+                   conditions = c("NGT", "IGT"),
+                   prot_stacked_result_file_path = "integration_prediction_result/stacked/rf/IGTVsNGT_prot.csv",
+                   alternate_stacked_result_file_path = "integration_prediction_result/stacked/rf/IGTVsNGT_both.csv",
+                   alt_type = "both")
+
+for(sample_type in c("train", "test")){
+  for(alt_type in c("tra", "both")){
+    compute_metrics.integrated(comparison = "CFRDVsIGT",
+                               conditions = c("IGT", "CFRD"),
+                               alt_type = alt_type,
+                               sample_type = sample_type,
+                               result_file_path = paste0("integration_prediction_result/delegate/CFRDVsIGT",
+                                                         "_", alt_type,
+                                                         ".csv"),
+                               metric_output_file_path = "integration_prediction_result/delegate/metrics.csv")
+    compute_metrics.integrated(comparison = "CFRDVsNGT",
+                               conditions = c("NGT", "CFRD"),
+                               alt_type = alt_type,
+                               sample_type = sample_type,
+                               result_file_path = paste0("integration_prediction_result/delegate/CFRDVsNGT",
+                                                         "_", alt_type,
+                                                         ".csv"),
+                               metric_output_file_path = "integration_prediction_result/delegate/metrics.csv")
+    compute_metrics.integrated(comparison = "IGTVsNGT",
+                               conditions = c("NGT", "IGT"),
+                               alt_type = alt_type,
+                               sample_type = sample_type,
+                               result_file_path = paste0("integration_prediction_result/delegate/IGTVsNGT",
+                                                         "_", alt_type,
+                                                         ".csv"),
+                               metric_output_file_path = "integration_prediction_result/delegate/metrics.csv")
+  }
+}
