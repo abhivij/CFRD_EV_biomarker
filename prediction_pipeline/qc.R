@@ -908,7 +908,7 @@ create_transcript_box_plots <- function(comparison,
 #create dim_red plots with both AU and DK cohort in one figure
 #this is to check if there are separate clusters for AU and DK within each of the pairs of CFRD, IGT, NGT
 # comparison = "CFRDVsIGT" #this will be NA if 3 classes are involved
-#                          #in that case non-modulator sample filtering will be seprately done too
+#                          #in that case non-modulator sample filtering will be separately done too
 # classes = c("NGT", "CFRD")
 # 
 # comparison <- NA
@@ -948,28 +948,25 @@ colour_column = "age_group"
 
 combattwice = FALSE
 
-comparison = "IGTVsNGT"
-classes = c("IGT", "NGT")
-class_colours = c("orange", "yellow")
+comparison = "CFRDVsIGT"
+classes = c("CFRD", "IGT")
+class_colours = c("red", "orange")
 dim_red = "UMAP"
-norm = "quantile"
-combat = TRUE
-dir_path = "plots_updated/dim_red_best_prot"
+norm = "non-normalized"
+dir_path = "plots_updated/tra_334"
 plot_width = 21
-perform_filter = FALSE
+perform_filter = TRUE
 colour_column = "batch_name"
-data_file_path = "data/proteomics/data_333samples_imputed_mf.csv"
-phenotype_file_path = "data/formatted/prot_phenotype_333.txt"
-best_features_file_path  = "data/selected_features/best_features_with_is_best.csv"
-dataset_replace_str = "CF_EV_prot_mf_quantile_combat_"
-omics_type = "prot"
-box_plot_dir_path = "plots_updated/boxplots_prot"
+data_file_path = "data/formatted/rna_all/umi_counts_filter90.csv"
+phenotype_file_path = "data/formatted/rna_all/phenotype.txt"
+plot_title_prefix = "1 "
 
 create_dim_red_plots <- function(comparison, classes,
                                  class_colours,
                                  dim_red, norm,
                                  fill_column = NA,
                                  colour_column = "age_group",
+                                 point_border_colours = c("black", "green"),
                                  combat_seq = FALSE, combat_seq_specify_group = FALSE,
                                  combatref = FALSE,
                                  combat = FALSE,
@@ -986,7 +983,8 @@ create_dim_red_plots <- function(comparison, classes,
                                  plot_title_prefix = "",
                                  plot_title_suffix = "",
                                  omics_type = "tra",
-                                 box_plot_dir_path = "plots_updated/boxplots"){
+                                 box_plot_dir_path = "plots_updated/boxplots",
+                                 biomarker_expr_file_path = "data/selected_features/biomarkers_expr.xlsx"){
   data <- read.table(data_file_path, header=TRUE, sep=",", row.names=1, skip=0,
                      nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
   phenotype <- read.table(phenotype_file_path, header=TRUE, sep="\t")
@@ -1011,11 +1009,9 @@ create_dim_red_plots <- function(comparison, classes,
     filter(Label %in% classes) %>%
     dplyr::select(Sample, Label, country, colour_column, mutation, 
                   sex, cohort, patient_recruitment_year,
-                  seq_plate, seq_miR_library_quality,
-                  quant_batch) %>%
+                  seq_plate, seq_miR_library_quality) %>%
     dplyr::mutate(Label = factor(Label)) %>%
-    dplyr::mutate(seq_plate = factor(seq_plate), 
-                  quant_batch = factor(quant_batch),
+    dplyr::mutate(seq_plate = factor(seq_plate),
                   patient_recruitment_year = factor(patient_recruitment_year)) %>%
     arrange(Label, Sample)
   
@@ -1208,7 +1204,7 @@ create_dim_red_plots <- function(comparison, classes,
                                                               colour = class_colours))) +
       ggplot2::scale_shape_manual(name = "Country", values = c(21, 22)) +
       ggplot2::guides(shape = guide_legend(override.aes = list(fill = c("black", "black")))) +
-      ggplot2::scale_colour_manual(name = sub("_", " ", colour_column), values = c("black", "green")) +
+      ggplot2::scale_colour_manual(name = sub("_", " ", colour_column), values = point_border_colours) +
       ggplot2::guides(colour = guide_legend(override.aes = list(shape = 1))) +
       ggplot2::labs(title = title) +
       ggplot2::xlab(xlab) +
@@ -1289,8 +1285,7 @@ create_dim_red_plots <- function(comparison, classes,
     # biomarkers_ordered <- c(biomarkers_specific, biomarkers_rem)
     # 
     data_to_write <- as.data.frame(data_to_plot_sub)
-    write.xlsx(data_to_write,
-               "data/selected_features/biomarkers_expr.xlsx",
+    write.xlsx(data_to_write, biomarker_expr_file_path,
                sheetName = paste(omics_type, comparison, sep = "_"),
                col.names = TRUE, row.names = FALSE, append = TRUE)
     
@@ -1299,6 +1294,8 @@ create_dim_red_plots <- function(comparison, classes,
     plot_title <- sub("UMAP plot of ", "", title)
     if(norm == "log_tmm"){
       y_lab <- "Log TMM of expression level across samples"
+    } else if(norm == "log_cpm"){
+      y_lab <- "Log CPM of expression level across samples"
     } else if(norm == "quantile"){
       y_lab <- "Quantile normed expression level across samples"
     }
