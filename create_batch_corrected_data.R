@@ -46,10 +46,10 @@ create_combat_files <- function(comparison, classes,
     filter(Label %in% classes)
   if(combattwice){
     output_labels <- output_labels %>%
-      dplyr::select(Sample, Label, country, age_group, mq_batch)
+      dplyr::select(Sample, Label, country, age_group, mq_batch, batch_name)
   } else{
     output_labels <- output_labels %>%
-      dplyr::select(Sample, Label, country, age_group)
+      dplyr::select(Sample, Label, country, age_group, batch_name)
   }
 
     
@@ -273,3 +273,51 @@ create_combat_files(comparison = "IGTVsNGT",
                     file_dir_path = "data/formatted/rna_all/",
                     file_suffix = "_log_cpm_combat.csv")
 
+
+
+#################
+#################
+#pre vs post mod
+
+
+create_combat_files(comparison = "PreModulatorVsPostModulator",
+                    classes = c("PreModulator", "PostModulator"), 
+                    norm = "quantile",
+                    data_file_path = "data/proteomics/data_333samples_imputed_mf.csv",
+                    phenotype_file_path = "data/formatted/prot_phenotype_333_2024Jan.txt",
+                    combattwice = FALSE,
+                    perform_filter = FALSE,
+                    file_dir_path = "data/formatted/proteomics/",
+                    file_suffix = "_imputed333_mf_quantile_combat.csv")
+
+create_combat_files(comparison = "PreModulatorVsPostModulator",
+                    classes = c("PreModulator", "PostModulator"), 
+                    norm = "log_cpm",
+                    data_file_path = "data/formatted/rna_all/umi_counts_filter90.csv",
+                    phenotype_file_path = "data/formatted/tra_phenotype_2024Jan.txt",
+                    combattwice = FALSE,
+                    perform_filter = TRUE,
+                    file_dir_path = "data/formatted/rna_all/",
+                    file_suffix = "_log_cpm_combat.csv")
+
+#below ones executing after modifying function definition to perform Combat with batch_name
+
+create_combat_files(comparison = "PreModulatorVsPostModulator",
+                    classes = c("PreModulator", "PostModulator"), 
+                    norm = "quantile",
+                    data_file_path = "data/proteomics/data_333samples_imputed_mf.csv",
+                    phenotype_file_path = "data/formatted/prot_phenotype_333_2024Jan.txt",
+                    combattwice = FALSE,
+                    perform_filter = FALSE,
+                    file_dir_path = "data/formatted/proteomics/",
+                    file_suffix = "_imputed333_mf_quantile_combat_with_batch_name.csv")
+
+create_combat_files(comparison = "PreModulatorVsPostModulator",
+                    classes = c("PreModulator", "PostModulator"), 
+                    norm = "log_cpm",
+                    data_file_path = "data/formatted/rna_all/umi_counts_filter90.csv",
+                    phenotype_file_path = "data/formatted/tra_phenotype_2024Jan.txt",
+                    combattwice = FALSE,
+                    perform_filter = TRUE,
+                    file_dir_path = "data/formatted/rna_all/",
+                    file_suffix = "_log_cpm_combat_with_batch_name.csv")
