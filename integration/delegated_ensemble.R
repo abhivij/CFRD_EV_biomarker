@@ -20,7 +20,8 @@ delegated_ensemble <- function(comparison,
                                prot_stacked_result_file_path,
                                alternate_stacked_result_file_path,
                                alt_type,
-                               k_prod_times = 30){
+                               k_prod_times = 30,
+                               result_file_dir_path = "integration_prediction_result/delegate/"){
   data.prot <- read.csv(prot_stacked_result_file_path) %>%
     dplyr::select(-c(PredictedLabel, cutoff, model))
   data.alt <- read.csv(alternate_stacked_result_file_path) %>%
@@ -42,28 +43,28 @@ delegated_ensemble <- function(comparison,
     data_sub.combined.train <- data_sub.combined %>%
       filter(Type == "train")
     
-    best_cutoff <- 0.9
+    best_cutoff <- 0.7
     best_auc <- 0
-    for(cutoff in c(0.9, 0.8, 0.7)){
-      data_sub.combined.train.pred_prob <- data_sub.combined.train %>%
-        mutate(Pred_prob = case_when(is.na(prot_stacked) ~ alt_stacked,
-                                     is.na(alt_stacked) ~ prot_stacked,
-                                     ((prot_stacked > cutoff) | (prot_stacked < (1-cutoff))) ~ prot_stacked,
-                                     TRUE ~ alt_stacked)) %>%
-        mutate(source = case_when(is.na(prot_stacked) ~ "alt",
-                                  is.na(alt_stacked) ~ "prot",
-                                  ((prot_stacked > cutoff) | (prot_stacked < (1-cutoff))) ~ "prot",
-                                  TRUE ~ "alt"))
-      
-      pr <- ROCR::prediction(data_sub.combined.train.pred_prob$Pred_prob, 
-                             data_sub.combined.train.pred_prob$TrueLabel, label.ordering = conditions)
-      auc <- ROCR::performance(pr, measure = "auc")@y.values[[1]]
-      
-      if(auc > best_auc){
-        best_auc <- auc
-        best_cutoff <- cutoff
-      }
-    }
+    # for(cutoff in c(0.9, 0.8, 0.7)){
+    #   data_sub.combined.train.pred_prob <- data_sub.combined.train %>%
+    #     mutate(Pred_prob = case_when(is.na(prot_stacked) ~ alt_stacked,
+    #                                  is.na(alt_stacked) ~ prot_stacked,
+    #                                  ((prot_stacked > cutoff) | (prot_stacked < (1-cutoff))) ~ prot_stacked,
+    #                                  TRUE ~ alt_stacked)) %>%
+    #     mutate(source = case_when(is.na(prot_stacked) ~ "alt",
+    #                               is.na(alt_stacked) ~ "prot",
+    #                               ((prot_stacked > cutoff) | (prot_stacked < (1-cutoff))) ~ "prot",
+    #                               TRUE ~ "alt"))
+    #   
+    #   pr <- ROCR::prediction(data_sub.combined.train.pred_prob$Pred_prob, 
+    #                          data_sub.combined.train.pred_prob$TrueLabel, label.ordering = conditions)
+    #   auc <- ROCR::performance(pr, measure = "auc")@y.values[[1]]
+    #   
+    #   if(auc > best_auc){
+    #     best_auc <- auc
+    #     best_cutoff <- cutoff
+    #   }
+    # }
     
     result_df <- data_sub.combined %>%
       mutate(Pred_prob = case_when(is.na(prot_stacked) ~ alt_stacked,
@@ -84,7 +85,6 @@ delegated_ensemble <- function(comparison,
       result_df_all <- rbind(result_df_all, result_df)
     }
   }
-  result_file_dir_path <- "integration_prediction_result/delegate/"
   result_file_name <- paste0(comparison, "_", alt_type,".csv")
   if(!dir.exists(result_file_dir_path)){
     dir.create(result_file_dir_path, recursive = TRUE)

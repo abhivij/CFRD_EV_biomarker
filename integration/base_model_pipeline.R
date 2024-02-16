@@ -86,6 +86,7 @@ prot_bec = "combat"
 tra_bec = "none"
 dataset_replace_string_prot = "CF_EV_prot_mf_quantile_combat_"
 dataset_replace_string_tra = "CF_EV_tra_334_"
+result_file_dir_path <- "integration_prediction_result/"
 
 base_model_pipeline <- function(comparison, conditions, 
                                 data_file_path_prot,
@@ -93,7 +94,8 @@ base_model_pipeline <- function(comparison, conditions,
                                 prot_bec = "combat",
                                 tra_bec = "combat",
                                 dataset_replace_string_prot = "CF_EV_prot_mf_quantile_combat_",
-                                dataset_replace_string_tra = "CF_EV_tra_combat_"){
+                                dataset_replace_string_tra = "CF_EV_tra_combat_",
+                                result_file_dir_path = "integration_prediction_result/"){
   
   phenotype_file_path_prot <- "data/formatted/prot_phenotype_333_2024Jan.txt"
   phenotype_file_path_tra <- "data/formatted/tra_phenotype_2024Jan.txt"
@@ -238,7 +240,6 @@ base_model_pipeline <- function(comparison, conditions,
     }
   }
   
-  result_file_dir_path <- "integration_prediction_result/"
   result_file_name <- paste0(comparison, ".csv")
   if(!dir.exists(result_file_dir_path)){
     dir.create(result_file_dir_path, recursive = TRUE)
