@@ -553,3 +553,87 @@ plot_pca_2factors(umi_counts = umi_counts,
                   legend_title = "condition",
                   norm = "",
                   plot_file_name = "plots/pca_after_norm/pca_CFRDVsIGTVsNGT_DK_nonorm.png")
+
+
+
+
+####################################
+
+# 2024 Feb 16
+# check if all post modulator samples have pre modulator samples
+
+phenotype.prot <- read.table("data/formatted/prot_phenotype_333_2024Jan.txt", header=TRUE, sep="\t")
+phenotype.tra <- read.table("data/formatted/tra_phenotype_2024Jan.txt", header=TRUE, sep="\t")
+
+postmod.prot <- phenotype.prot %>%
+  dplyr::filter(PreModulatorVsPostModulator == "PostModulator") %>%
+  dplyr::select(c(individual_id, sample_name, condition, batch_name))
+premod.prot <- phenotype.prot %>%
+  dplyr::filter(PreModulatorVsPostModulator == "PreModulator") %>%
+  dplyr::select(c(individual_id, sample_name, condition, batch_name))
+
+summary(factor(premod.prot$condition))
+# CFRD                 HC                IGT                NGT UNKNOWN TO PREDICT 
+# 38                 13                 38                 56                 22 
+
+summary(factor(postmod.prot$condition))
+# CFRD                IGT                NGT UNKNOWN TO PREDICT 
+# 46                 33                 75                 12 
+
+#how many post mod do not have pre mod
+prot_matching_data <- postmod.prot %>%
+  left_join(premod.prot, by = "individual_id", suffix = c("_postmod", "_premod"),
+            relationship = "many-to-many")
+sum(is.na(prot_matching_data$sample_name_premod))
+#73
+length(unique(prot_matching_data$sample_name_postmod))
+#162
+length(prot_matching_data$sample_name_postmod)
+#188
+
+#there are some replicate samples - so total number of samples should be obtained as
+length(postmod.prot$sample_name)
+#166
+
+#73 out of 166 postmod do not have corresponding premod i.e. for same individual
+
+prot_matching_data.nopremod <- prot_matching_data %>%
+  dplyr::filter(is.na(sample_name_premod)) %>%
+  dplyr::select(c(1:4))
+write.csv(prot_matching_data.nopremod, "data/formatted/post_mod_with_no_premod.prot.csv", row.names = FALSE)
+
+
+
+postmod.tra <- phenotype.tra %>%
+  dplyr::filter(PreModulatorVsPostModulator == "PostModulator") %>%
+  dplyr::select(c(individual_id, sample_name, condition, batch_name))
+premod.tra <- phenotype.tra %>%
+  dplyr::filter(PreModulatorVsPostModulator == "PreModulator") %>%
+  dplyr::select(c(individual_id, sample_name, condition, batch_name))
+
+summary(factor(premod.tra$condition))
+# CFRD                 HC                IGT                NGT UNKNOWN TO PREDICT 
+# 34                  6                 44                 62                 15 
+
+summary(factor(postmod.tra$condition))
+# CFRD                IGT                NGT UNKNOWN TO PREDICT 
+# 48                 36                 76                 13 
+
+
+#how many post mod do not have pre mod
+tra_matching_data <- postmod.tra %>%
+  left_join(premod.tra, by = "individual_id", suffix = c("_postmod", "_premod"),
+            relationship = "many-to-many")
+sum(is.na(tra_matching_data$sample_name_premod))
+#66
+length(unique(tra_matching_data$sample_name_postmod))
+#173
+length(tra_matching_data$sample_name_postmod)
+#197
+
+#66 out of 173 postmod do not have corresponding premod i.e. for same individual
+
+tra_matching_data.nopremod <- tra_matching_data %>%
+  dplyr::filter(is.na(sample_name_premod)) %>%
+  dplyr::select(c(1:4))
+write.csv(tra_matching_data.nopremod, "data/formatted/post_mod_with_no_premod.tra.csv", row.names = FALSE)
