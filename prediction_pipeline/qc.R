@@ -961,6 +961,24 @@ data_file_path = "data/formatted/rna_all/umi_counts_filter90.csv"
 phenotype_file_path = "data/formatted/rna_all/phenotype.txt"
 plot_title_prefix = "1 "
 
+
+comparison = NA
+classes = c("PostModulator_CFRD", "PostModulator_IGT", "PostModulator_NGT",
+            "PreModulator_CFRD", "PreModulator_IGT", "PreModulator_NGT")
+class_colours = c("indianred", "coral", "khaki", 
+                  "red", "orange", "yellow")
+dim_red = "UMAP"
+norm = "non-normalized"
+dir_path = "plots_updated/post_mod/proteomics"
+plot_width = 21
+perform_filter = FALSE
+colour_column = "batch_name"
+point_border_colours = c("black", "green", "purple")
+data = data
+phenotype = phenotype
+filter_post_modulator = FALSE
+custom_title = "proteomics pre and post modulator samples with Quantile norm + ComBat"
+
 create_dim_red_plots <- function(comparison, classes,
                                  class_colours,
                                  dim_red, norm,
@@ -978,32 +996,46 @@ create_dim_red_plots <- function(comparison, classes,
                                  dir_path = NA,
                                  data_file_path = "data/formatted/umi_counts.csv",
                                  phenotype_file_path = "data/formatted/phenotype.txt",
+                                 data = NA,
+                                 phenotype = NA,
                                  filter_out_child = FALSE,
+                                 dimred_plot_width_cm = 30,
                                  plot_width_cm = 21,
                                  plot_title_prefix = "",
                                  plot_title_suffix = "",
                                  omics_type = "tra",
                                  box_plot_dir_path = "plots_updated/boxplots",
-                                 biomarker_expr_file_path = "data/selected_features/biomarkers_expr.xlsx"){
-  data <- read.table(data_file_path, header=TRUE, sep=",", row.names=1, skip=0,
-                     nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")
-  phenotype <- read.table(phenotype_file_path, header=TRUE, sep="\t")
+                                 biomarker_expr_file_path = "data/selected_features/biomarkers_expr.xlsx",
+                                 filter_post_modulator = TRUE,
+                                 custom_title = NA){
+  if(is.null(dim(data))){
+    data <- read.table(data_file_path, header=TRUE, sep=",", row.names=1, skip=0,
+                       nrows=-1, comment.char="", fill=TRUE, na.strings = "NA")    
+  }
+  if(is.null(dim(phenotype))){
+    phenotype <- read.table(phenotype_file_path, header=TRUE, sep="\t")    
+  }
   
   title <- paste0(dim_red, " plot of ", paste(classes, collapse = ", "), " samples from ", norm, " data")
   
   if(!is.na(comparison)){
     output_labels <- phenotype %>%
-      rename("Label" = comparison) %>%
-      rename("colour_column" = colour_column)
+      dplyr::rename("Label" = comparison) %>%
+      dplyr::rename("colour_column" = colour_column)
   } else{
     #this case is to include greater than 2 conditions in the plot
     output_labels <- phenotype %>%
-      rename("Label" = "condition") %>%
-      rename("colour_column" = colour_column) %>%
-      #ensure that samples on modulator are not chosen
-      #using comparison field does not require the below, because comparison field creation 
-      #                 incorporates this filter
-      filter(is.na(pre_post_modulator) | pre_post_modulator == 0)
+      dplyr::rename("Label" = "condition") %>%
+      dplyr::rename("colour_column" = colour_column)
+    
+    #ensure that samples on modulator are not chosen
+    #using comparison field does not require the below, because comparison field creation 
+    #                 incorporates this filter
+    if(filter_post_modulator){
+      output_labels <- output_labels %>%
+        filter(is.na(pre_post_modulator) | pre_post_modulator == 0)      
+    }  
+
   }
   output_labels <- output_labels %>%
     filter(Label %in% classes) %>%
@@ -1192,6 +1224,9 @@ create_dim_red_plots <- function(comparison, classes,
     ylab <- "UMAP 2"
   }
   title <- paste0(plot_title_prefix, title, plot_title_suffix)
+  if(!is.na(custom_title)){
+    title <- custom_title
+  }
   
   if(is.na(fill_column)){
     ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
@@ -1239,7 +1274,7 @@ create_dim_red_plots <- function(comparison, classes,
   }
   file_name <- paste0(gsub(title, pattern = " |,", replacement = "-"), ".jpg")
   file_path <- paste(dir_path, file_name, sep = "/")
-  ggplot2::ggsave(file_path, units = "cm", width = 30)
+  ggplot2::ggsave(file_path, units = "cm", width = dimred_plot_width_cm)
   
   ###############
   #create biomarker box plots if best biomarkers only
