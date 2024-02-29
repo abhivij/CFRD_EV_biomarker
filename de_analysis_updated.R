@@ -1,4 +1,5 @@
-source('utils.R')
+source("utils_diff.R")
+source("utils.R")
 
 library(sva)
 
@@ -232,7 +233,7 @@ data.norm <- apply(data.rank, 2, index_to_mean, data_mean = data.mean)
 rownames(data.norm) <- rownames(data)
 data <- data.norm    
 
-all.equal(colnames(data_of_interest), phenotype$Sample)
+all.equal(colnames(data), phenotype$Sample)
 
 ##############################################################################
 
@@ -666,7 +667,7 @@ create_dim_red_plots(comparison = NA,
 
 
 ################################
-
+# combat with country+batch_name
 
 data <- read.csv("data/proteomics/data_333samples_imputed_mf.csv", row.names = 1)
 
@@ -716,7 +717,7 @@ data.norm <- apply(data.rank, 2, index_to_mean, data_mean = data.mean)
 rownames(data.norm) <- rownames(data)
 data <- data.norm    
 
-all.equal(colnames(data_of_interest), phenotype$Sample)
+all.equal(colnames(data), phenotype$Sample)
 
 phenotype <- phenotype %>%
   mutate(country_batch_name = paste(country, batch_name, sep = "_"))
@@ -868,3 +869,266 @@ create_dim_red_plots(comparison = NA,
                      filter_post_modulator = FALSE,
                      custom_title = "10 Proteomics postmod IGT NGT with Quantile norm and ComBat two_in_one_shot", 
                      combat = FALSE)
+
+
+#use this combat 2 in 1 shot for DE analysis
+
+# using DEP with this filtered data and manually creating SummarizedExperiment object 
+#           without using make_se (so as to avoid log) was turning out to be difficult.
+#           So directly using limma without voom as used within DEP
+
+all.equal(phenotype$Sample, colnames(data))
+# TRUE
+
+summary(factor(phenotype$condition))
+# CFRD  IGT  NGT 
+# 84   71  131 
+
+summary(factor(phenotype$modstatus_condition))
+# PostModulator_CFRD  PostModulator_IGT  PostModulator_NGT  PreModulator_CFRD   PreModulator_IGT   PreModulator_NGT 
+# 46                 33                 75                 38                 38                 56 
+
+model_matrix <- model.matrix(~ 0 + phenotype$modstatus_condition)
+colnames(model_matrix) <- sub("phenotype$modstatus_condition", "", colnames(model_matrix), fixed = TRUE)
+
+contr_matrix <- makeContrasts(contrasts = "PreModulator_CFRD - PreModulator_IGT",
+                              levels = colnames(model_matrix))
+fit <- lmFit(data, model_matrix)
+# head(coef(fit))
+fit <- contrasts.fit(fit, contr_matrix)
+# head(coef(fit))
+efit <- eBayes(fit)
+top.table <- topTable(efit, n = Inf, sort.by = "p") %>%
+  rownames_to_column("protein")
+result <- top.table %>%
+  dplyr::select(protein, logFC, P.Value, adj.P.Val) %>%
+  dplyr::rename(Molecule = protein, adjPVal = adj.P.Val, PVal = P.Value) %>%
+  arrange(logFC)
+
+plot_volcano_and_save_DE(result, plot_title = "PreModulator_CFRD Vs PreModulator_IGT",
+                         output_dir_path = "de_results_2024/proteomics/premod/p/",
+                         plot_file_name = "PreModulator_CFRDVsPreModulator_IGT.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = FALSE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+plot_volcano_and_save_DE(result, plot_title = "PreModulator_CFRD Vs PreModulator_IGT",
+                         output_dir_path = "de_results_2024/proteomics/premod/padj/",
+                         plot_file_name = "PreModulator_CFRDVsPreModulator_IGT.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = TRUE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+
+
+contr_matrix <- makeContrasts(contrasts = "PreModulator_CFRD - PreModulator_NGT",
+                              levels = colnames(model_matrix))
+fit <- lmFit(data, model_matrix)
+# head(coef(fit))
+fit <- contrasts.fit(fit, contr_matrix)
+# head(coef(fit))
+efit <- eBayes(fit)
+top.table <- topTable(efit, n = Inf, sort.by = "p") %>%
+  rownames_to_column("protein")
+result <- top.table %>%
+  dplyr::select(protein, logFC, P.Value, adj.P.Val) %>%
+  dplyr::rename(Molecule = protein, adjPVal = adj.P.Val, PVal = P.Value) %>%
+  arrange(logFC)
+
+plot_volcano_and_save_DE(result, plot_title = "PreModulator_CFRD Vs PreModulator_NGT",
+                         output_dir_path = "de_results_2024/proteomics/premod/p/",
+                         plot_file_name = "PreModulator_CFRDVsPreModulator_NGT.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = FALSE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+plot_volcano_and_save_DE(result, plot_title = "PreModulator_CFRD Vs PreModulator_NGT",
+                         output_dir_path = "de_results_2024/proteomics/premod/padj/",
+                         plot_file_name = "PreModulator_CFRDVsPreModulator_NGT.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = TRUE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+
+
+contr_matrix <- makeContrasts(contrasts = "PreModulator_IGT - PreModulator_NGT",
+                              levels = colnames(model_matrix))
+fit <- lmFit(data, model_matrix)
+# head(coef(fit))
+fit <- contrasts.fit(fit, contr_matrix)
+# head(coef(fit))
+efit <- eBayes(fit)
+top.table <- topTable(efit, n = Inf, sort.by = "p") %>%
+  rownames_to_column("protein")
+result <- top.table %>%
+  dplyr::select(protein, logFC, P.Value, adj.P.Val) %>%
+  dplyr::rename(Molecule = protein, adjPVal = adj.P.Val, PVal = P.Value) %>%
+  arrange(logFC)
+
+plot_volcano_and_save_DE(result, plot_title = "PreModulator_IGT Vs PreModulator_NGT",
+                         output_dir_path = "de_results_2024/proteomics/premod/p/",
+                         plot_file_name = "PreModulator_IGTVsPreModulator_NGT.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = FALSE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+plot_volcano_and_save_DE(result, plot_title = "PreModulator_IGT Vs PreModulator_NGT",
+                         output_dir_path = "de_results_2024/proteomics/premod/padj/",
+                         plot_file_name = "PreModulator_IGTVsPreModulator_NGT.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = TRUE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+
+################################################################################################
+
+contr_matrix <- makeContrasts(contrasts = "PostModulator_CFRD - PreModulator_CFRD",
+                              levels = colnames(model_matrix))
+fit <- lmFit(data, model_matrix)
+# head(coef(fit))
+fit <- contrasts.fit(fit, contr_matrix)
+# head(coef(fit))
+efit <- eBayes(fit)
+top.table <- topTable(efit, n = Inf, sort.by = "p") %>%
+  rownames_to_column("protein")
+result <- top.table %>%
+  dplyr::select(protein, logFC, P.Value, adj.P.Val) %>%
+  dplyr::rename(Molecule = protein, adjPVal = adj.P.Val, PVal = P.Value) %>%
+  arrange(logFC)
+
+plot_volcano_and_save_DE(result, plot_title = "PostModulator_CFRD Vs PreModulator_CFRD",
+                         output_dir_path = "de_results_2024/proteomics/postmod_premod/p/",
+                         plot_file_name = "PostModulator_CFRDVsPreModulator_CFRD.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = FALSE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+plot_volcano_and_save_DE(result, plot_title = "PostModulator_CFRD Vs PreModulator_CFRD",
+                         output_dir_path = "de_results_2024/proteomics/postmod_premod/padj/",
+                         plot_file_name = "PostModulator_CFRDVsPreModulator_CFRD.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = TRUE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+
+
+contr_matrix <- makeContrasts(contrasts = "PostModulator_NGT - PreModulator_NGT",
+                              levels = colnames(model_matrix))
+fit <- lmFit(data, model_matrix)
+# head(coef(fit))
+fit <- contrasts.fit(fit, contr_matrix)
+# head(coef(fit))
+efit <- eBayes(fit)
+top.table <- topTable(efit, n = Inf, sort.by = "p") %>%
+  rownames_to_column("protein")
+result <- top.table %>%
+  dplyr::select(protein, logFC, P.Value, adj.P.Val) %>%
+  dplyr::rename(Molecule = protein, adjPVal = adj.P.Val, PVal = P.Value) %>%
+  arrange(logFC)
+
+plot_volcano_and_save_DE(result, plot_title = "PostModulator_NGT Vs PreModulator_NGT",
+                         output_dir_path = "de_results_2024/proteomics/postmod_premod/p/",
+                         plot_file_name = "PostModulator_NGTVsPreModulator_NGT.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = FALSE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+plot_volcano_and_save_DE(result, plot_title = "PostModulator_NGT Vs PreModulator_NGT",
+                         output_dir_path = "de_results_2024/proteomics/postmod_premod/padj/",
+                         plot_file_name = "PostModulator_NGTVsPreModulator_NGT.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = TRUE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+
+
+contr_matrix <- makeContrasts(contrasts = "PostModulator_IGT - PreModulator_IGT",
+                              levels = colnames(model_matrix))
+fit <- lmFit(data, model_matrix)
+# head(coef(fit))
+fit <- contrasts.fit(fit, contr_matrix)
+# head(coef(fit))
+efit <- eBayes(fit)
+top.table <- topTable(efit, n = Inf, sort.by = "p") %>%
+  rownames_to_column("protein")
+result <- top.table %>%
+  dplyr::select(protein, logFC, P.Value, adj.P.Val) %>%
+  dplyr::rename(Molecule = protein, adjPVal = adj.P.Val, PVal = P.Value) %>%
+  arrange(logFC)
+
+plot_volcano_and_save_DE(result, plot_title = "PostModulator_IGT Vs PreModulator_IGT",
+                         output_dir_path = "de_results_2024/proteomics/postmod_premod/p/",
+                         plot_file_name = "PostModulator_IGTVsPreModulator_IGT.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = FALSE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+plot_volcano_and_save_DE(result, plot_title = "PostModulator_IGT Vs PreModulator_IGT",
+                         output_dir_path = "de_results_2024/proteomics/postmod_premod/padj/",
+                         plot_file_name = "PostModulator_IGTVsPreModulator_IGT.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = TRUE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+
+
+
+model_matrix <- model.matrix(~ 0 + phenotype$PreModulatorVsPostModulator)
+colnames(model_matrix) <- sub("phenotype$PreModulatorVsPostModulator", "", colnames(model_matrix), fixed = TRUE)
+
+contr_matrix <- makeContrasts(contrasts = "PostModulator - PreModulator",
+                              levels = colnames(model_matrix))
+fit <- lmFit(data, model_matrix)
+# head(coef(fit))
+fit <- contrasts.fit(fit, contr_matrix)
+# head(coef(fit))
+efit <- eBayes(fit)
+top.table <- topTable(efit, n = Inf, sort.by = "p") %>%
+  rownames_to_column("protein")
+result <- top.table %>%
+  dplyr::select(protein, logFC, P.Value, adj.P.Val) %>%
+  dplyr::rename(Molecule = protein, adjPVal = adj.P.Val, PVal = P.Value) %>%
+  arrange(logFC)
+
+plot_volcano_and_save_DE(result, plot_title = "PostModulator Vs PreModulator",
+                         output_dir_path = "de_results_2024/proteomics/postmod_premod/p/",
+                         plot_file_name = "PostModulatorVsPreModulator.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = FALSE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
+plot_volcano_and_save_DE(result, plot_title = "PostModulator Vs PreModulator",
+                         output_dir_path = "de_results_2024/proteomics/postmod_premod/padj/",
+                         plot_file_name = "PostModulatorVsPreModulator.png",
+                         fc_cutoff = 1.5,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = TRUE,
+                         molecule_names_file_path = "data/proteomics/protein_names.csv",
+                         molecule_names_file_columns = c(4, 2),
+                         plot_width_cm = 25)
