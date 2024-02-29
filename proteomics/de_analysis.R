@@ -1,10 +1,11 @@
-source("utils_diff.R")
-source("utils.R")
-
 library(sva)
 
 base_dir <- "~/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
 setwd(base_dir)
+
+source("utils_diff.R")
+source("utils.R")
+
 
 data <- read.table(file = "data/proteomics/all/proteinGroups.txt", sep = "\t", header = TRUE)
 
