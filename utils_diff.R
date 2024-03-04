@@ -3,20 +3,19 @@
 library(EnhancedVolcano)
 library(tidyverse)
 
-results = result
-k = 10
-plot_title = "PREOPE Vs MET"
-output_dir_path = "DE_results_2024/proteomics/1_only_condition/p/"
-plot_file_name = "PREOPEVsMET.png"
-fc_cutoff = 1.5
-pval_cutoff = 0.05
-use_adj_pval = FALSE
-x_lim = NA
-y_lim = NA
-molecule_names_file_path = "Data/Protein/formatted_data/all_protein_names.csv"
-molecule_names_file_columns = c(1, 3, 4)
-plot_width_cm = 25
-
+# results = result
+# k = 10
+# plot_title = "PREOPE Vs MET"
+# output_dir_path = "DE_results_2024/proteomics/1_only_condition/p/"
+# plot_file_name = "PREOPEVsMET.png"
+# fc_cutoff = 1.5
+# pval_cutoff = 0.05
+# use_adj_pval = FALSE
+# x_lim = NA
+# y_lim = NA
+# molecule_names_file_path = "Data/Protein/formatted_data/all_protein_names.csv"
+# molecule_names_file_columns = c(1, 3, 4)
+# plot_width_cm = 25
 
 #molecule_names_file_columns : c(<column_id of molecule_id>, <column_id of molecule_name>, 
 #                                                            <optional : column_id of alternate molecule_id to be used>)
@@ -48,8 +47,8 @@ plot_volcano_and_save_DE <- function(
     mutate(significance = case_when(logFC <= -lfc_cutoff & pvalcolumn <= pval_cutoff ~ 'Downregulated',
                                     logFC >= lfc_cutoff & pvalcolumn <= pval_cutoff ~ 'Upregulated',
                                     TRUE ~ 'Not significant')) %>% 
-    mutate(colour = case_when(significance == 'Downregulated' ~ '#E8495C',
-                              significance == 'Upregulated' ~ '#38ACE2',
+    mutate(colour = case_when(significance == 'Downregulated' ~ '#38ACE2',
+                              significance == 'Upregulated' ~ '#E8495C',
                               TRUE ~ 'grey')) %>%
     arrange(significance)
   
@@ -177,4 +176,5 @@ plot_volcano_and_save_DE <- function(
   write.table(results, file = paste0(output_dir_path, 
                                      "all_", de_results_file_name), sep = "\t", quote = F, row.names = F)
 }
+
 
