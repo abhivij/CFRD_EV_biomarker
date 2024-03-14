@@ -1163,3 +1163,58 @@ create_DE_boxplot(data, phenotype,
                   x_lab = "Proteins", output_dir_path = "plots_updated/post_mod/shift_cfrd_to_ngt/",
                   de_file_path = "de_results_2024/proteomics/premod/p/sig_no_name_PreModulator_CFRDVsPreModulator_NGT.csv", 
                   k = 10)
+
+####################################
+#venn diagram of post vs pre overlap DE
+
+de.CFRD <- read.table("de_results_2024/proteomics/postmod_premod/p/sig_no_name_PostModulator_CFRDVsPreModulator_CFRD.csv", 
+                      sep = "\t", header = TRUE)  
+de.CFRD.up <- de.CFRD %>%
+  filter(logFC > 0)
+de.CFRD.down <- de.CFRD %>%
+  filter(logFC < 0)
+
+de.IGT <- read.table("de_results_2024/proteomics/postmod_premod/p/sig_no_name_PostModulator_IGTVsPreModulator_IGT.csv", 
+                     sep = "\t", header = TRUE)  
+de.IGT.up <- de.IGT %>%
+  filter(logFC > 0)
+de.IGT.down <- de.IGT %>%
+  filter(logFC < 0)
+
+de.NGT <- read.table("de_results_2024/proteomics/postmod_premod/p/sig_no_name_PostModulator_NGTVsPreModulator_NGT.csv", 
+                     sep = "\t", header = TRUE)  
+de.NGT.up <- de.NGT %>%
+  filter(logFC > 0)
+de.NGT.down <- de.NGT %>%
+  filter(logFC < 0)
+
+ggvenn(list("CFRD" = de.CFRD.up$Molecule,
+            "IGT" = de.IGT.up$Molecule,
+            "NGT" = de.NGT.up$Molecule),
+       stroke_size = 0.1,
+       set_name_size = 4,
+       text_size = 3,
+       fill_alpha = 0.5,
+       fill_color = c("red", "orange", "yellow")) +
+  ggtitle("PostModulator Vs PreModulator upregulated protein overlap") +
+  theme(plot.title = element_text(vjust = 0, hjust = 0.5, size = rel(1.2), face = "bold"))
+ggsave("de_results_2024/proteomics/postmod_premod/overlap_up.png")
+
+intersect(de.CFRD.up$Molecule, de.IGT.up$Molecule)
+intersect(de.IGT.up$Molecule, de.NGT.up$Molecule)
+
+ggvenn(list("CFRD" = de.CFRD.down$Molecule,
+            "IGT" = de.IGT.down$Molecule,
+            "NGT" = de.NGT.down$Molecule),
+       stroke_size = 0.1,
+       set_name_size = 4,
+       text_size = 3,
+       fill_alpha = 0.5,
+       fill_color = c("red", "orange", "yellow")) +
+  ggtitle("PostModulator Vs PreModulator downregulated protein overlap") +
+  theme(plot.title = element_text(vjust = 0, hjust = 0.5, size = rel(1.2), face = "bold"))
+ggsave("de_results_2024/proteomics/postmod_premod/overlap_down.png")
+
+intersect(de.CFRD.down$Molecule, de.IGT.down$Molecule)
+intersect(de.CFRD.down$Molecule, de.NGT.down$Molecule)
+intersect(de.IGT.down$Molecule, de.NGT.down$Molecule)
