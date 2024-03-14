@@ -794,6 +794,23 @@ create_dim_red_plots(comparison = NA,
                      custom_title = "4 Proteomics shift from CFRD to NGT with Quantile norm and ComBat two_in_one_shot", 
                      combat = FALSE)
 
+
+create_dim_red_plots(comparison = NA,
+                     classes = c("PreModulator_CFRD", "PostModulator_CFRD", "PreModulator_NGT"), 
+                     class_colours = c("red", "indianred", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "non-normalized",
+                     dir_path = "plots_updated/post_mod/proteomics/shift",
+                     dimred_plot_width_cm = 36,
+                     perform_filter = FALSE,
+                     colour_column = "batch_name", point_border_colours = c("black", "green", "purple"),
+                     data = data,
+                     phenotype = phenotype %>% dplyr::rename("disease_status" = "condition") %>% dplyr::rename("condition" = "modstatus_condition"),
+                     filter_post_modulator = FALSE,
+                     custom_title = "Proteomics shift from CFRD to NGT with Quantile norm and ComBat two_in_one_shot", 
+                     combat = FALSE, simplified = TRUE)
+
+
 create_dim_red_plots(comparison = NA,
                      classes = c("PreModulator_CFRD", "PreModulator_IGT"), 
                      class_colours = c("red", "orange"),
@@ -1136,3 +1153,13 @@ plot_volcano_and_save_DE(result, plot_title = "PostModulator Vs PreModulator",
                          molecule_names_file_path = "data/proteomics/protein_names.csv",
                          molecule_names_file_columns = c(4, 2),
                          plot_width_cm = 25)
+
+
+####################################
+#create boxplots of upreg and downreg proteins in premod cfrd vs ngt, across premod cfrd, premod ngt, postmod cfrd
+
+create_DE_boxplot(data, phenotype, 
+                  conditions_of_interest = c("PreModulator_CFRD", "PreModulator_NGT", "PostModulator_CFRD"),
+                  x_lab = "Proteins", output_dir_path = "plots_updated/post_mod/shift_cfrd_to_ngt/",
+                  de_file_path = "de_results_2024/proteomics/premod/p/sig_no_name_PreModulator_CFRDVsPreModulator_NGT.csv", 
+                  k = 10)

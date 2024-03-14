@@ -217,19 +217,19 @@ make_se <- function(proteins_unique, columns, expdesign) {
 # 
 # diffex(data_unique, sinfo, cond1 = "NN", cond2 = "NH", file_path = "data/de_proteins/ALI/HCplusCF/NN_NH/")
 
-
-imputed_se <- imputed
-cond1 = "PreModulator_CFRD"
-cond2 = "PreModulator_IGT"
-file_path = "data/de_results_2024/proteomics/DEP_regular/p/"
-protein_names_file_path = "data/proteomics/protein_names.csv"
-fc = 1.5
-k = 10
-x_lim = NA
-y_lim = NA
-fc = 1.2
-pval_cutoff = 0.05
-use_adj_pval = FALSE
+# 
+# imputed_se <- imputed
+# cond1 = "PreModulator_CFRD"
+# cond2 = "PreModulator_IGT"
+# file_path = "data/de_results_2024/proteomics/DEP_regular/p/"
+# protein_names_file_path = "data/proteomics/protein_names.csv"
+# fc = 1.5
+# k = 10
+# x_lim = NA
+# y_lim = NA
+# fc = 1.2
+# pval_cutoff = 0.05
+# use_adj_pval = FALSE
 
 diffex <- function(imputed_se, cond1, cond2, file_path,
                    protein_names_file_path = "data/protein_names.csv",
@@ -371,9 +371,174 @@ diffex <- function(imputed_se, cond1, cond2, file_path,
 } #Cond1 = numerator, cond2 = denominator
 
 
+data = combined_data
+title = paste("Pathways in", conditions[1])
+file_name = paste0("Pathways", conditions[1], ".png")
+dir_path = "de_results_2024/proteomics/IPA_premod/"
+data_dir_path = "de_results_2024/proteomics/IPA_premod/formatted_files/"
+entries_of_interest_file_name = NA
+ylab_substr = "Pathways"
+max_count_filtered_pathways = 30
+
+create_bar_plot <- function(data, title, file_name,
+                            dir_path = "plots/IPA/",
+                            data_dir_path = "IPA/files/",
+                            ylab_substr = "Pathways",
+                            entries_of_interest_file_name = NA,
+                            max_count_filtered_pathways = 30){
+  if(!is.na(entries_of_interest_file_name)){
+    entries_of_interest <- read.table(entries_of_interest_file_name, header = FALSE, sep = "\t", col.names = "entries")
+    data <- data %>%
+      filter(pathways %in% entries_of_interest$entries)
+  }
+  if(!dir.exists(dir_path)){
+    dir.create(dir_path, recursive = TRUE)
+  }
+  if(!dir.exists(data_dir_path)){
+    dir.create(data_dir_path, recursive = TRUE)
+  }
+  
+  data_to_plot <- data %>%
+    mutate(zscore = as.numeric(zscore)) %>%
+    arrange(desc(zscore)) 
+  
+  data_to_plot <- data_to_plot %>%
+    mutate(pathways = factor(pathways, levels = rev(c(data_to_plot[, "pathways"]))))
+  
+  num_pathways <- length(data_to_plot$pathways)
+  print(dim(data_to_plot))
+  
+  write.table(data_to_plot, paste0(data_dir_path, 
+                                   sub(pattern = ".png", ".tsv", file_name)), 
+              row.names = FALSE, sep = "\t")
+  
+  ggplot(data_to_plot, aes(x = adjpval, y = pathways, fill = zscore)) +
+    geom_bar(stat = "identity") +
+    scale_fill_viridis_c(option = "inferno") +
+    xlab("-log10 adj.pval") +
+    ylab(paste0(ylab_substr," (count = ", num_pathways, ")")) +
+    geom_vline(xintercept = 1.301, linetype = 2) +
+    labs(caption = "Vertical dashed line indicates -log10(0.05)") +
+    ggtitle(title) +
+    theme(axis.title.x = element_text(size=rel(1.2)),
+          axis.title.y = element_text(size=rel(1.2)),
+          plot.title  = element_text(size=rel(1.3)),
+          plot.title.position = "plot")
+  
+  if(!dir.exists(dir_path)){
+    dir.create(dir_path, recursive = TRUE)
+  }
+  ggsave(paste(dir_path, file_name), units = "cm", width = 25, height = 30)  
+  
+  if(nrow(data_to_plot) > max_count_filtered_pathways){
+
+    count.activation <- ceiling((sum(data_to_plot$zscore > 0) / num_pathways) * max_count_filtered_pathways)
+    count.inhibition <- max_count_filtered_pathways - count.activation
+        
+    temp <- data_to_plot %>%
+      dplyr::filter(zscore > 0) %>%
+      arrange(desc(adjpval))
+    pathways.activated <- temp$pathways[c(1:count.activation)]
+    
+    temp <- data_to_plot %>%
+      dplyr::filter(zscore < 0) %>%
+      arrange(desc(adjpval))
+    pathways.inhibited <- temp$pathways[c(1:count.inhibition)]
+    
+    data_to_plot.filt <- data_to_plot %>%
+      dplyr::filter(pathways %in% c(pathways.activated, pathways.inhibited)) %>%
+      arrange(desc(zscore)) 
+    data_to_plot.filt <- data_to_plot.filt %>%
+      mutate(pathways = factor(pathways, levels = rev(c(data_to_plot.filt[, "pathways"]))))
+    print(dim(data_to_plot.filt))
+    
+    ggplot(data_to_plot.filt, aes(x = adjpval, y = pathways, fill = zscore)) +
+      geom_bar(stat = "identity") +
+      scale_fill_viridis_c(option = "inferno") +
+      xlab("-log10 adj.pval") +
+      ylab(paste0(ylab_substr," (count = ", max_count_filtered_pathways, ")")) +
+      geom_vline(xintercept = 1.301, linetype = 2) +
+      labs(caption = "Vertical dashed line indicates -log10(0.05)") +
+      ggtitle(title) +
+      theme(axis.title.x = element_text(size=rel(1.2)),
+            axis.title.y = element_text(size=rel(1.2)),
+            plot.title  = element_text(size=rel(1.3)),
+            plot.title.position = "plot")
+    
+    fil_dir_path <- paste0(dir_path, "filtered/")
+    
+    if(!dir.exists(fil_dir_path)){
+      dir.create(fil_dir_path, recursive = TRUE)
+    }
+    ggsave(paste(fil_dir_path, file_name), units = "cm", width = 25, height = 30)  
+  }
+}
 
 
+# #create boxplots of DE prot/transcripts to show shift from CFRD to NGT
+#de_file_path : file path of sig_<de file> with columns : Molecule, logFC, PVal, adjPVal
+create_DE_boxplot <- function(data, phenotype, conditions_of_interest,
+                              x_lab, output_dir_path,
+                              de_file_path, 
+                              k = 10){
+  
+  de_data <- read.table(de_file_path, sep = "\t", header = TRUE)  
+  
+  de.upreg <- de_data %>%
+    arrange(desc(logFC))
+  de.upreg <- de.upreg[c(1:k), "Molecule"]
+  
+  de.downreg <- de_data %>%
+    arrange(logFC)
+  de.downreg <- de.downreg[c(1:k), "Molecule"]
+  
+  phenotype.sub <- phenotype %>%
+    dplyr::filter(modstatus_condition %in% conditions_of_interest)
+  data.sub <- as.data.frame(t(data[, phenotype.sub$Sample])) %>%
+    rownames_to_column("Sample") %>%
+    inner_join(phenotype.sub %>% 
+                 dplyr::select(c(Sample, modstatus_condition)) %>%
+                 dplyr::rename(c("Condition" = "modstatus_condition"))) %>%
+    dplyr::relocate(Condition, .after = Sample)
+  
+  if(!dir.exists(output_dir_path)){
+    dir.create(path = output_dir_path, recursive = TRUE)
+  }
 
+  i <- 1
+  for(de in list(de.upreg, de.downreg)){
+    data_to_plot <- data.sub[, c("Sample", "Condition", de)]
+    data_to_plot <- data_to_plot %>%
+      pivot_longer(!c(Sample, Condition), names_to = "Molecule") %>%
+      mutate(Molecule = factor(Molecule, levels = de)) %>%
+      mutate(Condition = factor(Condition, levels = conditions_of_interest))
+    
+    if(i == 1){
+      text <- "Upregulated"
+    } else{
+      text <- "Downregulated"
+    }
+    title <- paste("Top", k, text, x_lab)
+    
+    ggplot(data_to_plot, aes(x = Molecule, y = value)) +
+      geom_boxplot(aes(fill = Condition)) +
+      xlab(x_lab) +
+      ylab("Expression") +
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = rel(1.2)),
+            axis.title.x = element_text(size = rel(1.2)),
+            axis.text.y = element_text(size = rel(1.2)),
+            axis.title.y = element_text(size = rel(1.2)),
+            legend.title = element_text(size = rel(1.2), face = "bold"),
+            legend.text = element_text(size = rel(1.2)),
+            plot.title = element_text(size = rel(1.4), face = "bold", hjust = 0.5)
+            ) +
+      ggtitle(title)
+    
+    output_file_path <- paste0(output_dir_path, title, ".png")
+    ggsave(output_file_path)
+    i <- i + 1
+  }
+}
 
 
 
