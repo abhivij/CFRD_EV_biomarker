@@ -983,6 +983,7 @@ create_dim_red_plots <- function(comparison, classes,
                                  class_colours,
                                  dim_red, norm,
                                  fill_column = NA,
+                                 simplified = FALSE,
                                  colour_column = "age_group",
                                  point_border_colours = c("black", "green"),
                                  combat_seq = FALSE, combat_seq_specify_group = FALSE,
@@ -1228,7 +1229,34 @@ create_dim_red_plots <- function(comparison, classes,
     title <- custom_title
   }
   
-  if(is.na(fill_column)){
+  if(simplified){
+    # ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
+    #   ggplot2::geom_point(ggplot2::aes(colour = output_labels$colour_column), size = 3) +
+    #   geom_text_repel(aes(label = text)) +
+    #   ggplot2::scale_fill_manual(name = "Condition", values = class_colours) +
+    #   ggplot2::guides(fill = guide_legend(override.aes = list(shape = 21,
+    #                                                           colour = class_colours))) +
+    #   ggplot2::scale_colour_manual(name = sub("_", " ", colour_column), values = point_border_colours) +
+    #   ggplot2::guides(colour = guide_legend(override.aes = list(shape = 1))) +
+    #   ggplot2::labs(title = title) +
+    #   ggplot2::xlab(xlab) +
+    #   ggplot2::ylab(ylab) +
+    #   labs(caption = paste("Data dimension :", paste(dim(data), collapse = "x")))  
+    
+    ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
+      ggplot2::geom_point(ggplot2::aes(fill = output_labels$Label), size = 3, shape = 21) +
+      geom_text_repel(aes(label = text)) +
+      ggplot2::scale_fill_manual(name = "Condition", values = class_colours) +
+      ggplot2::guides(fill = guide_legend(override.aes = list(shape = 21,
+                                                              colour = class_colours))) +
+      ggplot2::labs(title = title) +
+      ggplot2::xlab(xlab) +
+      ggplot2::ylab(ylab) +
+      labs(caption = paste(paste("Data dimension :", paste(dim(data), collapse = "x")), "\n",
+                           group_counts_text),
+           fill = fill_column)  
+  }
+  else if(is.na(fill_column)){
     ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_point(ggplot2::aes(fill = output_labels$Label,
                                        shape = output_labels$country,

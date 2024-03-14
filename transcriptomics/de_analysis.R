@@ -590,6 +590,21 @@ create_dim_red_plots(comparison = NA,
                      combat = FALSE)
 
 create_dim_red_plots(comparison = NA,
+                     classes = c("PreModulator_CFRD", "PostModulator_CFRD", "PreModulator_NGT"), 
+                     class_colours = c("red", "indianred", "yellow"),
+                     dim_red = "UMAP",
+                     norm = "non-normalized",
+                     dir_path = "plots_updated/post_mod/transcriptomics/shift",
+                     dimred_plot_width_cm = 36,
+                     perform_filter = FALSE,
+                     colour_column = "batch_name", point_border_colours = c("black", "green", "purple"),
+                     data = data,
+                     phenotype = phenotype %>% dplyr::rename("disease_status" = "condition") %>% dplyr::rename("condition" = "modstatus_condition"),
+                     filter_post_modulator = FALSE,
+                     custom_title = "Transcriptomics shift from CFRD to NGT with Log CPM norm and ComBat two_in_one_shot", 
+                     combat = FALSE, simplified = TRUE)
+
+create_dim_red_plots(comparison = NA,
                      classes = c("PreModulator_CFRD", "PreModulator_IGT"), 
                      class_colours = c("red", "orange"),
                      dim_red = "UMAP",
