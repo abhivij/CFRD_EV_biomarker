@@ -542,6 +542,222 @@ create_DE_boxplot <- function(data, phenotype, conditions_of_interest,
 
 
 
+# file_path = "de_results_2024/proteomics/IPA_premod/comparison_analysis/can_path_zscore.txt"
+# value_type = "zscore"
+# col_names = c("CFRD Vs IGT", 
+#               "CFRD Vs NGT", 
+#               "IGT Vs NGT")
+# output_path = "de_results_2024/proteomics/IPA_premod/premod.jpeg"
+# plot_title = "Premodulator samples Canonical Pathway Z-score"
+# output_file_path = "de_results_2024/proteomics/IPA_premod/premod_selected.txt"
+# plot_width = 1300
+# plot_height = 1100
+
+create_heatmap <- function(file_path, value_type, col_names,
+                           output_path, plot_title, output_file_path,
+                           plot_height = 1100, plot_width = 900){
+  
+  max_num_row <- 100
+  
+  if(length(col_names) == 3){
+    comparison <- read.table(file = file_path,
+                             sep="\t", header=T, row.names=1, skip = 2, quote = "",
+                             colClasses = c("character", "numeric", "numeric", "numeric"),
+                             na.strings = c("N/A"))  
+  } else if(length(col_names) == 4){
+    comparison <- read.table(file = file_path,
+                             sep="\t", header=T, row.names=1, skip = 2, quote = "",
+                             colClasses = c("character", "numeric", "numeric", "numeric", "numeric"),
+                             na.strings = c("N/A"))
+  }
+  
+  
+  if(value_type == "zscore"){
+    legend_title <- "Z-score"
+    
+    if(length(col_names) == 3){
+      colnames(comparison) <- c("A", "B", "C")
+      comparison <- comparison %>%
+        filter(!(is.na(A) & is.na(B) & is.na(C)))    
+    } else if(length(col_names) == 4){
+      colnames(comparison) <- c("A", "B", "C", "D")
+      comparison <- comparison %>%
+        filter(!(is.na(A) & is.na(B) & is.na(C) & is.na(D)))  
+    }
+    
+    if(nrow(comparison) > max_num_row){
+      if(length(col_names) == 3){
+        comparison_sub <- comparison %>%
+          select(A) %>%
+          filter(!is.na(A)) %>%
+          arrange(A)
+        rows_to_show <- c(rownames(comparison_sub)[1:5],
+                          rev(rownames(comparison_sub))[1:5])
+        
+        comparison_sub <- comparison %>%
+          select(B) %>%
+          filter(!is.na(B)) %>%
+          arrange(B)
+        rows_to_show <- c(rows_to_show,
+                          rownames(comparison_sub)[1:5],
+                          rev(rownames(comparison_sub))[1:5])
+        
+        comparison_sub <- comparison %>%
+          select(C) %>%
+          filter(!is.na(C)) %>%
+          arrange(C)
+        rows_to_show <- c(rows_to_show,
+                          rownames(comparison_sub)[1:5],
+                          rev(rownames(comparison_sub))[1:5])
+
+      } else if(length(col_names) == 4){
+        comparison_sub <- comparison %>%
+          select(A) %>%
+          filter(!is.na(A)) %>%
+          arrange(A)
+        rows_to_show <- c(rownames(comparison_sub)[1:5],
+                          rev(rownames(comparison_sub))[1:5])
+
+        comparison_sub <- comparison %>%
+          select(B) %>%
+          filter(!is.na(B)) %>%
+          arrange(B)
+        rows_to_show <- c(rows_to_show,
+                          rownames(comparison_sub)[1:5],
+                          rev(rownames(comparison_sub))[1:5])
+
+        comparison_sub <- comparison %>%
+          select(C) %>%
+          filter(!is.na(C)) %>%
+          arrange(C)
+        rows_to_show <- c(rows_to_show,
+                          rownames(comparison_sub)[1:5],
+                          rev(rownames(comparison_sub))[1:5])
+
+        comparison_sub <- comparison %>%
+          select(D) %>%
+          filter(!is.na(D)) %>%
+          arrange(D)
+        rows_to_show <- c(rows_to_show,
+                          rownames(comparison_sub)[1:5],
+                          rev(rownames(comparison_sub))[1:5])
+      }
+      rows_to_show <- unique(rows_to_show)
+      rows_to_show <- rows_to_show[!is.na(rows_to_show)]
+      showing_count <- paste("showing", length(rows_to_show), "of", nrow(comparison), "entries")
+      comparison <- comparison[rows_to_show, ]
+      if(length(col_names) == 3){
+        comparison <- comparison %>%
+          arrange(A, B, C)
+      } else if(length(colnames) == 4){
+        comparison <- comparison %>%
+          arrange(A, B, C, D)
+      }
+    } else{
+    showing_count <- paste(nrow(comparison), "entries")
+    }
+    min_val <- round(min(comparison, na.rm = TRUE) - 0.5)  
+    max_val <- round(max(comparison, na.rm = TRUE) + 0.5)
+    col_range <- colorRamp2(c(min_val,0,max_val),c("#3C50A2","white","#D55727"))
+    
+  } else if(value_type == "pval"){
+    
+    # cutoff <- 1.301 #-log10(0.05)
+    # 
+    # legend_title <- "-log 10 (adjusted PVal)"
+    # 
+    # if(length(col_names) == 2){
+    #   colnames(comparison) <- c("A", "B")
+    #   comparison <- comparison %>%
+    #     filter(!(A < cutoff & B < cutoff))
+    # } else if(length(col_names) == 5){
+    #   colnames(comparison) <- c("A", "B", "C", "D", "E")
+    #   comparison <- comparison %>%
+    #     filter(!(A < cutoff & B < cutoff & C < cutoff & D < cutoff & E < cutoff))
+    # }
+    # 
+    # if(nrow(comparison) > max_num_row){
+    #   if(length(col_names) == 2){
+    #     comparison_sub <- comparison %>%
+    #       select(A) %>%
+    #       filter(!is.na(A)) %>%
+    #       arrange(desc(A))
+    #     rows_to_show <- c(rownames(comparison_sub)[1:10])
+    #     
+    #     comparison_sub <- comparison %>%
+    #       select(B) %>%
+    #       filter(!is.na(B)) %>%
+    #       arrange(desc(B))
+    #     rows_to_show <- c(rows_to_show,
+    #                       rownames(comparison_sub)[1:10])
+    #   } else if(length(col_names) == 5){
+    #     comparison_sub <- comparison %>%
+    #       select(A) %>%
+    #       filter(!is.na(A)) %>%
+    #       arrange(desc(A))
+    #     rows_to_show <- c(rownames(comparison_sub)[1:10])
+    #     
+    #     comparison_sub <- comparison %>%
+    #       select(B) %>%
+    #       filter(!is.na(B)) %>%
+    #       arrange(desc(B))
+    #     rows_to_show <- c(rows_to_show,
+    #                       rownames(comparison_sub)[1:10])        
+    #     
+    #     comparison_sub <- comparison %>%
+    #       select(C) %>%
+    #       filter(!is.na(C)) %>%
+    #       arrange(desc(C))
+    #     rows_to_show <- c(rownames(comparison_sub)[1:10])
+    #     
+    #     comparison_sub <- comparison %>%
+    #       select(D) %>%
+    #       filter(!is.na(D)) %>%
+    #       arrange(desc(D))
+    #     rows_to_show <- c(rows_to_show,
+    #                       rownames(comparison_sub)[1:10])
+    #     
+    #     comparison_sub <- comparison %>%
+    #       select(E) %>%
+    #       filter(!is.na(E)) %>%
+    #       arrange(desc(E))
+    #     rows_to_show <- c(rows_to_show,
+    #                       rownames(comparison_sub)[1:10])
+    #   }
+    #   rows_to_show <- unique(rows_to_show)
+    #   rows_to_show <- rows_to_show[!is.na(rows_to_show)]
+    #   showing_count <- paste("showing", length(rows_to_show), "of", nrow(comparison), "entries") 
+    #   comparison <- comparison[rows_to_show, ]
+    # } else{
+    #   showing_count <- paste(nrow(comparison), "entries")  
+    # }
+    # max_val <- round(max(comparison, na.rm = TRUE) + 0.5)
+    # col_range <- colorRamp2(c(0,cutoff,max_val),c("grey","white","yellowgreen"))
+  }
+  colnames(comparison) <- col_names
+  
+  h <- Heatmap(data.matrix(comparison),
+               col = col_range, 
+               cluster_rows = F, cluster_columns = F,
+               heatmap_legend_param = list(title = legend_title,
+                                           direction = "vertical",
+                                           title_position = "topleft",
+                                           legend_width = unit(4, "cm")),
+               width = ncol(comparison) * unit(5, 'cm'),
+               column_names_rot = 45,
+               column_title = showing_count,
+               column_title_gp = gpar(fontsize = 12),
+               column_title_side = "bottom")
+  
+  jpeg(output_path, height = plot_height, width = plot_width)
+  draw(h, legend_grouping = "original", heatmap_legend_side = "left",
+       column_title = plot_title, column_title_side = "top",
+       column_title_gp = gpar(fontsize = 18))
+  dev.off()
+  
+  write.csv(comparison, output_file_path)
+  
+}
 
 
 

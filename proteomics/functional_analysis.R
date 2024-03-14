@@ -31,11 +31,12 @@ go_BP_plot <- function(go.bp, file_path){
 
 
 dir_path <- "de_results_2024/proteomics/premod/"
+max_bps_to_show <- 30
 
 for(file_name in c("PreModulator_CFRDVsPreModulator_IGT", "PreModulator_CFRDVsPreModulator_NGT",
                      "PreModulator_IGTVsPreModulator_NGT")){
   print(file_name)
-  # file_name <- "PreModulator_CFRDVsPreModulator_IGT"
+  file_name <- "PreModulator_CFRDVsPreModulator_NGT"
   full_file_name <- paste0("sig_no_name_", file_name, ".csv")
   
   de <- read.table(paste0(dir_path, 
@@ -64,12 +65,45 @@ for(file_name in c("PreModulator_CFRDVsPreModulator_IGT", "PreModulator_CFRDVsPr
   )
   
   de.up.ego.bp.result <- de.up.ego.bp@result %>%
-    filter(qvalue < 0.05)
+    filter(qvalue < 0.05) %>%
+    arrange(qvalue)
   rownames(de.up.ego.bp.result) <- c()
   
   de.down.ego.bp.result <- de.down.ego.bp@result %>%
-    filter(qvalue < 0.05)
+    filter(qvalue < 0.05) %>%
+    arrange(qvalue)
   rownames(de.down.ego.bp.result) <- c()
+  
+  count.up <- nrow(de.up.ego.bp.result)
+  count.down <- nrow(de.down.ego.bp.result) 
+  count.total <- count.up + count.down
+  
+  count.up.to_show <- ceiling((count.up * max_bps_to_show) / count.total)
+  count.down.to_show <- max_bps_to_show - count.up.to_show
+  
+  data_to_plot.up <- de.up.ego.bp.result[c(1:count.up.to_show), c("Description", "qvalue")]
+  if(nrow(de.up.ego.bp.result) > 0){
+    data_to_plot.up <- data_to_plot.up %>% mutate("Source" = "upreg")
+  }
+  data_to_plot.down <- de.down.ego.bp.result[c(1:count.down.to_show), c("Description", "qvalue")]
+  if(nrow(data_to_plot.down) > 0){
+    data_to_plot.down <- data_to_plot.down %>% mutate("Source" = "downreg")
+  }
+  data_to_plot <- rbind(data_to_plot.up, data_to_plot.down)
+  
+  ggplot(data_to_plot, aes(x = adjpval, y = pathways, fill = zscore)) +
+    geom_bar(stat = "identity") +
+    scale_fill_viridis_c(option = "inferno") +
+    xlab("-log10 adj.pval") +
+    ylab(paste0(ylab_substr," (count = ", max_count_filtered_pathways, ")")) +
+    geom_vline(xintercept = 1.301, linetype = 2) +
+    labs(caption = "Vertical dashed line indicates -log10(0.05)") +
+    ggtitle(title) +
+    theme(axis.title.x = element_text(size=rel(1.2)),
+          axis.title.y = element_text(size=rel(1.2)),
+          plot.title  = element_text(size=rel(1.3)),
+          plot.title.position = "plot")
+  
   
   plot_dir_path <- paste0(dir_path, "goBPtree/")
   if(!dir.exists(plot_dir_path)){
@@ -82,54 +116,54 @@ for(file_name in c("PreModulator_CFRDVsPreModulator_IGT", "PreModulator_CFRDVsPr
   }
   
   print(dim(de.up.ego.bp.result))
-  if(nrow(de.up.ego.bp.result) > 2){
-    go.bp <- de.up.ego.bp.result
-    simMatrix <- calculateSimMatrix(go.bp$ID,
-                                    orgdb="org.Hs.eg.db",
-                                    ont="BP",
-                                    method="Rel")
-    scores <- setNames(-log10(go.bp$qvalue), go.bp$ID)
-    reducedTerms <- reduceSimMatrix(simMatrix,
-                                    scores,
-                                    threshold=0.7,
-                                    orgdb="org.Hs.eg.db")
-    length(factor(reducedTerms$parentTerm))
-    
-    file_path <- paste0(plot_dir_path, "up_", file_name, ".pdf")
-    
-    pdf(file = file_path, height = 10, width = 10)
-    scatterPlot(simMatrix, reducedTerms)
-    dev.off()
-    
-    pdf(file = sub("goBPscatter", "goBPtree", file_path), height = 10, width = 10)
-    treemapPlot(reducedTerms)
-    dev.off()
-  }
+  # if(nrow(de.up.ego.bp.result) > 2){
+  #   go.bp <- de.up.ego.bp.result
+  #   simMatrix <- calculateSimMatrix(go.bp$ID,
+  #                                   orgdb="org.Hs.eg.db",
+  #                                   ont="BP",
+  #                                   method="Rel")
+  #   scores <- setNames(-log10(go.bp$qvalue), go.bp$ID)
+  #   reducedTerms <- reduceSimMatrix(simMatrix,
+  #                                   scores,
+  #                                   threshold=0.7,
+  #                                   orgdb="org.Hs.eg.db")
+  #   length(factor(reducedTerms$parentTerm))
+  #   
+  #   file_path <- paste0(plot_dir_path, "up_", file_name, ".pdf")
+  #   
+  #   pdf(file = file_path, height = 10, width = 10)
+  #   scatterPlot(simMatrix, reducedTerms)
+  #   dev.off()
+  #   
+  #   pdf(file = sub("goBPscatter", "goBPtree", file_path), height = 10, width = 10)
+  #   treemapPlot(reducedTerms)
+  #   dev.off()
+  # }
   
   print(dim(de.down.ego.bp.result))
-  if(nrow(de.down.ego.bp.result) > 2){
-    go.bp <- de.down.ego.bp.result
-    simMatrix <- calculateSimMatrix(go.bp$ID,
-                                    orgdb="org.Hs.eg.db",
-                                    ont="BP",
-                                    method="Rel")
-    scores <- setNames(-log10(go.bp$qvalue), go.bp$ID)
-    reducedTerms <- reduceSimMatrix(simMatrix,
-                                    scores,
-                                    threshold=0.7,
-                                    orgdb="org.Hs.eg.db")
-    length(factor(reducedTerms$parentTerm))
-    
-    file_path <- paste0(plot_dir_path, "down_", file_name, ".pdf")
-    
-    pdf(file = file_path, height = 10, width = 10)
-    scatterPlot(simMatrix, reducedTerms)
-    dev.off()
-    
-    pdf(file = sub("goBPscatter", "goBPtree", file_path), height = 10, width = 10)
-    treemapPlot(reducedTerms)
-    dev.off()
-  }
+  # if(nrow(de.down.ego.bp.result) > 2){
+  #   go.bp <- de.down.ego.bp.result
+  #   simMatrix <- calculateSimMatrix(go.bp$ID,
+  #                                   orgdb="org.Hs.eg.db",
+  #                                   ont="BP",
+  #                                   method="Rel")
+  #   scores <- setNames(-log10(go.bp$qvalue), go.bp$ID)
+  #   reducedTerms <- reduceSimMatrix(simMatrix,
+  #                                   scores,
+  #                                   threshold=0.7,
+  #                                   orgdb="org.Hs.eg.db")
+  #   length(factor(reducedTerms$parentTerm))
+  #   
+  #   file_path <- paste0(plot_dir_path, "down_", file_name, ".pdf")
+  #   
+  #   pdf(file = file_path, height = 10, width = 10)
+  #   scatterPlot(simMatrix, reducedTerms)
+  #   dev.off()
+  #   
+  #   pdf(file = sub("goBPscatter", "goBPtree", file_path), height = 10, width = 10)
+  #   treemapPlot(reducedTerms)
+  #   dev.off()
+  # }
   
 }
 
@@ -565,3 +599,24 @@ create_bar_plot(data = combined_data, ylab_substr = "Diseases & Biofunctions",
                 file_name = paste0("Diseases & Biofunctions", conditions[4], ".png"),
                 dir_path = "de_results_2024/proteomics/IPA_postmod_premod/", 
                 data_dir_path = "de_results_2024/proteomics/IPA_postmod_premod/formatted_files/")
+
+create_heatmap(file_path = "de_results_2024/proteomics/IPA_premod/comparison_analysis/can_path_zscore.txt",
+               value_type = "zscore",
+               col_names = c("CFRD Vs IGT", 
+                             "CFRD Vs NGT", 
+                             "IGT Vs NGT"),
+               output_path = "de_results_2024/proteomics/IPA_premod/premod.jpeg",
+               plot_title = "Premodulator samples Canonical Pathway Z-score",
+               output_file_path = "de_results_2024/proteomics/IPA_premod/premod_selected.txt",
+               plot_width = 1300)
+
+create_heatmap(file_path = "de_results_2024/proteomics/IPA_postmod_premod/comparison_analysis/can_path_zscore.txt",
+               value_type = "zscore",
+               col_names = c("Postmodulator Vs Premodulator", 
+                             "Postmodulator CFRD Vs Premodulator CFRD", 
+                             "Postmodulator IGT Vs Premodulator IGT",
+                             "Postmodulator NGT Vs Premodulator NGT"),
+               output_path = "de_results_2024/proteomics/IPA_postmod_premod/postmod_premod.jpeg",
+               plot_title = "Postmodulator Vs Premodulator samples Canonical Pathway Z-score",
+               output_file_path = "de_results_2024/proteomics/IPA_postmod_premod/postmod_premod_selected.txt",
+               plot_width = 1300)
