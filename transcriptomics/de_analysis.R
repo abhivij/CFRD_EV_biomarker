@@ -932,6 +932,12 @@ create_DE_boxplot(data, phenotype,
                   x_lab = "Transcripts", output_dir_path = "plots_updated/post_mod/shift_cfrd_to_ngt/",
                   de_file_path = "de_results_2024/transcriptomics/premod/p/sig_PreModulator_CFRDVsPreModulator_NGT.csv", 
                   k = 5)
+create_DE_boxplot(data, phenotype, 
+                  conditions_of_interest = c("PreModulator_CFRD", "PreModulator_NGT", "PostModulator_CFRD"),
+                  x_lab = "Transcripts", output_dir_path = "plots_updated/post_mod/shift_cfrd_to_ngt/",
+                  de_file_path = "de_results_2024/transcriptomics/premod/p/sig_PreModulator_CFRDVsPreModulator_NGT.csv", 
+                  k = 10)
+
 
 ####################################
 #venn diagram of post vs pre overlap DE

@@ -371,14 +371,14 @@ diffex <- function(imputed_se, cond1, cond2, file_path,
 } #Cond1 = numerator, cond2 = denominator
 
 
-data = combined_data
-title = paste("Pathways in", conditions[1])
-file_name = paste0("Pathways", conditions[1], ".png")
-dir_path = "de_results_2024/proteomics/IPA_premod/"
-data_dir_path = "de_results_2024/proteomics/IPA_premod/formatted_files/"
-entries_of_interest_file_name = NA
-ylab_substr = "Pathways"
-max_count_filtered_pathways = 30
+# data = combined_data
+# title = paste("Pathways in", conditions[1])
+# file_name = paste0("Pathways", conditions[1], ".png")
+# dir_path = "de_results_2024/proteomics/IPA_premod/"
+# data_dir_path = "de_results_2024/proteomics/IPA_premod/formatted_files/"
+# entries_of_interest_file_name = NA
+# ylab_substr = "Pathways"
+# max_count_filtered_pathways = 30
 
 create_bar_plot <- function(data, title, file_name,
                             dir_path = "plots/IPA/",
@@ -475,6 +475,14 @@ create_bar_plot <- function(data, title, file_name,
 }
 
 
+# data
+# phenotype 
+# conditions_of_interest = c("PreModulator_CFRD", "PreModulator_NGT", "PostModulator_CFRD")
+# x_lab = "Proteins"
+# output_dir_path = "plots_updated/post_mod/shift_cfrd_to_ngt/"
+# de_file_path = "de_results_2024/proteomics/premod/p/sig_no_name_PreModulator_CFRDVsPreModulator_NGT.csv"
+# k = 10
+
 # #create boxplots of DE prot/transcripts to show shift from CFRD to NGT
 #de_file_path : file path of sig_<de file> with columns : Molecule, logFC, PVal, adjPVal
 create_DE_boxplot <- function(data, phenotype, conditions_of_interest,
@@ -507,6 +515,8 @@ create_DE_boxplot <- function(data, phenotype, conditions_of_interest,
 
   i <- 1
   for(de in list(de.upreg, de.downreg)){
+    
+    # de <- de.upreg
     data_to_plot <- data.sub[, c("Sample", "Condition", de)]
     data_to_plot <- data_to_plot %>%
       pivot_longer(!c(Sample, Condition), names_to = "Molecule") %>%
@@ -520,6 +530,20 @@ create_DE_boxplot <- function(data, phenotype, conditions_of_interest,
     }
     title <- paste("Top", k, text, x_lab)
     
+    norm_test <- data_to_plot %>%
+      group_by(Condition, Molecule) %>%
+      shapiro_test(value)
+    print(sum(norm_test$p < 0.05) / nrow(norm_test))
+    # p < 0.05 implies data is not normally distributed - use wilcoxontest in this case
+    
+    wilcox_res <- data_to_plot %>%
+      group_by(Molecule) %>%
+      wilcox_test(value ~ Condition, p.adjust.method = "BH",
+                  comparisons = list(c("PreModulator_CFRD", "PreModulator_NGT"), c("PostModulator_CFRD", "PreModulator_NGT")))  
+    wilcox_res_with_pos <- wilcox_res %>%
+      mutate(round_padj = round(p.adj, digits = 2)) %>%
+      add_xy_position(x = "Molecule")
+    
     ggplot(data_to_plot, aes(x = Molecule, y = value)) +
       geom_boxplot(aes(fill = Condition)) +
       xlab(x_lab) +
@@ -530,9 +554,12 @@ create_DE_boxplot <- function(data, phenotype, conditions_of_interest,
             axis.title.y = element_text(size = rel(1.2)),
             legend.title = element_text(size = rel(1.2), face = "bold"),
             legend.text = element_text(size = rel(1.2)),
-            plot.title = element_text(size = rel(1.4), face = "bold", hjust = 0.5)
+            plot.title = element_text(size = rel(1.4), face = "bold", hjust = 0.5),
+            plot.caption = element_text(size = rel(1.2))
             ) +
-      ggtitle(title)
+      stat_pvalue_manual(data = wilcox_res_with_pos, label = "p.adj") +
+      ggtitle(title) +
+      labs(caption = "(BH adjusted p-values computed using Wilcoxon test)")
     
     output_file_path <- paste0(output_dir_path, title, ".png")
     ggsave(output_file_path)
