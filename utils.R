@@ -569,20 +569,21 @@ create_DE_boxplot <- function(data, phenotype, conditions_of_interest,
 
 
 
-# file_path = "de_results_2024/proteomics/IPA_premod/comparison_analysis/can_path_zscore.txt"
-# value_type = "zscore"
-# col_names = c("CFRD Vs IGT", 
-#               "CFRD Vs NGT", 
-#               "IGT Vs NGT")
-# output_path = "de_results_2024/proteomics/IPA_premod/premod.jpeg"
-# plot_title = "Premodulator samples Canonical Pathway Z-score"
-# output_file_path = "de_results_2024/proteomics/IPA_premod/premod_selected.txt"
-# plot_width = 1300
-# plot_height = 1100
+file_path = "de_results_2024/proteomics/IPA_premod/comparison_analysis/can_path_zscore.txt"
+value_type = "zscore"
+col_names = c("CFRD Vs IGT", 
+              "CFRD Vs NGT", 
+              "IGT Vs NGT")
+output_path = "de_results_2024/proteomics/IPA_premod/premod.jpeg"
+plot_title = "Premodulator samples Canonical Pathway Z-score"
+output_file_path = "de_results_2024/proteomics/IPA_premod/premod_selected.txt"
+plot_width = 1300
 
 create_heatmap <- function(file_path, value_type, col_names,
                            output_path, plot_title, output_file_path,
-                           plot_height = 1100, plot_width = 900){
+                           plot_height = 1100, plot_width = 900,
+                           show_only_common = FALSE,
+                           show_only_non_common = FALSE){
   
   max_num_row <- 100
   
@@ -610,6 +611,25 @@ create_heatmap <- function(file_path, value_type, col_names,
       colnames(comparison) <- c("A", "B", "C", "D")
       comparison <- comparison %>%
         filter(!(is.na(A) & is.na(B) & is.na(C) & is.na(D)))  
+    }
+    
+    #show pathways common across all
+    if(length(col_names) == 3){
+      comparison.common <- comparison %>%
+        filter(!is.na(A) & !is.na(B) & !is.na(C))    
+    } else if(length(col_names) == 4){
+      comparison.common <- comparison %>%
+        filter(!is.na(A) & !is.na(B) & !is.na(C) & !is.na(D)) 
+    }
+    comparison.others.rownames <- setdiff(rownames(comparison),
+                                          rownames(comparison.common))
+    comparison.others <- comparison[comparison.others.rownames, ] 
+    
+    if(show_only_common){
+      comparison <- comparison.common
+    }
+    if(show_only_non_common){
+      comparison <- comparison.others
     }
     
     if(nrow(comparison) > max_num_row){

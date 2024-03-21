@@ -317,13 +317,13 @@ colnames(comparison_zscore) <- conditions
 #Premodulator CFRD Vs Premodulator IGT
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[1]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[1]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(0.05))
   )
@@ -336,13 +336,13 @@ create_bar_plot(data = combined_data,
 #Premodulator CFRD Vs Premodulator NGT
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[2]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[2]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(0.05))
   )
@@ -355,13 +355,13 @@ create_bar_plot(data = combined_data,
 #Premodulator IGT Vs Premodulator NGT
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[3]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[3]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(1))
   )
@@ -389,13 +389,13 @@ colnames(comparison_zscore) <- conditions
 
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[1]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[1]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(0.05))
   )
@@ -408,13 +408,13 @@ create_bar_plot(data = combined_data,
 
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[2]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[2]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(0.05))
   )
@@ -427,13 +427,13 @@ create_bar_plot(data = combined_data,
 
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[3]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[3]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(0.05))
   )
@@ -446,13 +446,13 @@ create_bar_plot(data = combined_data,
 
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[4]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[4]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(0.05))
   )
@@ -479,13 +479,13 @@ colnames(comparison_zscore) <- conditions
 #Premodulator CFRD Vs Premodulator IGT
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[1]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[1]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(0.05))
   )
@@ -498,13 +498,13 @@ create_bar_plot(data = combined_data, ylab_substr = "Diseases & Biofunctions",
 #Premodulator CFRD Vs Premodulator NGT
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[2]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[2]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(0.05))
   )
@@ -517,13 +517,13 @@ create_bar_plot(data = combined_data, ylab_substr = "Diseases & Biofunctions",
 #Premodulator IGT Vs Premodulator NGT
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[3]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[3]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(1))
   )
@@ -551,13 +551,13 @@ colnames(comparison_zscore) <- conditions
 
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[1]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[1]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(0.05))
   )
@@ -570,13 +570,13 @@ create_bar_plot(data = combined_data, ylab_substr = "Diseases & Biofunctions",
 
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[2]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[2]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(0.05))
   )
@@ -589,13 +589,13 @@ create_bar_plot(data = combined_data, ylab_substr = "Diseases & Biofunctions",
 
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[3]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[3]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(0.05))
   )
@@ -608,13 +608,13 @@ create_bar_plot(data = combined_data, ylab_substr = "Diseases & Biofunctions",
 
 combined_data <- comparison_zscore %>%
   dplyr::rename(zscore = conditions[4]) %>%
-  select(zscore) %>%
+  dplyr::select(zscore) %>%
   rownames_to_column("pathways") %>%
   filter(!(is.na(zscore))) %>%
   inner_join(
     comparison_adjpval %>%
       dplyr::rename(adjpval = conditions[4]) %>%
-      select(adjpval) %>%
+      dplyr::select(adjpval) %>%
       rownames_to_column("pathways") %>%
       filter(adjpval > -log10(0.05))
   )
@@ -644,6 +644,52 @@ create_heatmap(file_path = "de_results_2024/proteomics/IPA_postmod_premod/compar
                plot_title = "Postmodulator Vs Premodulator samples Canonical Pathway Z-score",
                output_file_path = "de_results_2024/proteomics/IPA_postmod_premod/postmod_premod_selected.txt",
                plot_width = 1300)
+
+create_heatmap(file_path = "de_results_2024/proteomics/IPA_premod/comparison_analysis/can_path_zscore.txt",
+               value_type = "zscore",
+               col_names = c("CFRD Vs IGT", 
+                             "CFRD Vs NGT", 
+                             "IGT Vs NGT"),
+               output_path = "de_results_2024/proteomics/IPA_premod/premod_common.jpeg",
+               plot_title = "Premodulator samples common Canonical Pathway Z-score",
+               output_file_path = "de_results_2024/proteomics/IPA_premod/premod_selected_common.txt",
+               plot_width = 1300,
+               show_only_common = TRUE)
+
+create_heatmap(file_path = "de_results_2024/proteomics/IPA_premod/comparison_analysis/can_path_zscore.txt",
+               value_type = "zscore",
+               col_names = c("CFRD Vs IGT", 
+                             "CFRD Vs NGT", 
+                             "IGT Vs NGT"),
+               output_path = "de_results_2024/proteomics/IPA_premod/premod_non_common.jpeg",
+               plot_title = "Premodulator samples non-common Canonical Pathway Z-score",
+               output_file_path = "de_results_2024/proteomics/IPA_premod/premod_selected_non_common.txt",
+               plot_width = 1300,
+               show_only_non_common = TRUE)
+
+create_heatmap(file_path = "de_results_2024/proteomics/IPA_postmod_premod/comparison_analysis/can_path_zscore.txt",
+               value_type = "zscore",
+               col_names = c("Postmodulator Vs Premodulator", 
+                             "Postmodulator CFRD Vs Premodulator CFRD", 
+                             "Postmodulator IGT Vs Premodulator IGT",
+                             "Postmodulator NGT Vs Premodulator NGT"),
+               output_path = "de_results_2024/proteomics/IPA_postmod_premod/postmod_premod_common.jpeg",
+               plot_title = "Postmodulator Vs Premodulator samples common Canonical Pathway Z-score",
+               output_file_path = "de_results_2024/proteomics/IPA_postmod_premod/postmod_premod_common_selected.txt",
+               plot_width = 1300,
+               show_only_common = TRUE)
+
+create_heatmap(file_path = "de_results_2024/proteomics/IPA_postmod_premod/comparison_analysis/can_path_zscore.txt",
+               value_type = "zscore",
+               col_names = c("Postmodulator Vs Premodulator", 
+                             "Postmodulator CFRD Vs Premodulator CFRD", 
+                             "Postmodulator IGT Vs Premodulator IGT",
+                             "Postmodulator NGT Vs Premodulator NGT"),
+               output_path = "de_results_2024/proteomics/IPA_postmod_premod/postmod_premod_non_common.jpeg",
+               plot_title = "Postmodulator Vs Premodulator samples non-common Canonical Pathway Z-score",
+               output_file_path = "de_results_2024/proteomics/IPA_postmod_premod/postmod_premod_non_common_selected.txt",
+               plot_width = 1300,
+               show_only_non_common = TRUE)
 
 
 
