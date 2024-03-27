@@ -1287,3 +1287,43 @@ plot_common_feature_heatmap(c(111:116),
                             heatmap_file_name = "IGTVsNGT.png",
                             plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_333/subset/"
 )
+
+
+#heatmap with results from best biomarkers from prot and tra with combat
+#based on manually created file MeanAUC.csv
+data_to_plot <- read.csv("../data/2024_best_biomarkers_results/MeanAUC.csv") %>%
+  dplyr::select(c(1:3)) %>%
+  mutate(Comparison = sub("Vs", " Vs ", Comparison)) %>%
+  pivot_wider(names_from = OmicsType, values_from = MeanAUC) %>%
+  column_to_rownames("Comparison")
+data_to_plot <- as.matrix(data_to_plot)
+
+cm_data_to_plot <- read.csv("../data/2024_best_biomarkers_results/MeanAUC.csv") %>%
+  dplyr::select(c(1, 2, 4)) %>%
+  mutate(Comparison = sub("Vs", " Vs ", Comparison)) %>%
+  pivot_wider(names_from = OmicsType, values_from = BestClassifier) %>%
+  column_to_rownames("Comparison")
+data_to_plot <- as.matrix(data_to_plot)
+
+png("../data/2024_best_biomarkers_results/MeanAUC.png", units = "cm", width = 30, height = 25, res = 1200)
+ht <- Heatmap(data_to_plot, name = "Mean AUC",
+              col = magma(5),
+              rect_gp = gpar(col = "white", lwd = 1),
+              column_names_rot = 0,
+              column_names_centered = TRUE,
+              column_names_gp = gpar(fontsize = 12),
+              row_names_gp = gpar(fontsize = 12),
+              row_title_gp = gpar(fontsize = 15),
+              row_title = "Comparison",
+              row_names_side = "left",
+              column_title_gp = gpar(fontsize = 15), 
+              cluster_columns = FALSE,
+              cluster_rows = FALSE,
+              cell_fun = function(j, i, x, y, width, height, fill) {
+                grid.text(paste(sprintf("%.4f", data_to_plot[i, j]),
+                                paste0("( ", sprintf(cm_data_to_plot[i, j]), " )"),
+                                sep = "\n"), 
+                          x, y, gp = gpar(fontsize = 10, col = "slateblue3"))
+              })
+draw(ht, column_title = "Mean AUC results for best biomarkers")
+dev.off()
