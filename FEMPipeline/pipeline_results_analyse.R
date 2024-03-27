@@ -1234,21 +1234,21 @@ plot_heatmap(
 plot_common_feature_heatmap(c(69:72),
                             dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
                             results_dir = "../fem_pipeline_results_tra_334_combat_subset",
-                            dataset_replace_string = "CF_EV_",
+                            dataset_replace_string = "CF_EV_tra_334_combat_",
                             heatmap_file_name = "CFRDVsIGT.png",
                             plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334_combat/subset/"
 )
 plot_common_feature_heatmap(c(73:76),
                             dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
                             results_dir = "../fem_pipeline_results_tra_334_combat_subset",
-                            dataset_replace_string = "CF_EV_",
+                            dataset_replace_string = "CF_EV_tra_334_combat_",
                             heatmap_file_name = "CFRDVsNGT.png",
                             plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334_combat/subset/"
 )
 plot_common_feature_heatmap(c(77:81),
                             dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
                             results_dir = "../fem_pipeline_results_tra_334_combat_subset",
-                            dataset_replace_string = "CF_EV_",
+                            dataset_replace_string = "CF_EV_tra_334_combat_",
                             heatmap_file_name = "IGTVsNGT.png",
                             plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334_combat/subset/"
 )
