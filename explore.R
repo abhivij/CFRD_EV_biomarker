@@ -637,3 +637,76 @@ tra_matching_data.nopremod <- tra_matching_data %>%
   dplyr::filter(is.na(sample_name_premod)) %>%
   dplyr::select(c(1:4))
 write.csv(tra_matching_data.nopremod, "data/formatted/post_mod_with_no_premod.tra.csv", row.names = FALSE)
+
+
+####################################
+
+#check how many samples - pre and post have FEV values
+
+phenotype.prot <- read.table("data/formatted/prot_phenotype_333_2024Jan.txt", header=TRUE, sep="\t") %>%
+  mutate(FEV1 = gsub(" ", "", FEV1)) %>%
+  mutate(FEV1 = ifelse(FEV1 == "NA", NA, FEV1)) %>%
+  mutate(FEV1 = as.numeric(FEV1))
+phenotype.tra <- read.table("data/formatted/tra_phenotype_2024Jan.txt", header=TRUE, sep="\t") %>%
+  mutate(FEV1 = gsub(" ", "", FEV1)) %>%
+  mutate(FEV1 = ifelse(FEV1 == "NA", NA, FEV1)) %>%
+  mutate(FEV1 = as.numeric(FEV1))
+
+sum(!is.na(phenotype.prot$FEV1))
+#184
+length(phenotype.prot$FEV1)
+#333
+
+sum(!is.na(phenotype.tra$FEV1))
+#186
+length(phenotype.tra$FEV1)
+#334
+
+phenotype.prot <- phenotype.prot %>%
+  filter(condition %in% c("CFRD", "IGT", "NGT"))
+phenotype.tra <- phenotype.tra %>%
+  filter(condition %in% c("CFRD", "IGT", "NGT"))
+
+sum(!is.na(phenotype.prot$FEV1))
+#184
+length(phenotype.prot$FEV1)
+#286
+
+sum(!is.na(phenotype.tra$FEV1))
+#186
+length(phenotype.tra$FEV1)
+#300
+
+
+phenotype.prot.pre <- phenotype.prot %>%
+  dplyr::filter(PreModulatorVsPostModulator == "PreModulator")
+phenotype.prot.post <- phenotype.prot %>%
+  dplyr::filter(PreModulatorVsPostModulator == "PostModulator")
+
+phenotype.tra.pre <- phenotype.tra %>%
+  dplyr::filter(PreModulatorVsPostModulator == "PreModulator")
+phenotype.tra.post <- phenotype.tra %>%
+  dplyr::filter(PreModulatorVsPostModulator == "PostModulator")
+
+
+sum(!is.na(phenotype.prot.pre$FEV1))
+#109
+length(phenotype.prot.pre$FEV1)
+#132
+
+sum(!is.na(phenotype.prot.post$FEV1))
+#75
+length(phenotype.prot.post$FEV1)
+#154
+
+
+
+sum(!is.na(phenotype.tra.pre$FEV1))
+#108
+length(phenotype.tra.pre$FEV1)
+#140
+
+sum(!is.na(phenotype.tra.post$FEV1))
+#78
+length(phenotype.tra.post$FEV1)
+#160
