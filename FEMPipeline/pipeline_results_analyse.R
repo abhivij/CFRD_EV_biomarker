@@ -1323,7 +1323,71 @@ ht <- Heatmap(data_to_plot, name = "Mean AUC",
                 grid.text(paste(sprintf("%.4f", data_to_plot[i, j]),
                                 paste0("( ", sprintf(cm_data_to_plot[i, j]), " )"),
                                 sep = "\n"), 
-                          x, y, gp = gpar(fontsize = 10, col = "slateblue3"))
+                          x, y, gp = gpar(fontsize = 10, col = "slateblue3", fontface = "bold"))
               })
 draw(ht, column_title = "Mean AUC results for best biomarkers")
 dev.off()
+
+
+############################################################################
+# barplot with error bar - performance of best biomarkers
+data_to_plot <- read.csv("../data/2024_best_biomarkers_results/MeanAUC.csv")
+best_features <- read.csv("../data/selected_features/best_features_with_is_best.csv")  
+
+dataset_replace_string <- "CF_EV_tra_334_combat_"
+model_results.tra <- read.csv("../fem_pipeline_results_tra_334_combat_subset/model_results_test.csv") %>%
+  dplyr::select(all_of(c(1, 3, 7, 8, 9))) %>%
+  mutate(DataSetId = gsub(dataset_replace_string, "", DataSetId))
+best_features.tra <- best_features %>%
+  mutate(dataset_id = gsub(dataset_replace_string, "", dataset_id)) %>%
+  filter(is_best == 1, dataset_id %in% c("CFRDVsIGT", "CFRDVsNGT", "IGTVsNGT")) %>%
+  mutate(DataSetId = paste(dataset_id, description, min_iter_feature_presence, dataset_id, sep = "_"))
+data_to_plot.tra <- best_features.tra %>%
+  inner_join(data_to_plot %>% filter(OmicsType == "Transcriptomics"),
+             by = c("dataset_id" = "Comparison")) %>%
+  left_join(model_results.tra,
+             by = join_by(DataSetId, BestClassifier == Model))
+
+
+dataset_replace_string <- "CF_EV_prot_mf_quantile_combat_"
+model_results.prot <- read.csv("../fem_pipeline_results_prot_mf_quantile_combat_subset/model_results_test.csv") %>%
+  dplyr::select(all_of(c(1, 3, 7, 8, 9))) %>%
+  mutate(DataSetId = gsub(dataset_replace_string, "", DataSetId))
+best_features.prot <- best_features %>%
+  mutate(dataset_id = gsub(dataset_replace_string, "", dataset_id)) %>%
+  filter(is_best == 1, dataset_id %in% c("CFRDVsIGT", "CFRDVsNGT", "IGTVsNGT")) %>%
+  mutate(DataSetId = paste(dataset_id, description, min_iter_feature_presence, dataset_id, sep = "_"))
+data_to_plot.prot <- best_features.prot %>%
+  inner_join(data_to_plot %>% filter(OmicsType == "Proteomics"),
+             by = c("dataset_id" = "Comparison")) %>%
+  left_join(model_results.prot,
+            by = join_by(DataSetId, BestClassifier == Model))
+
+data_to_plot.combined <- rbind(data_to_plot.prot, data_to_plot.tra) %>%
+  mutate(dataset_id = sub("Vs", " Vs ", dataset_id)) %>%
+  mutate(dataset_id = factor(dataset_id, levels = c("CFRD Vs NGT", "CFRD Vs IGT", "IGT Vs NGT"))) %>%
+  mutate(BestClassifier = factor(BestClassifier, 
+                                 levels = c("Random Forest",
+                                            "Radial Kernel SVM",
+                                            "Simple logistic regression")))
+
+ggplot(data_to_plot.combined, aes(x = dataset_id, fill = BestClassifier, y = Mean_AUC)) +
+  geom_bar(stat="identity", position="dodge") +
+  geom_errorbar( aes(x = dataset_id, ymin = X95.CI_AUC_lower, ymax = X95.CI_AUC_upper), position="dodge") +
+  #scale_fill_viridis_d(option = "viridis") +
+  xlab("Comparison") +
+  ylab("Mean AUC") +
+  guides(fill=guide_legend(title = "Best Classifier")) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
+  theme(axis.text.x = element_text(angle=45, hjust=1, vjust=1),
+        axis.text.y = element_text(size=rel(1.2), hjust=0.95),
+        axis.title.x = element_text(size=rel(1.2)),
+        axis.title.y = element_text(size=rel(1.2)),
+        strip.text = element_text(size=rel(1.2)),
+        legend.title = element_text(size=rel(1.2)),
+        legend.text = element_text(size=rel(1.1)),
+        panel.background = element_rect(colour = "grey50", fill = "white"),
+        strip.background = element_rect(colour = "grey50", fill = "white")
+  ) +
+  facet_wrap(facets = vars(OmicsType))
+ggsave("../data/2024_best_biomarkers_results/MeanAUC_barplot.png")
