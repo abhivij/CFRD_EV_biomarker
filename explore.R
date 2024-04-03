@@ -710,3 +710,67 @@ sum(!is.na(phenotype.tra.post$FEV1))
 #78
 length(phenotype.tra.post$FEV1)
 #160
+
+
+###################################################
+
+#check number of samples with pairwise FEV values
+
+
+phenotype.prot <- read.table("data/formatted/prot_phenotype_333_2024Jan.txt", header=TRUE, sep="\t") %>%
+  mutate(FEV1 = gsub(" ", "", FEV1)) %>%
+  mutate(FEV1 = ifelse(FEV1 == "NA", NA, FEV1)) %>%
+  mutate(FEV1 = as.numeric(FEV1)) %>%
+  filter(!is.na(FEV1))
+phenotype.tra <- read.table("data/formatted/tra_phenotype_2024Jan.txt", header=TRUE, sep="\t") %>%
+  mutate(FEV1 = gsub(" ", "", FEV1)) %>%
+  mutate(FEV1 = ifelse(FEV1 == "NA", NA, FEV1)) %>%
+  mutate(FEV1 = as.numeric(FEV1)) %>%
+  filter(!is.na(FEV1))
+
+postmod.prot <- phenotype.prot %>%
+  dplyr::filter(PreModulatorVsPostModulator == "PostModulator") %>%
+  dplyr::select(c(individual_id, sample_name, condition, FEV1, batch_name))
+premod.prot <- phenotype.prot %>%
+  dplyr::filter(PreModulatorVsPostModulator == "PreModulator") %>%
+  dplyr::select(c(individual_id, sample_name, condition, FEV1, batch_name))
+
+#how many post mod do not have pre mod
+prot_matching_data <- postmod.prot %>%
+  left_join(premod.prot, by = "individual_id", suffix = c("_postmod", "_premod"),
+            relationship = "many-to-many")
+sum(is.na(prot_matching_data$sample_name_premod))
+#39
+
+sum(!is.na(prot_matching_data$sample_name_premod))
+#39
+
+length(unique(prot_matching_data$sample_name_postmod))
+#74
+length(prot_matching_data$sample_name_postmod)
+#78
+
+
+
+
+postmod.tra <- phenotype.tra %>%
+  dplyr::filter(PreModulatorVsPostModulator == "PostModulator") %>%
+  dplyr::select(c(individual_id, sample_name, condition, FEV1, batch_name))
+premod.tra <- phenotype.tra %>%
+  dplyr::filter(PreModulatorVsPostModulator == "PreModulator") %>%
+  dplyr::select(c(individual_id, sample_name, condition, FEV1, batch_name))
+
+#how many post mod do not have pre mod
+tra_matching_data <- postmod.tra %>%
+  left_join(premod.tra, by = "individual_id", suffix = c("_postmod", "_premod"),
+            relationship = "many-to-many")
+sum(is.na(tra_matching_data$sample_name_premod))
+#38
+
+sum(!is.na(tra_matching_data$sample_name_premod))
+#41
+
+length(unique(tra_matching_data$sample_name_postmod))
+#78
+length(tra_matching_data$sample_name_postmod)
+#79
