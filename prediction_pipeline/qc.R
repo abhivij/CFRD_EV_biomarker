@@ -1254,7 +1254,8 @@ create_dim_red_plots <- function(comparison, classes,
       ggplot2::ylab(ylab) +
       labs(caption = paste(paste("Data dimension :", paste(dim(data), collapse = "x")), "\n",
                            group_counts_text),
-           fill = fill_column)  
+           fill = fill_column) +
+      theme(panel.background = element_rect(colour = "grey50", fill = "white"))
   }
   else if(is.na(fill_column)){
     ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
@@ -1274,7 +1275,8 @@ create_dim_red_plots <- function(comparison, classes,
       ggplot2::ylab(ylab) +
       labs(caption = paste(paste("Data dimension :", paste(dim(data), collapse = "x")), "\n",
                            group_counts_text),
-           fill = fill_column)    
+           fill = fill_column) +
+      theme(panel.background = element_rect(colour = "grey50", fill = "white"))    
   } else{
     ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_point(ggplot2::aes(fill = output_labels$fill_column,
@@ -1291,7 +1293,8 @@ create_dim_red_plots <- function(comparison, classes,
       ggplot2::ylab(ylab) +
       labs(caption = paste(paste("Data dimension :", paste(dim(data), collapse = "x")), "\n",
                            group_counts_text),
-           fill = fill_column)    
+           fill = fill_column) +
+      theme(panel.background = element_rect(colour = "grey50", fill = "white"))    
   }
 
   if(is.na(dir_path)){
@@ -1379,7 +1382,8 @@ create_dim_red_plots <- function(comparison, classes,
       labs(fill = "") +
       theme(
         strip.text.x = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        panel.background = element_rect(colour = "grey50", fill = "white")
       )
     
     plot
