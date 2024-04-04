@@ -1232,3 +1232,148 @@ ggsave("de_results_2024/proteomics/postmod_premod/overlap_down.png")
 intersect(de.CFRD.down$Molecule, de.IGT.down$Molecule)
 intersect(de.CFRD.down$Molecule, de.NGT.down$Molecule)
 intersect(de.IGT.down$Molecule, de.NGT.down$Molecule)
+
+
+####################################
+#venn diagram of pre CFRD, IGT, NGT DE results overlap with identified biomarkers
+
+biomarkers.CFRD_IGT <- read.xlsx("data/selected_features/prot_combat_biomarkers.xlsx", sheetName = "prot_CFRDVsIGT")
+biomarkers.CFRD_NGT <- read.xlsx("data/selected_features/prot_combat_biomarkers.xlsx", sheetName = "prot_CFRDVsNGT")
+biomarkers.IGT_NGT <- read.xlsx("data/selected_features/prot_combat_biomarkers.xlsx", sheetName = "prot_IGTVsNGT")
+
+de.CFRD_IGT <- read.table("de_results_2024/proteomics/premod/p/sig_no_name_PreModulator_CFRDVsPreModulator_IGT.csv", 
+                          sep = "\t", header = TRUE)  
+de.CFRD_IGT.up <- de.CFRD_IGT %>%
+  filter(logFC > 0)
+de.CFRD_IGT.down <- de.CFRD_IGT %>%
+  filter(logFC < 0)
+
+common <- intersect(de.CFRD_IGT.up$Molecule, biomarkers.CFRD_IGT$biomarkers)
+if(length(common) > 0){
+  caption_text <- paste0("Common: ", paste(common, collapse = ", ", sep = ""))
+} else{
+  caption_text <- ""
+}
+ggvenn(list("Upregulated proteins" = de.CFRD_IGT.up$Molecule,
+            "Identified biomarkers" = biomarkers.CFRD_IGT$biomarkers),
+       stroke_size = 0.1,
+       set_name_size = 4,
+       text_size = 3,
+       fill_alpha = 0.5,
+       fill_color = c("red", "gold")) +
+  ggtitle("CFRD Vs IGT proteomics") +
+  labs(caption = caption_text) +
+  theme(plot.title = element_text(vjust = 0, hjust = 0.5, size = rel(1.2), face = "bold"),
+        plot.caption = element_text(hjust = 0.5))
+ggsave("biomarker_de_overlap/protein_CFRD_IGT_up.png")
+
+common <- intersect(de.CFRD_IGT.down$Molecule, biomarkers.CFRD_IGT$biomarkers)
+if(length(common) > 0){
+  caption_text <- paste0("Common: ", paste(common, collapse = ", ", sep = ""))
+} else{
+  caption_text <- ""
+}
+ggvenn(list("Downregulated proteins" = de.CFRD_IGT.down$Molecule,
+            "Identified biomarkers" = biomarkers.CFRD_IGT$biomarkers),
+       stroke_size = 0.1,
+       set_name_size = 4,
+       text_size = 3,
+       fill_alpha = 0.5,
+       fill_color = c("blue", "gold")) +
+  ggtitle("CFRD Vs IGT proteomics") +
+  labs(caption = caption_text) +
+  theme(plot.title = element_text(vjust = 0, hjust = 0.5, size = rel(1.2), face = "bold"),
+        plot.caption = element_text(hjust = 0.5))
+ggsave("biomarker_de_overlap/protein_CFRD_IGT_down.png")
+
+
+de.CFRD_NGT <- read.table("de_results_2024/proteomics/premod/p/sig_no_name_PreModulator_CFRDVsPreModulator_NGT.csv", 
+                          sep = "\t", header = TRUE)  
+de.CFRD_NGT.up <- de.CFRD_NGT %>%
+  filter(logFC > 0)
+de.CFRD_NGT.down <- de.CFRD_NGT %>%
+  filter(logFC < 0)
+
+common <- intersect(de.CFRD_NGT.up$Molecule, biomarkers.CFRD_NGT$biomarkers)
+if(length(common) > 0){
+  caption_text <- paste0("Common: ", paste(common, collapse = ", ", sep = ""))
+} else{
+  caption_text <- ""
+}
+ggvenn(list("Upregulated proteins" = de.CFRD_NGT.up$Molecule,
+            "Identified biomarkers" = biomarkers.CFRD_NGT$biomarkers),
+       stroke_size = 0.1,
+       set_name_size = 4,
+       text_size = 3,
+       fill_alpha = 0.5,
+       fill_color = c("red", "gold")) +
+  ggtitle("CFRD Vs NGT proteomics") +
+  labs(caption = caption_text) +
+  theme(plot.title = element_text(vjust = 0, hjust = 0.5, size = rel(1.2), face = "bold"),
+        plot.caption = element_text(hjust = 0.5))
+ggsave("biomarker_de_overlap/protein_CFRD_NGT_up.png")
+
+common <- intersect(de.CFRD_NGT.down$Molecule, biomarkers.CFRD_NGT$biomarkers)
+if(length(common) > 0){
+  caption_text <- paste0("Common: ", paste(common, collapse = ", ", sep = ""))
+} else{
+  caption_text <- ""
+}
+ggvenn(list("Downregulated proteins" = de.CFRD_NGT.down$Molecule,
+            "Identified biomarkers" = biomarkers.CFRD_NGT$biomarkers),
+       stroke_size = 0.1,
+       set_name_size = 4,
+       text_size = 3,
+       fill_alpha = 0.5,
+       fill_color = c("blue", "gold")) +
+  ggtitle("CFRD Vs NGT proteomics") +
+  labs(caption = caption_text) +
+  theme(plot.title = element_text(vjust = 0, hjust = 0.5, size = rel(1.2), face = "bold"),
+        plot.caption = element_text(hjust = 0.5))
+ggsave("biomarker_de_overlap/protein_CFRD_NGT_down.png")
+
+
+de.IGT_NGT <- read.table("de_results_2024/proteomics/premod/p/sig_no_name_PreModulator_IGTVsPreModulator_NGT.csv", 
+                         sep = "\t", header = TRUE)  
+de.IGT_NGT.up <- de.IGT_NGT %>%
+  filter(logFC > 0)
+de.IGT_NGT.down <- de.IGT_NGT %>%
+  filter(logFC < 0)
+
+common <- intersect(de.IGT_NGT.up$Molecule, biomarkers.IGT_NGT$biomarkers)
+if(length(common) > 0){
+  caption_text <- paste0("Common: ", paste(common, collapse = ", ", sep = ""))
+} else{
+  caption_text <- ""
+}
+ggvenn(list("Upregulated proteins" = de.IGT_NGT.up$Molecule,
+            "Identified biomarkers" = biomarkers.IGT_NGT$biomarkers),
+       stroke_size = 0.1,
+       set_name_size = 4,
+       text_size = 3,
+       fill_alpha = 0.5,
+       fill_color = c("red", "gold")) +
+  ggtitle("IGT Vs NGT proteomics") +
+  labs(caption = caption_text) +
+  theme(plot.title = element_text(vjust = 0, hjust = 0.5, size = rel(1.2), face = "bold"),
+        plot.caption = element_text(hjust = 0.5))
+ggsave("biomarker_de_overlap/protein_IGT_NGT_up.png")
+
+common <- intersect(de.IGT_NGT.down$Molecule, biomarkers.IGT_NGT$biomarkers)
+if(length(common) > 0){
+  caption_text <- paste0("Common: ", paste(common, collapse = ", ", sep = ""))
+} else{
+  caption_text <- ""
+}
+ggvenn(list("Downregulated proteins" = de.IGT_NGT.down$Molecule,
+            "Identified biomarkers" = biomarkers.IGT_NGT$biomarkers),
+       stroke_size = 0.1,
+       set_name_size = 4,
+       text_size = 3,
+       fill_alpha = 0.5,
+       fill_color = c("blue", "gold")) +
+  ggtitle("IGT Vs NGT proteomics") +
+  labs(caption = caption_text) +
+  theme(plot.title = element_text(vjust = 0, hjust = 0.5, size = rel(1.2), face = "bold"),
+        plot.caption = element_text(hjust = 0.5))
+ggsave("biomarker_de_overlap/protein_IGT_NGT_down.png")
