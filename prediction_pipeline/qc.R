@@ -917,73 +917,63 @@ create_transcript_box_plots <- function(comparison,
 # shownames = FALSE
 # norm = "log_tmm"
 
+
 fill_column = NA
+simplified = FALSE
+simplified_with_mean = FALSE
+colour_column = "age_group"
+point_border_colours = c("black", "green")
 combat_seq = FALSE
 combat_seq_specify_group = FALSE
 combatref = FALSE
+combat = FALSE
+combattwice = FALSE
 shownames = FALSE
 perform_filter = TRUE
 best_features_file_path = NA
 dataset_replace_str = NA
 dir_path = NA
 data_file_path = "data/formatted/umi_counts.csv"
+phenotype_file_path = "data/formatted/phenotype.txt"
+# data = NA
+# phenotype = NA
 filter_out_child = FALSE
+dimred_plot_width_cm = 30
+plot_width_cm = 21
 plot_title_prefix = ""
 plot_title_suffix = ""
-box_plot_dir_path <- "plots_updated/boxplots"
-
-comparison = "CFRDVsIGT"
-classes = c("CFRD", "IGT")
-class_colours = c("red", "orange")
-dim_red = "UMAP"
-norm = "log_tmm"
-combat = TRUE
-dir_path = "plots_updated/dim_red"
-plot_width_cm = 21
-
-best_features_file_path  = "data/selected_features/best_features_with_is_best.csv"
-dataset_replace_str = "CF_EV_tra_combat_"
-colour_column = "age_group"
-
-
-combattwice = FALSE
-
-comparison = "CFRDVsIGT"
-classes = c("CFRD", "IGT")
-class_colours = c("red", "orange")
-dim_red = "UMAP"
-norm = "non-normalized"
-dir_path = "plots_updated/tra_334"
-plot_width = 21
-perform_filter = TRUE
-colour_column = "batch_name"
-data_file_path = "data/formatted/rna_all/umi_counts_filter90.csv"
-phenotype_file_path = "data/formatted/rna_all/phenotype.txt"
-plot_title_prefix = "1 "
+omics_type = "tra"
+box_plot_dir_path = "plots_updated/boxplots"
+biomarker_expr_file_path = "data/selected_features/biomarkers_expr.xlsx"
+filter_post_modulator = TRUE
+custom_title = NA
 
 
 comparison = NA
-classes = c("PostModulator_CFRD", "PostModulator_IGT", "PostModulator_NGT",
-            "PreModulator_CFRD", "PreModulator_IGT", "PreModulator_NGT")
-class_colours = c("indianred", "coral", "khaki", 
-                  "red", "orange", "yellow")
+classes = c("PreModulator_CFRD", "PostModulator_CFRD", "PreModulator_NGT")
+class_colours = c("red", "blue", "yellow")
 dim_red = "UMAP"
 norm = "non-normalized"
-dir_path = "plots_updated/post_mod/proteomics"
-plot_width = 21
+dir_path = "plots_updated/post_mod/proteomics/shift"
+dimred_plot_width_cm = 36
 perform_filter = FALSE
 colour_column = "batch_name"
 point_border_colours = c("black", "green", "purple")
 data = data
-phenotype = phenotype
+phenotype = phenotype %>% dplyr::rename("disease_status" = "condition") %>% dplyr::rename("condition" = "modstatus_condition")
 filter_post_modulator = FALSE
-custom_title = "proteomics pre and post modulator samples with Quantile norm + ComBat"
+custom_title = "Proteomics shift from CFRD to NGT with Quantile norm and ComBat two_in_one_shot"
+combat = FALSE
+simplified = TRUE
+
+
 
 create_dim_red_plots <- function(comparison, classes,
                                  class_colours,
                                  dim_red, norm,
                                  fill_column = NA,
                                  simplified = FALSE,
+                                 simplified_with_mean = FALSE,
                                  colour_column = "age_group",
                                  point_border_colours = c("black", "green"),
                                  combat_seq = FALSE, combat_seq_specify_group = FALSE,
@@ -1229,22 +1219,12 @@ create_dim_red_plots <- function(comparison, classes,
     title <- custom_title
   }
   
+  output_labels <- output_labels %>%
+    mutate(Label = factor(Label, levels = classes))
   if(simplified){
-    # ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
-    #   ggplot2::geom_point(ggplot2::aes(colour = output_labels$colour_column), size = 3) +
-    #   geom_text_repel(aes(label = text)) +
-    #   ggplot2::scale_fill_manual(name = "Condition", values = class_colours) +
-    #   ggplot2::guides(fill = guide_legend(override.aes = list(shape = 21,
-    #                                                           colour = class_colours))) +
-    #   ggplot2::scale_colour_manual(name = sub("_", " ", colour_column), values = point_border_colours) +
-    #   ggplot2::guides(colour = guide_legend(override.aes = list(shape = 1))) +
-    #   ggplot2::labs(title = title) +
-    #   ggplot2::xlab(xlab) +
-    #   ggplot2::ylab(ylab) +
-    #   labs(caption = paste("Data dimension :", paste(dim(data), collapse = "x")))  
-    
     ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
-      ggplot2::geom_point(ggplot2::aes(fill = output_labels$Label), size = 3, shape = 21) +
+      ggplot2::geom_point(ggplot2::aes(fill = output_labels$Label),
+                          size = 3, shape = 21) +
       geom_text_repel(aes(label = text)) +
       ggplot2::scale_fill_manual(name = "Condition", values = class_colours) +
       ggplot2::guides(fill = guide_legend(override.aes = list(shape = 21,
@@ -1252,7 +1232,70 @@ create_dim_red_plots <- function(comparison, classes,
       ggplot2::labs(title = title) +
       ggplot2::xlab(xlab) +
       ggplot2::ylab(ylab) +
-      labs(caption = paste(paste("Data dimension :", paste(dim(data), collapse = "x")), "\n",
+      labs(caption = paste0(paste("Data dimension :", paste(dim(data), collapse = "x")), "\n",
+                            group_counts_text),
+           fill = fill_column) +
+      theme(panel.background = element_rect(colour = "grey50", fill = "white"))
+  }
+  else if(simplified_with_mean){
+    
+    group_means <- dim_red_df %>%
+      rownames_to_column("Sample") %>%
+      inner_join(output_labels %>% dplyr::select(Sample, Label)) %>%
+      group_by(Label) %>%
+      summarize(mean_x = median(x), mean_y = median(y)) %>%
+      arrange(Label)
+    dim_red_df.modified <- rbind(dim_red_df, 
+                                 group_means %>% 
+                                   mutate(Sample = paste("Mean", Label, sep = "_")) %>% 
+                                   column_to_rownames("Sample") %>%
+                                   dplyr::select(-c(Label)) %>%
+                                   dplyr::rename(c("x" = "mean_x", "y" = "mean_y"))
+                            )
+    output_labels.modified <- rbind(output_labels %>% 
+                                      dplyr::select(c(Sample, Label)) %>%
+                                      mutate(Type = "Sample"),
+                                    group_means %>% 
+                                      mutate(Sample = paste("Mean", Label, sep = "_")) %>%
+                                      mutate(Type = "Mean") %>%
+                                      dplyr::select(c(Sample, Label, Type))
+                              )
+    output_labels.modified <- output_labels.modified %>%
+      mutate(Type = factor(Type, levels = c("Sample", "Mean")))
+            
+    
+    dist.euc <- function(p1, p2) sqrt(sum((p1 - p2) ^ 2))
+    
+    dist.man <- function(p1, p2) sum(abs(p1 - p2))
+    
+    mean.class1 <- group_means[1, 2:3]
+    mean.class2 <- group_means[2, 2:3]
+    mean.class3 <- group_means[3, 2:3]
+    
+    dist.euc(mean.class1, mean.class3)
+    dist.euc(mean.class2, mean.class3)
+    
+    distance_text <- paste0("Distance between means of ", classes[1], " and ", classes[3], " = ", 
+                            round(dist.euc(mean.class1, mean.class3), digits = 3),
+                            "\n",
+                            "Distance between means of ", classes[2], " and ", classes[3], " = ", 
+                            round(dist.euc(mean.class2, mean.class3), digits = 3))
+    
+    ggplot2::ggplot(dim_red_df.modified, ggplot2::aes(x = x, y = y)) +
+      ggplot2::geom_point(ggplot2::aes(fill = output_labels.modified$Label,
+                                       shape = output_labels.modified$Type),
+                          size = 3) +
+      geom_text_repel(aes(label = text)) +
+      ggplot2::scale_fill_manual(name = "Condition", values = class_colours) +
+      ggplot2::guides(fill = guide_legend(override.aes = list(shape = 21,
+                                                              colour = class_colours))) +
+      ggplot2::scale_shape_manual(name = "Data Point Type", values = c(21, 23)) +
+      ggplot2::guides(shape = guide_legend(override.aes = list(fill = c("black", "black")))) +
+      ggplot2::labs(title = title) +
+      ggplot2::xlab(xlab) +
+      ggplot2::ylab(ylab) +
+      labs(caption = paste0(distance_text, "\n",
+                           paste("Data dimension :", paste(dim(data), collapse = "x")), "\n",
                            group_counts_text),
            fill = fill_column) +
       theme(panel.background = element_rect(colour = "grey50", fill = "white"))
