@@ -815,6 +815,102 @@ plot_volcano_and_save_DE(result, plot_title = "PreModulator_IGT Vs PreModulator_
 
 ################################################################################################
 
+contr_matrix <- makeContrasts(contrasts = "PostModulator_CFRD - PostModulator_IGT",
+                              levels = colnames(model_matrix))
+
+# v <- voom(data, model_matrix, plot = TRUE)
+# Error in voom(data, model_matrix, plot = TRUE) : 
+#   Negative counts not allowed
+
+fit <- lmFit(data, model_matrix)
+# head(coef(fit))
+fit <- contrasts.fit(fit, contr_matrix)
+# head(coef(fit))
+efit <- eBayes(fit)
+top.table <- topTable(efit, n = Inf, sort.by = "p") %>%
+  rownames_to_column("rna")
+result <- top.table %>%
+  dplyr::select(rna, logFC, P.Value, adj.P.Val) %>%
+  dplyr::rename(Molecule = rna, adjPVal = adj.P.Val, PVal = P.Value) %>%
+  arrange(logFC)
+
+plot_volcano_and_save_DE(result, plot_title = "PostModulator_CFRD Vs PostModulator_IGT",
+                         output_dir_path = "de_results_2024/transcriptomics/postmod/p/",
+                         plot_file_name = "PostModulator_CFRDVsPostModulator_IGT.png",
+                         fc_cutoff = 1.2,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = FALSE,
+                         plot_width_cm = 25)
+plot_volcano_and_save_DE(result, plot_title = "PostModulator_CFRD Vs PostModulator_IGT",
+                         output_dir_path = "de_results_2024/transcriptomics/postmod/padj/",
+                         plot_file_name = "PostModulator_CFRDVsPostModulator_IGT.png",
+                         fc_cutoff = 1.2,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = TRUE,
+                         plot_width_cm = 25)
+
+
+contr_matrix <- makeContrasts(contrasts = "PostModulator_CFRD - PostModulator_NGT",
+                              levels = colnames(model_matrix))
+fit <- lmFit(data, model_matrix)
+# head(coef(fit))
+fit <- contrasts.fit(fit, contr_matrix)
+# head(coef(fit))
+efit <- eBayes(fit)
+top.table <- topTable(efit, n = Inf, sort.by = "p") %>%
+  rownames_to_column("rna")
+result <- top.table %>%
+  dplyr::select(rna, logFC, P.Value, adj.P.Val) %>%
+  dplyr::rename(Molecule = rna, adjPVal = adj.P.Val, PVal = P.Value) %>%
+  arrange(logFC)
+
+plot_volcano_and_save_DE(result, plot_title = "PostModulator_CFRD Vs PostModulator_NGT",
+                         output_dir_path = "de_results_2024/transcriptomics/postmod/p/",
+                         plot_file_name = "PostModulator_CFRDVsPostModulator_NGT.png",
+                         fc_cutoff = 1.2,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = FALSE,
+                         plot_width_cm = 25)
+plot_volcano_and_save_DE(result, plot_title = "PostModulator_CFRD Vs PostModulator_NGT",
+                         output_dir_path = "de_results_2024/transcriptomics/postmod/padj/",
+                         plot_file_name = "PostModulator_CFRDVsPostModulator_NGT.png",
+                         fc_cutoff = 1.2,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = TRUE,
+                         plot_width_cm = 25)
+
+
+contr_matrix <- makeContrasts(contrasts = "PostModulator_IGT - PostModulator_NGT",
+                              levels = colnames(model_matrix))
+fit <- lmFit(data, model_matrix)
+# head(coef(fit))
+fit <- contrasts.fit(fit, contr_matrix)
+# head(coef(fit))
+efit <- eBayes(fit)
+top.table <- topTable(efit, n = Inf, sort.by = "p") %>%
+  rownames_to_column("rna")
+result <- top.table %>%
+  dplyr::select(rna, logFC, P.Value, adj.P.Val) %>%
+  dplyr::rename(Molecule = rna, adjPVal = adj.P.Val, PVal = P.Value) %>%
+  arrange(logFC)
+
+plot_volcano_and_save_DE(result, plot_title = "PostModulator_IGT Vs PostModulator_NGT",
+                         output_dir_path = "de_results_2024/transcriptomics/postmod/p/",
+                         plot_file_name = "PostModulator_IGTVsPostModulator_NGT.png",
+                         fc_cutoff = 1.2,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = FALSE,
+                         plot_width_cm = 25)
+plot_volcano_and_save_DE(result, plot_title = "PostModulator_IGT Vs PostModulator_NGT",
+                         output_dir_path = "de_results_2024/transcriptomics/postmod/padj/",
+                         plot_file_name = "PostModulator_IGTVsPostModulator_NGT.png",
+                         fc_cutoff = 1.2,
+                         pval_cutoff = 0.05,
+                         use_adj_pval = TRUE,
+                         plot_width_cm = 25)
+
+################################################################################################
+
 contr_matrix <- makeContrasts(contrasts = "PostModulator_CFRD - PreModulator_CFRD",
                               levels = colnames(model_matrix))
 fit <- lmFit(data, model_matrix)
