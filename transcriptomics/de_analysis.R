@@ -1252,3 +1252,33 @@ ggvenn(list("Downregulated transcripts" = de.IGT_NGT.down$Molecule,
   theme(plot.title = element_text(vjust = 0, hjust = 0.5, size = rel(1.2), face = "bold"),
         plot.caption = element_text(hjust = 0.5))
 ggsave("biomarker_de_overlap/transcripts_IGT_NGT_down.png")
+
+
+#######################################################################
+
+#venn diagram within premod overlap with within postmod
+
+create_DE_up_down_venn(de_file_path1 = "de_results_2024/transcriptomics/premod/p/sig_PreModulator_CFRDVsPreModulator_IGT.csv",
+                       de_file_path2 = "de_results_2024/transcriptomics/postmod/p/sig_PostModulator_CFRDVsPostModulator_IGT.csv",
+                       output_dir_path = "de_results_2024/transcriptomics/pre_post_overlap/",
+                       file_name_upreg = "transcriptomics_pre_post_CFRD_IGT_up.png",
+                       file_name_downreg = "transcriptomics_pre_post_CFRD_IGT_down.png",
+                       comparison1_name = "Pre Modulator",
+                       comparison2_name = "Post Modulator",
+                       title <- "CFRD Vs IGT")
+create_DE_up_down_venn(de_file_path1 = "de_results_2024/transcriptomics/premod/p/sig_PreModulator_CFRDVsPreModulator_NGT.csv",
+                       de_file_path2 = "de_results_2024/transcriptomics/postmod/p/sig_PostModulator_CFRDVsPostModulator_NGT.csv",
+                       output_dir_path = "de_results_2024/transcriptomics/pre_post_overlap/",
+                       file_name_upreg = "transcriptomics_pre_post_CFRD_NGT_up.png",
+                       file_name_downreg = "transcriptomics_pre_post_CFRD_NGT_down.png",
+                       comparison1_name = "Pre Modulator",
+                       comparison2_name = "Post Modulator",
+                       title <- "CFRD Vs NGT")
+create_DE_up_down_venn(de_file_path1 = "de_results_2024/transcriptomics/premod/p/sig_PreModulator_IGTVsPreModulator_NGT.csv",
+                       de_file_path2 = "de_results_2024/transcriptomics/postmod/p/sig_PostModulator_IGTVsPostModulator_NGT.csv",
+                       output_dir_path = "de_results_2024/transcriptomics/pre_post_overlap/",
+                       file_name_upreg = "transcriptomics_pre_post_IGT_NGT_up.png",
+                       file_name_downreg = "transcriptomics_pre_post_IGT_NGT_down.png",
+                       comparison1_name = "Pre Modulator",
+                       comparison2_name = "Post Modulator",
+                       title <- "IGT Vs NGT")

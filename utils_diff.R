@@ -178,3 +178,79 @@ plot_volcano_and_save_DE <- function(
 }
 
 
+de_file_path1 <- "de_results_2024/proteomics/premod/p/sig_no_name_PreModulator_CFRDVsPreModulator_IGT.csv"
+de_file_path2 <- "de_results_2024/proteomics/postmod/p/sig_no_name_PostModulator_CFRDVsPostModulator_IGT.csv"
+output_dir_path <- "de_results_2024/proteomics/pre_post_overlap/"
+file_name_upreg <- "proteomics_pre_post_CFRD_IGT_up.png"
+file_name_downreg <- "proteomics_pre_post_CFRD_IGT_down.png"
+comparison1_name <- "Pre Modulator"
+comparison2_name <- "Post Modulator"
+title <- "CFRD Vs IGT"
+
+#creates venn diagrams of between 2 comparisons for upregulated and downregulated DE 
+create_DE_up_down_venn <- function(de_file_path1, de_file_path2, output_dir_path, 
+                                   file_name_upreg, file_name_downreg,
+                                   comparison1_name, comparison2_name,
+                                   title){
+  
+  if(!dir.exists(output_dir_path)){
+    dir.create(output_dir_path, recursive = TRUE)
+  }
+  
+  de.comparison1 <- read.table(de_file_path1, sep = "\t", header = TRUE)  
+  de.comparison1.up <- de.comparison1 %>%
+    filter(logFC > 0)
+  de.comparison1.down <- de.comparison1 %>%
+    filter(logFC < 0)
+  
+  de.comparison2 <- read.table(de_file_path2, sep = "\t", header = TRUE)  
+  de.comparison2.up <- de.comparison2 %>%
+    filter(logFC > 0)
+  de.comparison2.down <- de.comparison2 %>%
+    filter(logFC < 0)
+  
+  common <- intersect(de.comparison1.up$Molecule, de.comparison2.up$Molecule)
+  if(length(common) > 0){
+    caption_text <- paste0("Common: ", paste(common, collapse = ", ", sep = ""))
+  } else{
+    caption_text <- ""
+  }
+  
+  upregulated_list <- list(de.comparison1.up$Molecule, de.comparison2.up$Molecule)
+  names(upregulated_list) <- c(paste("Upregulated in", comparison1_name), paste("Upregulated in", comparison2_name))
+  
+  ggvenn(upregulated_list,
+         stroke_size = 0.1,
+         set_name_size = 4,
+         text_size = 3,
+         fill_alpha = 0.5,
+         fill_color = c("red", "tomato")) +
+    ggtitle(title) +
+    labs(caption = caption_text) +
+    theme(plot.title = element_text(vjust = 0, hjust = 0.5, size = rel(1.2), face = "bold"),
+          plot.caption = element_text(hjust = 0.5))
+  ggsave(paste0(output_dir_path, file_name_upreg))
+
+  
+  common <- intersect(de.comparison1.down$Molecule, de.comparison2.down$Molecule)
+  if(length(common) > 0){
+    caption_text <- paste0("Common: ", paste(common, collapse = ", ", sep = ""))
+  } else{
+    caption_text <- ""
+  }
+  
+  downregulated_list <- list(de.comparison1.down$Molecule, de.comparison2.down$Molecule)
+  names(downregulated_list) <- c(paste("Downregulated in", comparison1_name), paste("Downregulated in", comparison2_name))
+  
+  ggvenn(downregulated_list,
+         stroke_size = 0.1,
+         set_name_size = 4,
+         text_size = 3,
+         fill_alpha = 0.5,
+         fill_color = c("blue", "cyan")) +
+    ggtitle(title) +
+    labs(caption = caption_text) +
+    theme(plot.title = element_text(vjust = 0, hjust = 0.5, size = rel(1.2), face = "bold"),
+          plot.caption = element_text(hjust = 0.5))
+  ggsave(paste0(output_dir_path, file_name_downreg))  
+}
