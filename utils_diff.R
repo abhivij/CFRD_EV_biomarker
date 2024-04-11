@@ -160,7 +160,7 @@ plot_volcano_and_save_DE <- function(
   
   plot(volcanoplot)
   ggsave(paste0(output_dir_path, plot_file_name), units = "cm", width = plot_width_cm)
-  # ggsave(paste0(file_path, cond1,".vs.",cond2,".pdf"), units = "cm", width = 25)
+  ggsave(paste0(output_dir_path, sub(".png", ".pdf", plot_file_name, fixed = TRUE)), units = "cm", width = plot_width_cm)
   
   de_results_file_name <- sub(".png", ".csv", plot_file_name)
   de_results_file_name <- sub(".jpg", ".csv", de_results_file_name)
