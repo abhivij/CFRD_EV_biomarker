@@ -428,7 +428,11 @@ create_bar_plot <- function(data, title, file_name,
   if(!dir.exists(dir_path)){
     dir.create(dir_path, recursive = TRUE)
   }
+  file_name_updated <- sub(".jpeg", ".pdf", file_name)
+  file_name_updated <- sub(".jpg", ".pdf", file_name_updated)
+  file_name_updated <- sub(".png", ".pdf", file_name_updated)
   ggsave(paste(dir_path, file_name), units = "cm", width = 25, height = 30)  
+  ggsave(paste(dir_path, file_name_updated), units = "cm", width = 25, height = 30)  
   
   if(nrow(data_to_plot) > max_count_filtered_pathways){
 
@@ -471,6 +475,7 @@ create_bar_plot <- function(data, title, file_name,
       dir.create(fil_dir_path, recursive = TRUE)
     }
     ggsave(paste(fil_dir_path, file_name), units = "cm", width = 25, height = 30)  
+    ggsave(paste(fil_dir_path, file_name_updated), units = "cm", width = 25, height = 30)  
   }
 }
 
@@ -555,14 +560,15 @@ create_DE_boxplot <- function(data, phenotype, conditions_of_interest,
             legend.title = element_text(size = rel(1.2), face = "bold"),
             legend.text = element_text(size = rel(1.2)),
             plot.title = element_text(size = rel(1.4), face = "bold", hjust = 0.5),
-            plot.caption = element_text(size = rel(1.2))
+            plot.caption = element_text(size = rel(1.2)),
+            panel.background = element_rect(colour = "grey50", fill = "white")
             ) +
       stat_pvalue_manual(data = wilcox_res_with_pos, label = "p.adj") +
       ggtitle(title) +
       labs(caption = "(BH adjusted p-values computed using Wilcoxon test)")
     
     output_file_path <- paste0(output_dir_path, title, ".png")
-    ggsave(output_file_path)
+    ggsave(output_file_path, width = 30, units = "cm")
     i <- i + 1
   }
 }
@@ -578,12 +584,16 @@ output_path = "de_results_2024/proteomics/IPA_premod/premod.jpeg"
 plot_title = "Premodulator samples Canonical Pathway Z-score"
 output_file_path = "de_results_2024/proteomics/IPA_premod/premod_selected.txt"
 plot_width = 1300
+plot_height = 1100
+show_only_common = FALSE
+show_only_non_common = FALSE
 
 create_heatmap <- function(file_path, value_type, col_names,
                            output_path, plot_title, output_file_path,
                            plot_height = 1100, plot_width = 900,
                            show_only_common = FALSE,
-                           show_only_non_common = FALSE){
+                           show_only_non_common = FALSE,
+                           pdf_height = 15, pdf_width = 18){
   
   max_num_row <- 100
   
@@ -635,14 +645,14 @@ create_heatmap <- function(file_path, value_type, col_names,
     if(nrow(comparison) > max_num_row){
       if(length(col_names) == 3){
         comparison_sub <- comparison %>%
-          select(A) %>%
+          dplyr::select(A) %>%
           filter(!is.na(A)) %>%
           arrange(A)
         rows_to_show <- c(rownames(comparison_sub)[1:5],
                           rev(rownames(comparison_sub))[1:5])
         
         comparison_sub <- comparison %>%
-          select(B) %>%
+          dplyr::select(B) %>%
           filter(!is.na(B)) %>%
           arrange(B)
         rows_to_show <- c(rows_to_show,
@@ -650,7 +660,7 @@ create_heatmap <- function(file_path, value_type, col_names,
                           rev(rownames(comparison_sub))[1:5])
         
         comparison_sub <- comparison %>%
-          select(C) %>%
+          dplyr::select(C) %>%
           filter(!is.na(C)) %>%
           arrange(C)
         rows_to_show <- c(rows_to_show,
@@ -659,14 +669,14 @@ create_heatmap <- function(file_path, value_type, col_names,
 
       } else if(length(col_names) == 4){
         comparison_sub <- comparison %>%
-          select(A) %>%
+          dplyr::select(A) %>%
           filter(!is.na(A)) %>%
           arrange(A)
         rows_to_show <- c(rownames(comparison_sub)[1:5],
                           rev(rownames(comparison_sub))[1:5])
 
         comparison_sub <- comparison %>%
-          select(B) %>%
+          dplyr::select(B) %>%
           filter(!is.na(B)) %>%
           arrange(B)
         rows_to_show <- c(rows_to_show,
@@ -674,7 +684,7 @@ create_heatmap <- function(file_path, value_type, col_names,
                           rev(rownames(comparison_sub))[1:5])
 
         comparison_sub <- comparison %>%
-          select(C) %>%
+          dplyr::select(C) %>%
           filter(!is.na(C)) %>%
           arrange(C)
         rows_to_show <- c(rows_to_show,
@@ -682,7 +692,7 @@ create_heatmap <- function(file_path, value_type, col_names,
                           rev(rownames(comparison_sub))[1:5])
 
         comparison_sub <- comparison %>%
-          select(D) %>%
+          dplyr::select(D) %>%
           filter(!is.na(D)) %>%
           arrange(D)
         rows_to_show <- c(rows_to_show,
@@ -800,6 +810,15 @@ create_heatmap <- function(file_path, value_type, col_names,
   draw(h, legend_grouping = "original", heatmap_legend_side = "left",
        column_title = plot_title, column_title_side = "top",
        column_title_gp = gpar(fontsize = 18))
+  dev.off()
+  
+  output_path_updated <- sub(".jpeg", ".pdf", output_path)
+  output_path_updated <- sub(".jpg", ".pdf", output_path_updated)
+  output_path_updated <- sub(".png", ".pdf", output_path_updated)
+  draw(h, legend_grouping = "original", heatmap_legend_side = "left",
+       column_title = plot_title, column_title_side = "top",
+       column_title_gp = gpar(fontsize = 18))
+  dev.copy2pdf(file = output_path_updated, height = pdf_height, width = pdf_width)
   dev.off()
   
   write.csv(comparison, output_file_path)
