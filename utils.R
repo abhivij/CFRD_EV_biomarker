@@ -481,29 +481,42 @@ create_bar_plot <- function(data, title, file_name,
 
 
 # data
-# phenotype 
+# phenotype
 # conditions_of_interest = c("PreModulator_CFRD", "PreModulator_NGT", "PostModulator_CFRD")
-# x_lab = "Proteins"
+# x_lab = "Transcripts"
 # output_dir_path = "plots_updated/post_mod/shift_cfrd_to_ngt/"
-# de_file_path = "de_results_2024/proteomics/premod/p/sig_no_name_PreModulator_CFRDVsPreModulator_NGT.csv"
+# de_file_path = "de_results_2024/transcriptomics/premod/p/sig_PreModulator_CFRDVsPreModulator_NGT.csv"
 # k = 10
+# condition_colours = c("red", "yellow", "blue")
+
 
 # #create boxplots of DE prot/transcripts to show shift from CFRD to NGT
 #de_file_path : file path of sig_<de file> with columns : Molecule, logFC, PVal, adjPVal
 create_DE_boxplot <- function(data, phenotype, conditions_of_interest,
                               x_lab, output_dir_path,
                               de_file_path, 
-                              k = 10){
+                              k = 10,
+                              condition_colours = c("red", "yellow", "blue")){
   
   de_data <- read.table(de_file_path, sep = "\t", header = TRUE)  
   
   de.upreg <- de_data %>%
+    filter(PVal <= 0.05 & logFC > 0) %>%
     arrange(desc(logFC))
-  de.upreg <- de.upreg[c(1:k), "Molecule"]
-  
+  if(nrow(de.upreg) >= k){
+    de.upreg <- de.upreg[c(1:k), "Molecule"]
+  } else{
+    de.upreg <- de.upreg[, "Molecule"]
+  }
+
   de.downreg <- de_data %>%
+    filter(PVal <= 0.05 & logFC < 0) %>%
     arrange(logFC)
-  de.downreg <- de.downreg[c(1:k), "Molecule"]
+  if(nrow(de.downreg) >= k){
+    de.downreg <- de.downreg[c(1:k), "Molecule"]
+  } else{
+    de.downreg <- de.downreg[, "Molecule"]
+  }
   
   phenotype.sub <- phenotype %>%
     dplyr::filter(modstatus_condition %in% conditions_of_interest)
@@ -521,7 +534,6 @@ create_DE_boxplot <- function(data, phenotype, conditions_of_interest,
   i <- 1
   for(de in list(de.upreg, de.downreg)){
     
-    # de <- de.upreg
     data_to_plot <- data.sub[, c("Sample", "Condition", de)]
     data_to_plot <- data_to_plot %>%
       pivot_longer(!c(Sample, Condition), names_to = "Molecule") %>%
@@ -553,6 +565,7 @@ create_DE_boxplot <- function(data, phenotype, conditions_of_interest,
       geom_boxplot(aes(fill = Condition)) +
       xlab(x_lab) +
       ylab("Expression") +
+      scale_fill_manual(name = "Condition", values = condition_colours) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = rel(1.2)),
             axis.title.x = element_text(size = rel(1.2)),
             axis.text.y = element_text(size = rel(1.2)),
@@ -569,6 +582,7 @@ create_DE_boxplot <- function(data, phenotype, conditions_of_interest,
     
     output_file_path <- paste0(output_dir_path, title, ".png")
     ggsave(output_file_path, width = 30, units = "cm")
+    ggsave(sub(".png", ".pdf", output_file_path), width = 30, units = "cm")
     i <- i + 1
   }
 }
