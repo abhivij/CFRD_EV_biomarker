@@ -962,9 +962,10 @@ point_border_colours = c("black", "green", "purple")
 data = data
 phenotype = phenotype %>% dplyr::rename("disease_status" = "condition") %>% dplyr::rename("condition" = "modstatus_condition")
 filter_post_modulator = FALSE
-custom_title = "Proteomics shift from CFRD to NGT with Quantile norm and ComBat two_in_one_shot"
+custom_title = "Proteomics shift from CFRD to NGT with Quantile norm and ComBat two_in_one_shot with names" 
 combat = FALSE
 simplified = TRUE
+shownames = TRUE
 
 
 
@@ -1196,9 +1197,12 @@ create_dim_red_plots <- function(comparison, classes,
     title <- paste0(title, " best biomarkers")
   }
   
-  
   if(shownames){
     text <- rownames(data)
+    # custom_text_labels <- data.frame(rname = rownames(data)) %>%
+    #   inner_join(output_labels %>% dplyr::select(Sample, Label), by = c("rname" = "Sample")) %>%
+    #   inner_join(phenotype %>% dplyr::select(Sample, sample_long_name_t), by = c("rname" = "Sample")) %>%
+    #   mutate(custom_label = ifelse(Label == "PostModulator_CFRD", sample_long_name_t, NA))
   } else{
     text <- ""
   }
@@ -1213,12 +1217,22 @@ create_dim_red_plots <- function(comparison, classes,
     dim_red_df <- data.frame(x = result$layout[,1], y = result$layout[,2])  
     xlab <- "UMAP 1"
     ylab <- "UMAP 2"
+    
+    # custom_text_labels <- custom_text_labels %>%
+    #   inner_join(dim_red_df %>% rownames_to_column("rname"))
+    # custom_text_labels <- custom_text_labels %>%
+    #   mutate(custom_label = ifelse(x < -0.7, custom_label, NA))
+    # text <- custom_text_labels$custom_label
+    # 
+    # phenotype_specific <- phenotype %>%
+    #   inner_join(custom_text_labels %>% dplyr::select(rname, custom_label) %>% filter(!is.na(custom_label)), 
+    #              by = c("Sample" = "rname"))
+    # write.csv(phenotype_specific, "manuscript_figures/fig2/problem_samples.csv", row.names = FALSE)
   }
   title <- paste0(plot_title_prefix, title, plot_title_suffix)
   if(!is.na(custom_title)){
     title <- custom_title
   }
-  
   output_labels <- output_labels %>%
     mutate(Label = factor(Label, levels = classes))
   if(simplified){
@@ -1243,7 +1257,7 @@ create_dim_red_plots <- function(comparison, classes,
       rownames_to_column("Sample") %>%
       inner_join(output_labels %>% dplyr::select(Sample, Label)) %>%
       group_by(Label) %>%
-      summarize(mean_x = median(x), mean_y = median(y)) %>%
+      summarize(mean_x = mean(x), mean_y = mean(y)) %>%
       arrange(Label)
     dim_red_df.modified <- rbind(dim_red_df, 
                                  group_means %>% 
@@ -1268,18 +1282,41 @@ create_dim_red_plots <- function(comparison, classes,
     
     dist.man <- function(p1, p2) sum(abs(p1 - p2))
     
-    mean.class1 <- group_means[1, 2:3]
-    mean.class2 <- group_means[2, 2:3]
-    mean.class3 <- group_means[3, 2:3]
-    
-    dist.euc(mean.class1, mean.class3)
-    dist.euc(mean.class2, mean.class3)
-    
-    distance_text <- paste0("Distance between means of ", classes[1], " and ", classes[3], " = ", 
-                            round(dist.euc(mean.class1, mean.class3), digits = 3),
-                            "\n",
-                            "Distance between means of ", classes[2], " and ", classes[3], " = ", 
-                            round(dist.euc(mean.class2, mean.class3), digits = 3))
+    if(length(classes) == 6){
+      mean.class1 <- group_means[1, 2:3]
+      mean.class2 <- group_means[2, 2:3]
+      mean.class3 <- group_means[3, 2:3]
+      mean.class4 <- group_means[4, 2:3]
+      mean.class5 <- group_means[5, 2:3]
+      mean.class6 <- group_means[6, 2:3]
+      
+      dist.euc(mean.class1, mean.class2)
+      dist.euc(mean.class3, mean.class4)
+      dist.euc(mean.class5, mean.class6)
+      
+      distance_text <- paste0("Distance between means of ", classes[1], " and ", classes[2], " = ", 
+                              round(dist.euc(mean.class1, mean.class2), digits = 3),
+                              "\n",
+                              "Distance between means of ", classes[3], " and ", classes[4], " = ", 
+                              round(dist.euc(mean.class3, mean.class4), digits = 3),
+                              "\n",
+                              "Distance between means of ", classes[5], " and ", classes[6], " = ", 
+                              round(dist.euc(mean.class5, mean.class6), digits = 3))      
+    } else{
+      mean.class1 <- group_means[1, 2:3]
+      mean.class2 <- group_means[2, 2:3]
+      mean.class3 <- group_means[3, 2:3]
+      
+      dist.euc(mean.class1, mean.class3)
+      dist.euc(mean.class2, mean.class3)
+      
+      distance_text <- paste0("Distance between means of ", classes[1], " and ", classes[3], " = ", 
+                              round(dist.euc(mean.class1, mean.class3), digits = 3),
+                              "\n",
+                              "Distance between means of ", classes[2], " and ", classes[3], " = ", 
+                              round(dist.euc(mean.class2, mean.class3), digits = 3))      
+    }
+
     
     ggplot2::ggplot(dim_red_df.modified, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_point(ggplot2::aes(fill = output_labels.modified$Label,
