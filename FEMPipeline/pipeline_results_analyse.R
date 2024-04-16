@@ -1391,3 +1391,4 @@ ggplot(data_to_plot.combined, aes(x = dataset_id, fill = BestClassifier, y = Mea
   ) +
   facet_wrap(facets = vars(OmicsType))
 ggsave("../data/2024_best_biomarkers_results/MeanAUC_barplot.png")
+ggsave("../data/2024_best_biomarkers_results/MeanAUC_barplot.pdf")
