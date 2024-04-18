@@ -683,6 +683,13 @@ phenotype <- read.table("data/formatted/prot_phenotype_333_2024Jan.txt", header 
   mutate(modstatus_condition_country = paste(PreModulatorVsPostModulator, condition, country, sep = "_")) %>%
   mutate(modstatus_condition = paste(PreModulatorVsPostModulator, condition, sep = "_"))
 
+phenotype %>%
+  group_by(cohort) %>%
+  summarize(patients = n_distinct(individual_id))
+# "CPH"           98
+# "RPA_NSW"       52
+# "SCH_NSW"       30
+# "UNSW"           3
 
 # %>%
 #   dplyr::rename(c("disease_status" = "condition"))

@@ -494,6 +494,15 @@ summary(factor(phenotype$condition))
 # CFRD                 HC                IGT                NGT UNKNOWN TO PREDICT 
 # 82                  6                 80                138                 28
 
+phenotype %>%
+  group_by(cohort) %>%
+  summarize(patients = n_distinct(individual_id))
+# cohort  patients
+# <chr>      <int>
+#   1 CPH           99
+# 2 RPA_NSW       45
+# 3 SCH_NSW       31
+# 4 UNSW           3
 
 # %>%
 #   dplyr::rename(c("disease_status" = "condition"))
