@@ -219,7 +219,8 @@ plot_common_feature_heatmap <- function(dparg_vec,
                                         results_dir = "fem_pipeline_results",
                                         dataset_replace_string = "",
                                         heatmap_file_name,
-                                        plot_dir_path = "../plots/FEMPipeline_tmm_all/subset/"){
+                                        plot_dir_path = "../plots/FEMPipeline_tmm_all/subset/",
+                                        create_pdf = FALSE){
   data_info <- read.table(paste(results_dir, "data_info.csv", sep = "/"), 
                           sep = ',', header = TRUE)
   fsm_info <- read.table(paste(results_dir, "fsm_info.csv", sep = "/"),
@@ -274,6 +275,22 @@ plot_common_feature_heatmap <- function(dparg_vec,
                 })
   draw(ht, column_title = heatmap_title)
   dev.off()
+  
+  if(create_pdf){
+    pdf(sub(".png", ".pdf", file_path))
+    ht <- Heatmap(data_to_plot, name = "Mean AUC",
+                  col = magma(5),
+                  rect_gp = gpar(col = "white", lwd = 1),
+                  column_names_rot = 60,
+                  column_names_gp = gpar(fontsize = 10),
+                  row_title = "Classification Models",
+                  row_names_side = "left",
+                  cell_fun = function(j, i, x, y, width, height, fill) {
+                    grid.text(sprintf("%.4f", data_to_plot[i, j]), x, y, gp = gpar(fontsize = 10, col = "slateblue3"))
+                  })
+    draw(ht, column_title = heatmap_title)
+    dev.off()
+  }
 }
 
 
@@ -1163,21 +1180,24 @@ plot_common_feature_heatmap(c(73:78),
                             results_dir = "../fem_pipeline_results_prot_mf_quantile_combat_subset",
                             dataset_replace_string = "CF_EV_prot_mf_quantile_combat_",
                             heatmap_file_name = "CFRDVsIGT.png",
-                            plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/subset/"
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/subset/",
+                            create_pdf = TRUE
 )
 plot_common_feature_heatmap(c(79:81),
                             dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
                             results_dir = "../fem_pipeline_results_prot_mf_quantile_combat_subset",
                             dataset_replace_string = "CF_EV_prot_mf_quantile_combat_",
                             heatmap_file_name = "CFRDVsNGT.png",
-                            plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/subset/"
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/subset/",
+                            create_pdf = TRUE
 )
 plot_common_feature_heatmap(c(82:86),
                             dataset_pipeline_arguments = dataset_pipeline_arguments_prot,
                             results_dir = "../fem_pipeline_results_prot_mf_quantile_combat_subset",
                             dataset_replace_string = "CF_EV_prot_mf_quantile_combat_",
                             heatmap_file_name = "IGTVsNGT.png",
-                            plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/subset/"
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_prot_mf_quantile_combat/subset/",
+                            create_pdf = TRUE
 )
 
 
@@ -1236,21 +1256,24 @@ plot_common_feature_heatmap(c(69:72),
                             results_dir = "../fem_pipeline_results_tra_334_combat_subset",
                             dataset_replace_string = "CF_EV_tra_334_combat_",
                             heatmap_file_name = "CFRDVsIGT.png",
-                            plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334_combat/subset/"
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334_combat/subset/",
+                            create_pdf = TRUE
 )
 plot_common_feature_heatmap(c(73:76),
                             dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
                             results_dir = "../fem_pipeline_results_tra_334_combat_subset",
                             dataset_replace_string = "CF_EV_tra_334_combat_",
                             heatmap_file_name = "CFRDVsNGT.png",
-                            plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334_combat/subset/"
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334_combat/subset/",
+                            create_pdf = TRUE
 )
 plot_common_feature_heatmap(c(77:81),
                             dataset_pipeline_arguments = dataset_pipeline_arguments_tra,
                             results_dir = "../fem_pipeline_results_tra_334_combat_subset",
                             dataset_replace_string = "CF_EV_tra_334_combat_",
                             heatmap_file_name = "IGTVsNGT.png",
-                            plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334_combat/subset/"
+                            plot_dir_path = "../plots_updated/fem_pipeline_results_tra_334_combat/subset/",
+                            create_pdf = TRUE
 )
 
 
@@ -1306,6 +1329,30 @@ cm_data_to_plot <- read.csv("../data/2024_best_biomarkers_results/MeanAUC.csv") 
 data_to_plot <- as.matrix(data_to_plot)
 
 png("../data/2024_best_biomarkers_results/MeanAUC.png", units = "cm", width = 30, height = 25, res = 1200)
+ht <- Heatmap(data_to_plot, name = "Mean AUC",
+              col = magma(5),
+              rect_gp = gpar(col = "white", lwd = 1),
+              column_names_rot = 0,
+              column_names_centered = TRUE,
+              column_names_gp = gpar(fontsize = 12),
+              row_names_gp = gpar(fontsize = 12),
+              row_title_gp = gpar(fontsize = 15),
+              row_title = "Comparison",
+              row_names_side = "left",
+              column_title_gp = gpar(fontsize = 15), 
+              cluster_columns = FALSE,
+              cluster_rows = FALSE,
+              cell_fun = function(j, i, x, y, width, height, fill) {
+                grid.text(paste(sprintf("%.4f", data_to_plot[i, j]),
+                                paste0("( ", sprintf(cm_data_to_plot[i, j]), " )"),
+                                sep = "\n"), 
+                          x, y, gp = gpar(fontsize = 10, col = "slateblue3", fontface = "bold"))
+              })
+draw(ht, column_title = "Mean AUC results for best biomarkers")
+dev.off()
+
+
+pdf("../data/2024_best_biomarkers_results/MeanAUC.pdf")
 ht <- Heatmap(data_to_plot, name = "Mean AUC",
               col = magma(5),
               rect_gp = gpar(col = "white", lwd = 1),
