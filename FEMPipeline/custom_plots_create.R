@@ -284,7 +284,8 @@ create_all_iter_pred_heatmap <- function(sample_wise_results,
                                          comparison_of_interest,
                                          classes,
                                          sample_type, phenotype,
-                                         plot_dir_path = "plots/custom_heatmap/per_iter_pred/"){
+                                         plot_dir_path = "plots/custom_heatmap/per_iter_pred/",
+                                         pdf_plot = FALSE){
   results <- sample_wise_results %>%
     filter(Type == sample_type, comparison == comparison_of_interest)%>%
     dplyr::select(c(Sample, Iter, PredProb, PredictedLabel, TrueLabel, Model))
@@ -338,7 +339,7 @@ create_all_iter_pred_heatmap <- function(sample_wise_results,
                 rect_gp = gpar(col = "white", lwd = 1),
                 cluster_columns = FALSE,
                 cluster_rows = FALSE,
-                row_title = "Samples",
+                row_title = paste("Samples (", nrow(data_to_plot), ")"),
                 row_names_side = "left",
                 row_split = meta_data.row$TrueLabel,
                 column_split = meta_data.col$Repeat,
@@ -366,9 +367,16 @@ create_all_iter_pred_heatmap <- function(sample_wise_results,
   if(!dir.exists(plot_dir_path)){
     dir.create(plot_dir_path, recursive = TRUE)
   }
-  png(paste0(plot_dir_path, comparison_of_interest, 
-             sample_type,
-             ".png"), units = "cm", width = 20, height = 15, res = 1200)  
+  if(pdf_plot){
+    pdf(paste0(plot_dir_path, comparison_of_interest, 
+               sample_type,
+               ".pdf"))      
+  } else{
+    png(paste0(plot_dir_path, comparison_of_interest, 
+               sample_type,
+               ".png"), units = "cm", width = 20, height = 15, res = 1200)      
+  }
+
   draw(ht, 
        column_title = paste("Predictions : ", sample_type, "subset samples of", sub("Vs", " Vs ", comparison_of_interest)))    
   dev.off() 
