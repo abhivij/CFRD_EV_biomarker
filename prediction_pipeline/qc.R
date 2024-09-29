@@ -8,6 +8,7 @@ library(ggvenn)
 library(sva)
 library(harmony)
 library(xlsx)
+library(rstatix)
 
 base_dir <- "~/UNSW/VafaeeLab/CysticFibrosisGroup/ExoCF/CFRD_EV_biomarker/"
 setwd(base_dir)
@@ -935,8 +936,8 @@ dataset_replace_str = NA
 dir_path = NA
 data_file_path = "data/formatted/umi_counts.csv"
 phenotype_file_path = "data/formatted/phenotype.txt"
-# data = NA
-# phenotype = NA
+data = NA
+phenotype = NA
 filter_out_child = FALSE
 dimred_plot_width_cm = 30
 plot_width_cm = 21
@@ -949,23 +950,41 @@ filter_post_modulator = TRUE
 custom_title = NA
 
 
-comparison = NA
-classes = c("PreModulator_CFRD", "PostModulator_CFRD", "PreModulator_NGT")
-class_colours = c("red", "blue", "yellow")
+# comparison = NA
+# classes = c("PreModulator_CFRD", "PostModulator_CFRD", "PreModulator_NGT")
+# class_colours = c("red", "blue", "yellow")
+# dim_red = "UMAP"
+# norm = "non-normalized"
+# dir_path = "plots_updated/post_mod/proteomics/shift"
+# dimred_plot_width_cm = 36
+# perform_filter = FALSE
+# colour_column = "batch_name"
+# point_border_colours = c("black", "green", "purple")
+# data = data
+# phenotype = phenotype %>% dplyr::rename("disease_status" = "condition") %>% dplyr::rename("condition" = "modstatus_condition")
+# filter_post_modulator = FALSE
+# custom_title = "Proteomics shift from CFRD to NGT with Quantile norm and ComBat two_in_one_shot with names" 
+# combat = FALSE
+# simplified = TRUE
+# shownames = TRUE
+
+comparison = "CFRDVsIGT"
+classes = c("CFRD", "IGT")
+class_colours = c("red", "orange")
 dim_red = "UMAP"
-norm = "non-normalized"
-dir_path = "plots_updated/post_mod/proteomics/shift"
-dimred_plot_width_cm = 36
-perform_filter = FALSE
-colour_column = "batch_name"
-point_border_colours = c("black", "green", "purple")
-data = data
-phenotype = phenotype %>% dplyr::rename("disease_status" = "condition") %>% dplyr::rename("condition" = "modstatus_condition")
-filter_post_modulator = FALSE
-custom_title = "Proteomics shift from CFRD to NGT with Quantile norm and ComBat two_in_one_shot with names" 
-combat = FALSE
-simplified = TRUE
-shownames = TRUE
+norm = "log_cpm"
+combat = TRUE
+dir_path = "plots_updated/tra_334/dim_red_best_combat"
+plot_width = 21
+perform_filter = TRUE
+colour_column = "age_group"
+data_file_path = "data/formatted/rna_all/umi_counts_filter90.csv"
+phenotype_file_path = "data/formatted/tra_phenotype_2024Jan.txt"
+best_features_file_path  = "data/selected_features/best_features_with_is_best.csv"
+dataset_replace_str = "CF_EV_tra_334_combat_"
+omics_type = "tra"
+box_plot_dir_path = "plots_updated/tra_334/boxplot_best_combat"
+biomarker_expr_file_path = "data/selected_features/tra_combat_biomarkers.xlsx"
 
 
 
@@ -1250,8 +1269,7 @@ create_dim_red_plots <- function(comparison, classes,
                             group_counts_text),
            fill = fill_column) +
       theme(panel.background = element_rect(colour = "grey50", fill = "white"))
-  }
-  else if(simplified_with_mean){
+  } else if(simplified_with_mean){
     
     group_means <- dim_red_df %>%
       rownames_to_column("Sample") %>%
@@ -1336,8 +1354,7 @@ create_dim_red_plots <- function(comparison, classes,
                            group_counts_text),
            fill = fill_column) +
       theme(panel.background = element_rect(colour = "grey50", fill = "white"))
-  }
-  else if(is.na(fill_column)){
+  } else if(is.na(fill_column)){
     ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_point(ggplot2::aes(fill = output_labels$Label,
                                        shape = output_labels$country,
@@ -1387,6 +1404,10 @@ create_dim_red_plots <- function(comparison, classes,
   file_path <- paste(dir_path, file_name, sep = "/")
   ggplot2::ggsave(file_path, units = "cm", width = dimred_plot_width_cm)
   
+  file_name <- paste0(gsub(title, pattern = " |,", replacement = "-"), ".pdf")
+  file_path <- paste(dir_path, file_name, sep = "/")
+  ggplot2::ggsave(file_path, units = "cm", width = dimred_plot_width_cm)
+  
   ###############
   #create biomarker box plots if best biomarkers only
   
@@ -1395,7 +1416,7 @@ create_dim_red_plots <- function(comparison, classes,
       rownames_to_column("sample_name") %>%
       inner_join(output_labels %>%
                    dplyr::select(c(Sample, Label)) %>%
-                   rename(c("sample_name" = "Sample")))
+                   dplyr::rename(c("sample_name" = "Sample")))
     group_counts <- data_to_plot %>%
       group_by(Label) %>%
       summarize(n = n())
@@ -1453,24 +1474,40 @@ create_dim_red_plots <- function(comparison, classes,
       x_lab <- paste0("Proteins (", num_biomarkers, ")")
     }
     
-    plot <- ggplot() +
-      aes(x = biomarkers, y = value, fill = Label) +
-      geom_boxplot(data = data_to_plot) +
+    norm_test <- data_to_plot %>%
+      group_by(Label, biomarkers) %>%
+      shapiro_test(value)
+    print(sum(norm_test$p < 0.05) / nrow(norm_test))
+    
+    wilcox_res <- data_to_plot %>%
+      group_by(biomarkers) %>%
+      wilcox_test(value ~ Label) 
+    #only 1 comparison - p value adjustment doesn't make sense
+    wilcox_res_with_pos <- wilcox_res %>%
+      add_xy_position(x = "biomarkers")
+    
+    plot <- ggplot(data_to_plot, aes(x = biomarkers, y = value)) +
+      geom_boxplot(aes(fill = Label)) +
       xlab(x_lab) +
       ylab(y_lab) +
       ggtitle(plot_title) +
-      labs(fill = "") +
+      scale_fill_manual(name = "Label", values = class_colours) +
       theme(
         strip.text.x = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
         panel.background = element_rect(colour = "grey50", fill = "white")
-      )
+      ) +
+      stat_pvalue_manual(data = wilcox_res_with_pos, label = "p", size = 2.5)
     
     plot
     if(!dir.exists(box_plot_dir_path)){
       dir.create(box_plot_dir_path, recursive = TRUE)
     }
     file_name <- paste0(gsub(plot_title, pattern = " ", replacement = "-"), ".png")
+    file_path <- paste(box_plot_dir_path, file_name, sep = "/")
+    ggplot2::ggsave(file_path, units = "cm", width = plot_width_cm)
+    
+    file_name <- paste0(gsub(plot_title, pattern = " ", replacement = "-"), ".pdf")
     file_path <- paste(box_plot_dir_path, file_name, sep = "/")
     ggplot2::ggsave(file_path, units = "cm", width = plot_width_cm)
   }
