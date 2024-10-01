@@ -388,3 +388,138 @@ create_all_iter_pred_heatmap <- function(sample_wise_results,
 # comparison_of_interest = "CFRDVsIGT"
 # classes = c("IGT", "CFRD")
 # phenotype <- read.table("data/formatted/phenotype.txt", sep = "\t", header = TRUE)
+
+create_stacked_model_result_heatmap <- function(sample_type, plot_dir_path = "plots_Sep2024/",
+                                                pdf_plot = TRUE){
+  stacked_model_results <- read_excel("supplemental_files/S5_IntegrationResults.xlsx", sheet = "Stacked Model Results") %>%
+    dplyr::filter(!is.na(Comparison) & Type == sample_type) %>%
+    mutate(Comparison = sub("Vs", " Vs ", Comparison)) %>%
+    mutate(Comparison = factor(Comparison, levels = c("CFRD Vs NGT",
+                                                      "CFRD Vs IGT",
+                                                      "IGT Vs NGT"))) %>%
+    mutate(Omics_type = dplyr::case_match(Omics_type, 
+               "tra_stacked" ~ "Top 2 transcriptomic models",
+               "prot_stacked" ~ "Top 2 proteomic models",
+               "both_stacked" ~ "Top 2 transcriptomic models \nand top 2 proteomic models")) 
+  data_to_plot <- as.matrix(stacked_model_results %>%
+    dplyr::select(c(MeanAccuracy, MeanAUC, MeanTPR, MeanTNR)))
+  
+  row_col <- list()
+  
+  cms <- unique(stacked_model_results$model)
+  row_col[["Classification model"]] <- brewer.pal(n = length(cms), name = "Paired")
+  names(row_col[["Classification model"]]) <- cms
+  
+  bms <- unique(stacked_model_results$Omics_type)
+  row_col[["Base models used"]] <- brewer.pal(n = length(bms), name = "Set2")
+  names(row_col[["Base models used"]]) <- bms
+  
+  ht <- Heatmap(data_to_plot, name = paste("Metric values"),
+          rect_gp = gpar(col = "white", lwd = 1),
+          col = viridis(5),
+          cell_fun = function(j, i, x, y, width, height, fill) {
+            grid.text(sprintf("%.3f", data_to_plot[i, j]), x, y, gp = gpar(fontsize = 6, col = "slateblue3"))
+          },
+          cluster_columns = FALSE,
+          show_row_dend = FALSE,
+          # cluster_rows = FALSE,
+          cluster_row_slices = FALSE,
+
+          row_split = stacked_model_results$Comparison,
+
+          row_names_gp = gpar(fontsize = 12),
+          column_names_gp = gpar(fontsize = 10),
+          column_names_rot = 0,
+          column_names_centered = TRUE,
+          column_title = paste("Stacked model result metrics for", sample_type, "samples"),
+          column_title_side = "top",
+          column_title_gp = gpar(fontsize = 15),
+          column_names_side = "top",
+    ) + 
+    HeatmapAnnotation("Base models used" = stacked_model_results$Omics_type,
+                      "Classification model" = stacked_model_results$model,
+                      which = "row",
+                      col = row_col,
+                      annotation_name_rot = 60)
+  
+  if(!dir.exists(plot_dir_path)){
+    dir.create(plot_dir_path, recursive = TRUE)
+  }
+  if(pdf_plot){
+    pdf(paste0(plot_dir_path, "stacked_", 
+               sample_type,
+               ".pdf"))      
+  } else{
+    png(paste0(plot_dir_path, "stacked_", 
+               sample_type,
+               ".png"), units = "cm", width = 20, height = 15, res = 1200)      
+  }
+  
+  draw(ht)    
+  dev.off() 
+  
+}
+
+
+create_delegate_model_result_heatmap <- function(sample_type, plot_dir_path = "plots_Sep2024/",
+                                                pdf_plot = TRUE){
+  delegate_model_results <- read_excel("supplemental_files/S5_IntegrationResults.xlsx", sheet = "Delegate Ensemble Model Results") %>%
+    dplyr::filter(Type == sample_type) %>%
+    mutate(Comparison = sub("Vs", " Vs ", Comparison)) %>%
+    mutate(Comparison = factor(Comparison, levels = c("CFRD Vs NGT",
+                                                      "CFRD Vs IGT",
+                                                      "IGT Vs NGT"))) %>%
+    mutate(Alt_type = dplyr::case_match(Alt_type, 
+                                          "tra" ~ "transcriptomic stacked model prediction",
+                                          "both" ~ "transcriptomic and proteomic combined\n stacked model prediction")) 
+  data_to_plot <- as.matrix(delegate_model_results %>%
+                              dplyr::select(c(MeanAccuracy, MeanAUC, MeanTPR, MeanTNR)))
+  
+  row_col <- list()
+  
+  bms <- unique(delegate_model_results$Alt_type)
+  row_col[["Alternate prediction used"]] <- brewer.pal(n = 3, name = "Set2")[1:length(bms)] #min value allowed for n is 3
+  names(row_col[["Alternate prediction used"]]) <- bms
+  
+  ht <- Heatmap(data_to_plot, name = paste("Metric values"),
+                rect_gp = gpar(col = "white", lwd = 1),
+                col = viridis(5),
+                cell_fun = function(j, i, x, y, width, height, fill) {
+                  grid.text(sprintf("%.3f", data_to_plot[i, j]), x, y, gp = gpar(fontsize = 6, col = "slateblue3"))
+                },
+                cluster_columns = FALSE,
+                show_row_dend = FALSE,
+                # cluster_rows = FALSE,
+                cluster_row_slices = FALSE,
+                
+                row_split = delegate_model_results$Comparison,
+                
+                row_names_gp = gpar(fontsize = 12),
+                column_names_gp = gpar(fontsize = 10),
+                column_names_rot = 0,
+                column_names_centered = TRUE,
+                column_title = paste("Delegate model result metrics for", sample_type, "samples"),
+                column_title_side = "top",
+                column_title_gp = gpar(fontsize = 15),
+                column_names_side = "top",
+  ) + 
+    HeatmapAnnotation("Alternate prediction used" = delegate_model_results$Alt_type,
+                      which = "row",
+                      col = row_col,
+                      annotation_name_rot = 60)
+  
+  if(!dir.exists(plot_dir_path)){
+    dir.create(plot_dir_path, recursive = TRUE)
+  }
+  if(pdf_plot){
+    pdf(paste0(plot_dir_path, "delegate_", 
+               sample_type,
+               ".pdf"))      
+  } else{
+    png(paste0(plot_dir_path, "delegate_", 
+               sample_type,
+               ".png"), units = "cm", width = 20, height = 15, res = 1200)      
+  }
+  draw(ht)    
+  dev.off() 
+}

@@ -456,3 +456,11 @@ create_all_iter_pred_heatmap(sample_wise_results,
                              sample_type = "train", phenotype,
                              plot_dir_path = "plots_Sep2024/per_iter_pred_prot/",
                              pdf_plot = TRUE)
+
+
+
+create_stacked_model_result_heatmap("train")
+create_stacked_model_result_heatmap("test")
+
+create_delegate_model_result_heatmap("train")
+create_delegate_model_result_heatmap("test")
