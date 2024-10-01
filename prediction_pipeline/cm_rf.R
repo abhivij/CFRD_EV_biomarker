@@ -13,7 +13,7 @@ rf_model <- function(data.train, label.train, data.test, label.test,
     data.sanity_check <- data.train - colMeans(data.train)
     if(sum(data.sanity_check != 0) != 0){
       #ensure that atleast one column is not a constant vector
-      #does this by checking if sum of all entries is non-zero after subtracting column mean
+      #does this by checking if there is atleast one non-zero entry after subtracting column mean
       
       #all columns constant causes the below line to run forever
       model <- randomForest::randomForest(x = data.train, y = factor(label.train$Label, levels = classes))

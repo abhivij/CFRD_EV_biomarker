@@ -4,7 +4,7 @@ library(tidyverse)
 library(readxl)
 
 library(sva)
-library(Seurat)
+# library(Seurat)
 
 library(ggvenn)
 library(ggplot2)
@@ -657,9 +657,11 @@ dim(data)
 
 
 #check if all samples uploaded are unique - i.e. no re-upload of same data
+#the below read file is created by copy paste from qiagen output - with all 4 columns in different rows
 rna_new_rough_data <- read.table("data/rna_new/all_sample_names_initial.txt", header = FALSE, sep = "\n")
 (dim(rna_new_rough_data)[1]-4)/4
 
+#used -4 to remove header lines
 rna_new <- data.frame(matrix(ncol = 4, nrow = (dim(rna_new_rough_data)[1]-4)/4))
 colnames(rna_new) <- rna_new_rough_data[c(1:4), 1]
 
@@ -847,3 +849,92 @@ nrow(filt_data)
 #1607
 
 write.csv(filt_data, "data/formatted/rna_all/umi_counts_filter90.csv")
+
+
+
+
+############
+#checking quantified results from Qiagen RNASeqPortal for redemultiplexed new (62) samples (provided by Ramaciotti on Dec 2023)
+data.redemux <- read_excel("data/formatted/rna_new/redemultiplexed/QC experiment piRNA matrix.xlsx")
+
+sum(is.na(data.redemux$Name))
+#0
+
+data.redemux <- data.redemux %>%
+  mutate(across(!contains("Name"), as.numeric))
+dim(data.redemux)
+# [1] 6574   63
+
+data.redemux_grouped <- data.redemux %>% 
+  group_by(Name) %>%
+  summarize(n = n()) %>%
+  filter(n > 1)
+#0
+
+length(unique(data.redemux$Name))
+# [1] 6574
+#so all unique
+
+
+data.redemux <- data.redemux %>%
+  column_to_rownames("Name")
+
+rsum <- rowSums(data.redemux)
+
+data.redemux <- data.redemux %>%
+  filter(rowSums(data.redemux) != 0)
+dim(data.redemux)
+# [1] 5359   62
+
+
+
+data <- read_excel("data/formatted/rna_new/qiagen_output/disease_NGT_control/disease_status piRNA matrix.xlsx")
+sum(is.na(data$Name))
+
+which(is.na(data$Name))
+
+data <- data %>%
+  filter(!is.na(Name)) %>%
+  mutate(across(!contains("Name"), as.numeric))
+dim(data)
+# [1] 6574   63
+data_grouped <- data %>% 
+  group_by(Name) %>%
+  summarize(n = n()) %>%
+  filter(n > 1)
+#0
+
+length(unique(data$Name))
+#6574
+
+data <- data %>%
+  column_to_rownames("Name")
+rsum <- rowSums(data)
+data <- data %>%
+  filter(rowSums(data) != 0)
+dim(data)
+# [1] 5359   62
+
+data <- data %>%
+  rownames_to_column("Name") %>%
+  arrange(Name) %>%
+  column_to_rownames("Name")
+
+data.redemux <- data.redemux %>%
+  rownames_to_column("Name") %>%
+  arrange(Name) %>%
+  column_to_rownames("Name")
+
+all.equal(rownames(data), rownames(data.redemux))
+
+meta_data <- read.csv("data/formatted/rna_new/meta_data_minimal.csv")
+
+data <- data %>%
+  dplyr::select(meta_data$Sample)
+data.redemux <- data.redemux %>%
+  dplyr::select(meta_data$Sample)
+
+all.equal(data, data.redemux)
+# [1] TRUE
+
+#redemultiplexed data same as original 
