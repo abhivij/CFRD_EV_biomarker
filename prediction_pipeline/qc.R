@@ -1255,6 +1255,16 @@ create_dim_red_plots <- function(comparison, classes,
   output_labels <- output_labels %>%
     mutate(Label = factor(Label, levels = classes))
   if(simplified){
+    
+    #note - adding the below lines to obtain UMAP coordinates as per Bala's request on 2025 May 26
+    print('UMAP coordinates')
+    all_data_to_plot <- dim_red_df %>%
+      rownames_to_column("Sample") %>%
+      inner_join(output_labels %>% dplyr::select(Sample, Label))
+    write.xlsx(all_data_to_plot, file=paste(dir_path, "umap_coordinates.xlsx", sep = "/"),
+               col.names = TRUE, row.names = FALSE)
+    # until here added on 2025 May 26
+    
     ggplot2::ggplot(dim_red_df, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_point(ggplot2::aes(fill = output_labels$Label),
                           size = 3, shape = 21) +
